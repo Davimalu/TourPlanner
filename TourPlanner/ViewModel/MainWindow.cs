@@ -38,12 +38,12 @@ namespace TourPlanner.ViewModel
             }
         }
 
-        public ICommand ExecuteCommandOpenFileButtonContextMenu { get; }
+        public ICommand ExecuteShowContextMenu { get; }
         public ICommand ExecuteCommandExit { get; } = new RelayCommand(_ => Environment.Exit(0));
 
         public MainWindow()
         {
-            ExecuteCommandOpenFileButtonContextMenu = new ExecuteCommandOpenFileButtonContextMenu(this);
+            ExecuteShowContextMenu = new ExecuteShowContextMenu(this);
 
             Logs = new List<Tour>
             {

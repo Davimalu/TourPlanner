@@ -10,10 +10,10 @@ using System.Reflection;
 
 namespace TourPlanner.Logic.MainWindow
 {
-    class ExecuteCommandOpenFileButtonContextMenu : ICommand
+    class ExecuteShowContextMenu : ICommand
     {
         private ViewModel.MainWindow _mainWindow;
-        public ExecuteCommandOpenFileButtonContextMenu(ViewModel.MainWindow mainWindow)
+        public ExecuteShowContextMenu(ViewModel.MainWindow mainWindow)
         {
             this._mainWindow = mainWindow;
         }

@@ -26,7 +26,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Name="FileButton" Content="File" Command="{Binding Path=ExecuteCommandOpenFileButtonContextMenu}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
+            <Button Grid.Column="0" Name="FileButton" Content="File" Command="{Binding Path=ExecuteShowContextMenu}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
                 <Button.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="New"/>
