@@ -65,7 +65,7 @@
                 <!-- GridSplitter for resizing -->
                 <GridSplitter Grid.Column="1"
                               Width="5"
-                              Margin="5"
+                              Margin="0 5 0 5"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Stretch"
                               Background="Gray"/>
@@ -79,7 +79,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Top Column -->
-                    <TabControl Grid.Row="0">
+                    <TabControl Grid.Row="0" Margin="5">
                         <TabItem Header="General">
                             <StackPanel>
                                 <TextBlock>General Placeholder</TextBlock>
@@ -100,7 +100,7 @@
                     <!-- Grid Splitter for resizing -->
                     <GridSplitter Grid.Row="1"
                                   Height="5"
-                                  Margin="5"
+                                  Margin="5 0 5 0"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
                                   ResizeDirection="Rows"
@@ -108,7 +108,7 @@
 
                     <!-- Bottom Column -->
                     <DataGrid Grid.Row="2" ItemsSource="{Binding Path=Logs}" AutoGenerateColumns="True" 
-                              ColumnWidth="*" Margin="10" />
+                              ColumnWidth="*" Margin="5" />
                     
 
                 </Grid>
