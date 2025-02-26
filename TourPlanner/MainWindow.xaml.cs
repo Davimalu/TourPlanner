@@ -17,54 +17,11 @@ namespace TourPlanner;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window, INotifyPropertyChanged
+public partial class MainWindow : Window
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private List<TourLog> logs;
-    public List<TourLog> Logs
-    {
-        get => logs;
-        set
-        {
-            logs = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Logs)));
-        }
-    }
-
-    private List<string> tours;
-
-    public List<string> Tours
-    {
-        get => tours;
-        set
-        {
-            tours = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tours)));
-        }
-    }
-
     public MainWindow()
     {
         InitializeComponent();
-
-        Logs = new List<TourLog>
-        {
-            new TourLog { Date = DateTime.Now, Duration = 120, Distance = 10 },
-            new TourLog { Date = DateTime.Now, Duration = 90, Distance = 8 },
-            new TourLog { Date = DateTime.Now, Duration = 60, Distance = 5 },
-            new TourLog { Date = DateTime.Now, Duration = 30, Distance = 2 },
-            new TourLog { Date = DateTime.Now, Duration = 15, Distance = 1 }
-        };
-
-        Tours = new List<string>
-        {
-                "Wienerwald",
-                "Dopplerhütte",
-                "Figlwarte",
-                "Dorfrunde",
-                "Vestibulum at eros"
-        };
     }
 
 
@@ -81,11 +38,4 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         Application.Current.Shutdown();
     }
-}
-
-public class TourLog
-{
-    public DateTime Date { get; set; }
-    public int Duration { get; set; }
-    public int Distance { get; set; }
 }
