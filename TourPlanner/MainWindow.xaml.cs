@@ -23,19 +23,4 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
     }
-
-
-    private void FileButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.ContextMenu != null)
-        {
-            btn.ContextMenu.IsOpen = true;
-        }
-    }
-
-
-    private void Exit_Click(object sender, RoutedEventArgs e)
-    {
-        Application.Current.Shutdown();
-    }
 }

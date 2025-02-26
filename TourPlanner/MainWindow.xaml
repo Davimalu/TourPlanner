@@ -26,13 +26,13 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Name="FileButton" Content="File" Click="FileButton_Click">
+            <Button Grid.Column="0" Name="FileButton" Content="File" Command="{Binding Path=ExecuteCommandOpenFileButtonContextMenu}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
                 <Button.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="New"/>
                         <MenuItem Header="Open"/>
                         <Separator/>
-                        <MenuItem Header="Exit" Click="Exit_Click"/>
+                        <MenuItem Header="Exit" Command="{Binding Path=ExecuteCommandExit}"/>
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>

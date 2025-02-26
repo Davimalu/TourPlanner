@@ -4,6 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using TourPlanner.Logic;
+using TourPlanner.Logic.MainWindow;
 using TourPlanner.Model;
 
 namespace TourPlanner.ViewModel
@@ -35,8 +38,13 @@ namespace TourPlanner.ViewModel
             }
         }
 
+        public ICommand ExecuteCommandOpenFileButtonContextMenu { get; }
+        public ICommand ExecuteCommandExit { get; } = new RelayCommand(_ => Environment.Exit(0));
+
         public MainWindow()
         {
+            ExecuteCommandOpenFileButtonContextMenu = new ExecuteCommandOpenFileButtonContextMenu(this);
+
             Logs = new List<Tour>
             {
                 new Tour { Date = DateTime.Now, Duration = 120, Distance = 10 },
