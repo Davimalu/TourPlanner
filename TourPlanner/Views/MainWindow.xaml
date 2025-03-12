@@ -36,14 +36,8 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Left Column -->
-                <ListView ItemsSource="{Binding Tours}" Margin="5">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Tours" Width="200" DisplayMemberBinding="{Binding}"/>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <!-- Left Column: Tour List -->
+                <local:TourList Grid.Column="0" x:Name="TourList"/>
 
                 <!-- GridSplitter for resizing -->
                 <GridSplitter Grid.Column="1"
