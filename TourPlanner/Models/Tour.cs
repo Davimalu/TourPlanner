@@ -11,7 +11,7 @@ namespace TourPlanner.Models
         public string EndLocation { get; set; } = String.Empty;
         public Transport TransportationType { get; set; }
         public float Distance { get; set; }
-        public DateTime EstimatedTime { get; set; }
+        public float EstimatedTime { get; set; }
         public string RouteInformation { get; set; } = String.Empty;
 
         public ObservableCollection<TourLog> Logs { get; set; } = new ObservableCollection<TourLog>();

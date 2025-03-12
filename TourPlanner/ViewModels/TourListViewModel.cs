@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
@@ -6,7 +7,7 @@ using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {
-    class TourListViewModel : BaseViewModel
+    public class TourListViewModel : BaseViewModel
     {
         private ObservableCollection<Tour> _tours;
         public ObservableCollection<Tour> Tours
@@ -40,8 +41,11 @@ namespace TourPlanner.ViewModels
             {
                 _selectedTour = value;
                 RaisePropertyChanged(nameof(SelectedTour));
+                SelectedTourChanged?.Invoke(SelectedTour);
             }
         }
+
+        public event Action<Tour?>? SelectedTourChanged;
 
 
 
@@ -60,7 +64,7 @@ namespace TourPlanner.ViewModels
                     EndLocation = "Hütteldorf, Wien",
                     TransportationType = Transport.Bicycle,
                     Distance = 35,
-                    EstimatedTime = new DateTime(2025, 4, 10),
+                    EstimatedTime = 110,
                     RouteInformation = "Von Hütteldorf über Purkersdorf, Mauerbach und zurück nach Hütteldorf."
                 },
                 new Tour
@@ -71,7 +75,7 @@ namespace TourPlanner.ViewModels
                     EndLocation = "Retz",
                     TransportationType = Transport.Car,
                     Distance = 75,
-                    EstimatedTime = new DateTime(2025, 4, 15),
+                    EstimatedTime = 200,
                     RouteInformation = "Von Korneuburg über Stockerau, Hollabrunn nach Retz mit schönen Aussichten auf die Weinberge."
                 },
                 new Tour
@@ -82,7 +86,7 @@ namespace TourPlanner.ViewModels
                     EndLocation = "Floridsdorfer Brücke, Wien",
                     TransportationType = Transport.Foot,
                     Distance = 7,
-                    EstimatedTime = new DateTime(2025, 4, 20),
+                    EstimatedTime = 110,
                     RouteInformation = "Entlang der Donauinsel von der Reichsbrücke zur Floridsdorfer Brücke mit schöner Natur und Ausblicken."
                 },
                 new Tour
@@ -93,7 +97,7 @@ namespace TourPlanner.ViewModels
                     EndLocation = "Baden bei Wien",
                     TransportationType = Transport.Bicycle,
                     Distance = 28,
-                    EstimatedTime = new DateTime(2025, 4, 25),
+                    EstimatedTime = 70,
                     RouteInformation = "Von Wienerberg entlang des Wiener Neustädter Kanals nach Baden mit vielen Rastmöglichkeiten."
                 },
                 new Tour
@@ -104,7 +108,7 @@ namespace TourPlanner.ViewModels
                     EndLocation = "Leopoldsberg",
                     TransportationType = Transport.Foot,
                     Distance = 5,
-                    EstimatedTime = new DateTime(2025, 4, 30),
+                    EstimatedTime = 60,
                     RouteInformation = "Von Kahlenbergerdorf den steilen Wanderweg hoch zum Leopoldsberg mit fantastischer Aussicht."
                 }
             };

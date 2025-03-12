@@ -17,7 +17,7 @@ public partial class App : Application
         MenuBarViewModel menuBarViewModel = new MenuBarViewModel();
         SearchBarViewModel searchBarViewModel = new SearchBarViewModel();
         TourListViewModel tourListViewModel = new TourListViewModel();
-        MainWindowViewModel mainWindowViewModel = new MainWindowViewModel();
+        MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(tourListViewModel);
 
         // Create the Views (and initialize them with the ViewModels)
         MainWindow mainWindow = new MainWindow
