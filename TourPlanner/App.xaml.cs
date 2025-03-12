@@ -1,6 +1,8 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
+using TourPlanner.ViewModels;
+using TourPlanner.Views;
 
 namespace TourPlanner;
 
@@ -9,5 +11,25 @@ namespace TourPlanner;
 /// </summary>
 public partial class App : Application
 {
+    private void Application_Startup(object sender, StartupEventArgs e)
+    {
+        // Create the ViewModels
+        MenuBarViewModel menuBarViewModel = new MenuBarViewModel();
+        SearchBarViewModel searchBarViewModel = new SearchBarViewModel();
+        TourListViewModel tourListViewModel = new TourListViewModel();
+        MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(tourListViewModel);
+
+        // Create the Views (and initialize them with the ViewModels)
+        MainWindow mainWindow = new MainWindow
+        {
+            DataContext = mainWindowViewModel,
+            MenuBar = { DataContext = menuBarViewModel },
+            SearchBar = { DataContext = searchBarViewModel },
+            TourList = { DataContext = tourListViewModel }
+        };
+
+        // Show the MainWindow
+        mainWindow.Show();
+    }
 }
 
