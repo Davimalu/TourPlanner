@@ -14,6 +14,7 @@ public partial class App : Application
     private void Application_Startup(object sender, StartupEventArgs e)
     {
         // Create the ViewModels
+        MenuBarViewModel menuBarViewModel = new MenuBarViewModel();
         SearchBarViewModel searchBarViewModel = new SearchBarViewModel();
         MainWindowViewModel mainWindowViewModel = new MainWindowViewModel();
 
@@ -21,6 +22,7 @@ public partial class App : Application
         MainWindow mainWindow = new MainWindow
         {
             DataContext = mainWindowViewModel,
+            MenuBar = { DataContext = menuBarViewModel },
             SearchBar = { DataContext = searchBarViewModel }
         };
 
