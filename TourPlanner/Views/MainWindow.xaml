@@ -73,7 +73,6 @@
                                                     <RowDefinition Height="Auto"/>
                                                     <RowDefinition Height="Auto"/>
                                                     <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
                                                 </Grid.RowDefinitions>
 
                                                 <!-- Labels -->
@@ -83,7 +82,6 @@
                                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="Transportation:" FontWeight="Bold"/>
                                                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Distance:" FontWeight="Bold"/>
                                                 <TextBlock Grid.Row="5" Grid.Column="0" Text="Estimated Time:" FontWeight="Bold"/>
-                                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Route Information:" FontWeight="Bold"/>
 
                                                 <!-- Data Binding -->
                                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTour.TourDescription, TargetNullValue=''}" TextWrapping="Wrap"/>
@@ -92,7 +90,6 @@
                                                 <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedTour.TransportationType, TargetNullValue=''}" TextWrapping="Wrap"/>
                                                 <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedTour.Distance, TargetNullValue=''}" TextWrapping="Wrap"/>
                                                 <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedTour.EstimatedTime, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedTour.RouteInformation, TargetNullValue=''}" TextWrapping="Wrap"/>
                                             </Grid>
                                         </StackPanel>
                                     </Border>
@@ -100,9 +97,9 @@
                             </Grid>
                         </TabItem>
                         <TabItem Header="Route">
-                            <StackPanel>
-                                <TextBlock>Placeholder for Map</TextBlock>
-                            </StackPanel>
+                            <Viewbox>
+                                <Image Stretch="Uniform" Source="{Binding Path=SelectedTour.RouteInformation}" />
+                            </Viewbox>
                         </TabItem>
                         <TabItem Header="Misc">
                             <StackPanel>

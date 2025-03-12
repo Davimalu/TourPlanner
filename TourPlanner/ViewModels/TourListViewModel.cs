@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
 using TourPlanner.Models;
@@ -65,7 +66,7 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Bicycle,
                     Distance = 35,
                     EstimatedTime = 110,
-                    RouteInformation = "Von Hütteldorf über Purkersdorf, Mauerbach und zurück nach Hütteldorf."
+                    RouteInformation = new BitmapImage(new Uri("https://www.niederoesterreich.at/images/d5tn5wton7g-/54c38e4576bea605b3d94ba94a49d669.jpg"))
                 },
                 new Tour
                 {
@@ -76,7 +77,7 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Car,
                     Distance = 75,
                     EstimatedTime = 200,
-                    RouteInformation = "Von Korneuburg über Stockerau, Hollabrunn nach Retz mit schönen Aussichten auf die Weinberge."
+                    RouteInformation = new BitmapImage(new Uri("https://vcdn.bergfex.at/images/resized/ff/9db2417c640525ff_7fef80f030ce570f@2x.jpg"))
                 },
                 new Tour
                 {
@@ -87,7 +88,7 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Foot,
                     Distance = 7,
                     EstimatedTime = 110,
-                    RouteInformation = "Entlang der Donauinsel von der Reichsbrücke zur Floridsdorfer Brücke mit schöner Natur und Ausblicken."
+                    RouteInformation = new BitmapImage(new Uri("https://vcdn.bergfex.at/images/resized/a0/c30bcdee9546ada0_c25240774a8f2541.jpg"))
                 },
                 new Tour
                 {
@@ -98,7 +99,7 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Bicycle,
                     Distance = 28,
                     EstimatedTime = 70,
-                    RouteInformation = "Von Wienerberg entlang des Wiener Neustädter Kanals nach Baden mit vielen Rastmöglichkeiten."
+                    RouteInformation = new BitmapImage(new Uri("https://fahr-radwege.com/ThermenradwegEuroVeloTeil2.jpg"))
                 },
                 new Tour
                 {
@@ -109,7 +110,7 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Foot,
                     Distance = 5,
                     EstimatedTime = 60,
-                    RouteInformation = "Von Kahlenbergerdorf den steilen Wanderweg hoch zum Leopoldsberg mit fantastischer Aussicht."
+                    RouteInformation = new BitmapImage(new Uri("https://easycitypass.com/media/pages/blog/community-insider/wandern-vom-kahlenberg-uber-den-leopoldsberg-nach-nussdorf/b926bd4ae5-1686150598/Screenshot-2020-12-10-101455-1.png"))
                 }
             };
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Media.Imaging;
 using TourPlanner.Enums;
 
 namespace TourPlanner.Models
@@ -12,7 +13,7 @@ namespace TourPlanner.Models
         public Transport TransportationType { get; set; }
         public float Distance { get; set; }
         public float EstimatedTime { get; set; }
-        public string RouteInformation { get; set; } = String.Empty;
+        public BitmapImage RouteInformation { get; set; }
 
         public ObservableCollection<TourLog> Logs { get; set; } = new ObservableCollection<TourLog>();
     }
