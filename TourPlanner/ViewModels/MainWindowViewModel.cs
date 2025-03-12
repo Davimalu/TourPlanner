@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TourPlanner.Commands;
 using TourPlanner.Logic;
 using TourPlanner.Logic.MainWindow;
-using TourPlanner.Model;
+using TourPlanner.Models;
 
-namespace TourPlanner.ViewModel
+namespace TourPlanner.ViewModels
 {
-    public class MainWindow : INotifyPropertyChanged
+    public class MainWindowViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -41,7 +42,7 @@ namespace TourPlanner.ViewModel
         public ICommand ExecuteShowContextMenu { get; }
         public ICommand ExecuteCommandExit { get; } = new RelayCommand(_ => Environment.Exit(0));
 
-        public MainWindow()
+        public MainWindowViewModel()
         {
             ExecuteShowContextMenu = new ExecuteShowContextMenu(this);
 

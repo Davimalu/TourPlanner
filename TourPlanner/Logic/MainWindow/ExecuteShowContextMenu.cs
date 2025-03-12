@@ -12,10 +12,10 @@ namespace TourPlanner.Logic.MainWindow
 {
     class ExecuteShowContextMenu : ICommand
     {
-        private ViewModel.MainWindow _mainWindow;
-        public ExecuteShowContextMenu(ViewModel.MainWindow mainWindow)
+        private ViewModels.MainWindowViewModel _mainWindowViewModel;
+        public ExecuteShowContextMenu(ViewModels.MainWindowViewModel mainWindowViewModel)
         {
-            this._mainWindow = mainWindow;
+            this._mainWindowViewModel = mainWindowViewModel;
         }
 
 
