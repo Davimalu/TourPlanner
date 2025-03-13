@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
@@ -10,126 +8,86 @@ namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
-        private TourLog _selectedLog;
-        private string _newComment;
-        private Difficulty _newDifficulty;
-        private float _newDistanceTraveled;
-        private DateTime _newTimeTaken;
-        private Rating _newRating;
-
-        public ObservableCollection<TourLog> TourLogs { get; set; }
-
-        public TourLog SelectedLog
+        private ObservableCollection<TourLog> _tourLogs;
+        public ObservableCollection<TourLog> TourLogs
         {
-            get => _selectedLog;
+            get { return _tourLogs; }
             set
             {
-                _selectedLog = value;
-                OnPropertyChanged();
+                _tourLogs = value;
+                RaisePropertyChanged(nameof(TourLogs));
             }
         }
 
+        private string _newComment;
         public string NewComment
         {
-            get => _newComment;
+            get { return _newComment; }
             set
             {
                 _newComment = value;
-                OnPropertyChanged();
+                RaisePropertyChanged(nameof(NewComment));
             }
         }
 
-        public Difficulty NewDifficulty
+        private TourLog? _selectedLog;
+        public TourLog? SelectedLog
         {
-            get => _newDifficulty;
+            get { return _selectedLog; }
             set
             {
-                _newDifficulty = value;
-                OnPropertyChanged();
+                _selectedLog = value;
+                RaisePropertyChanged(nameof(SelectedLog));
             }
         }
-
-        public float NewDistanceTraveled
-        {
-            get => _newDistanceTraveled;
-            set
-            {
-                _newDistanceTraveled = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public DateTime NewTimeTaken
-        {
-            get => _newTimeTaken;
-            set
-            {
-                _newTimeTaken = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public Rating NewRating
-        {
-            get => _newRating;
-            set
-            {
-                _newRating = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand ExecuteAddNewTourLog { get; }
-        public ICommand ExecuteDeleteTourLog { get; }
 
         public TourLogsViewModel()
         {
-            TourLogs = new ObservableCollection<TourLog>();
-            ExecuteAddNewTourLog = new RelayCommand(AddNewTourLog, CanAddNewTourLog);
-            ExecuteDeleteTourLog = new RelayCommand(DeleteTourLog, CanDeleteTourLog);
+            // Initialize dummy logs
+            TourLogs = new ObservableCollection<TourLog>
+            {
+                new TourLog
+                {
+                    TimeStamp = DateTime.Now,
+                    Comment = "Erster Log",
+                    Difficulty = Difficulty.Easy,
+                    DistanceTraveled = 10,
+                    TimeTaken = DateTime.Now,
+                    Rating = Rating.Good
+                },
+                new TourLog
+                {
+                    TimeStamp = DateTime.Now,
+                    Comment = "Zweiter Log",
+                    Difficulty = Difficulty.Medium,
+                    DistanceTraveled = 20,
+                    TimeTaken = DateTime.Now,
+                    Rating = Rating.Great
+                }
+            };
         }
 
-        private void AddNewTourLog(object parameter)
+        public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
-            var newLog = new TourLog
+            TourLogs.Add(new TourLog
             {
                 TimeStamp = DateTime.Now,
                 Comment = NewComment,
-                Difficulty = NewDifficulty,
-                DistanceTraveled = NewDistanceTraveled,
-                TimeTaken = NewTimeTaken,
-                Rating = NewRating
-            };
+                Difficulty = Difficulty.Easy,
+                DistanceTraveled = 0,
+                TimeTaken = DateTime.Now,
+                Rating = Rating.Okay
+            });
+            NewComment = string.Empty;
+        }, _ => !string.IsNullOrEmpty(NewComment));
 
-            TourLogs.Add(newLog);
-            ClearInputFields();
-        }
-
-        private bool CanAddNewTourLog(object parameter)
-        {
-            return !string.IsNullOrWhiteSpace(NewComment) && NewDistanceTraveled > 0 && NewTimeTaken != default;
-        }
-
-        private void DeleteTourLog(object parameter)
+        public ICommand ExecuteDeleteTourLog => new RelayCommand(_ =>
         {
             if (SelectedLog != null)
             {
                 TourLogs.Remove(SelectedLog);
             }
-        }
-
-        private bool CanDeleteTourLog(object parameter)
-        {
-            return SelectedLog != null;
-        }
-
-        private void ClearInputFields()
-        {
-            NewComment = string.Empty;
-            NewDifficulty = Difficulty.Easy;
-            NewDistanceTraveled = 0;
-            NewTimeTaken = default;
-            NewRating = Rating.OneStar;
-        }
+            SelectedLog = null;
+        }, _ => SelectedLog != null);
     }
 }
