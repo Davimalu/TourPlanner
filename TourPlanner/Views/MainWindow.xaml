@@ -120,7 +120,10 @@
                     <!-- Bottom Column -->
                     <DataGrid Grid.Row="2" ItemsSource="{Binding Path=Logs}" AutoGenerateColumns="True" 
                               ColumnWidth="*" Margin="5" />
-                    
+
+
+                    <!--<local:TourLogs Grid.Column="0"/>-->
+
 
                 </Grid>
             </Grid>
