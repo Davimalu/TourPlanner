@@ -37,13 +37,18 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <!-- TextBox nimmt den restlichen Platz ein -->
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <!-- Buttons -->
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewComment, UpdateSourceTrigger=PropertyChanged}"/>
-            <Button Grid.Column="1" Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTourLog}"/>
-            <Button Grid.Column="2" Margin="5" Content="Delete" Command="{Binding Path=ExecuteDeleteTourLog}"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTourLog}" Width="60"/>
+                <Button Margin="5" Content="Edit" Command="{Binding Path=ExecuteEditTourLog}" Width="60"/>
+                <Button Margin="5" Content="Save" Command="{Binding Path=ExecuteSaveTourLog}" Width="60"/>
+                <Button Margin="5" Content="Delete" Command="{Binding Path=ExecuteDeleteTourLog}" Width="60"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

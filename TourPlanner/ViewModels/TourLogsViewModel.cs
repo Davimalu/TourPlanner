@@ -3,6 +3,7 @@ using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
 using TourPlanner.Models;
+using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
@@ -38,6 +39,22 @@ namespace TourPlanner.ViewModels
             {
                 _selectedLog = value;
                 RaisePropertyChanged(nameof(SelectedLog));
+                if (SelectedLog != null)
+                {
+                    // Fülle die Eingabefelder mit den Daten des ausgewählten Logs
+                    NewComment = SelectedLog.Comment;
+                }
+            }
+        }
+
+        private bool _isEditing;
+        public bool IsEditing
+        {
+            get { return _isEditing; }
+            set
+            {
+                _isEditing = value;
+                RaisePropertyChanged(nameof(IsEditing));
             }
         }
 
@@ -89,5 +106,28 @@ namespace TourPlanner.ViewModels
             }
             SelectedLog = null;
         }, _ => SelectedLog != null);
+
+        public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
+        {
+            if (SelectedLog != null)
+            {
+                var editWindow = new EditTourLogWindow
+                {
+                    DataContext = new EditTourLogViewModel { TourLog = SelectedLog }
+                };
+                editWindow.ShowDialog();
+            }
+        }, _ => SelectedLog != null);
+
+        public ICommand ExecuteSaveTourLog => new RelayCommand(_ =>
+        {
+            if (SelectedLog != null)
+            {
+                SelectedLog.Comment = NewComment;
+                IsEditing = false;
+                NewComment = string.Empty;
+            }
+        }, _ => !string.IsNullOrEmpty(NewComment));
+
     }
 }
