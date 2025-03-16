@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
@@ -9,26 +10,14 @@ namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
-        private ObservableCollection<TourLog> _tourLogs;
-        public ObservableCollection<TourLog> TourLogs
+        private string _newLogName;
+        public string NewLogName
         {
-            get { return _tourLogs; }
+            get { return _newLogName; }
             set
             {
-                _tourLogs = value;
-                RaisePropertyChanged(nameof(TourLogs));
-            }
-        }
-
-
-        private string _newComment;
-        public string NewComment
-        {
-            get { return _newComment; }
-            set
-            {
-                _newComment = value;
-                RaisePropertyChanged(nameof(NewComment));
+                _newLogName = value;
+                RaisePropertyChanged(nameof(NewLogName));
             }
         }
 
@@ -65,51 +54,41 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
-            TourLogs.Add(new TourLog
+            SelectedTour!.Logs.Add(new TourLog
             {
-                TimeStamp = DateTime.Now,
-                Comment = NewComment,
-                Difficulty = Difficulty.Easy,
-                DistanceTraveled = 0,
-                TimeTaken = DateTime.Now,
-                Rating = Rating.Okay
+                Comment = NewLogName,
             });
-            NewComment = string.Empty;
-        }, _ => !string.IsNullOrEmpty(NewComment));
+            NewLogName = string.Empty;
+        }, _ => SelectedTour != null && !string.IsNullOrEmpty(NewLogName));
 
 
         public ICommand ExecuteDeleteTourLog => new RelayCommand(_ =>
         {
-            if (SelectedLog != null)
-            {
-                TourLogs.Remove(SelectedLog);
-            }
+            SelectedTour!.Logs.Remove(SelectedLog!);
             SelectedLog = null;
-        }, _ => SelectedLog != null);
+        }, _ => SelectedTour != null && SelectedLog != null);
 
 
         public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
         {
-            if (SelectedLog != null)
+            var editWindow = new EditTourLogWindow
             {
-                var editWindow = new EditTourLogWindow
+                DataContext = new EditTourLogViewModel(SelectedLog!, updatedLog =>
                 {
-                    DataContext = new EditTourLogViewModel(SelectedLog, updatedLog =>
-                    {
-                        // Update the selected log with the changes
-                        SelectedLog.Comment = updatedLog.Comment;
-                        SelectedLog.Difficulty = updatedLog.Difficulty;
-                        SelectedLog.DistanceTraveled = updatedLog.DistanceTraveled;
-                        SelectedLog.TimeTaken = updatedLog.TimeTaken;
-                        SelectedLog.Rating = updatedLog.Rating;
+                    // Update the selected log with the changes
+                    SelectedLog!.Comment = updatedLog.Comment;
+                    SelectedLog!.Difficulty = updatedLog.Difficulty;
+                    SelectedLog!.DistanceTraveled = updatedLog.DistanceTraveled;
+                    SelectedLog!.TimeTaken = updatedLog.TimeTaken;
+                    SelectedLog!.Rating = updatedLog.Rating;
 
-                        // Notify the UI that the logs have changed
-                        RaisePropertyChanged(nameof(TourLogs));
-                    })
-                };
+                    // Notify the UI that the logs have changed
+                    RaisePropertyChanged(nameof(SelectedTour));
+                })
+            };
 
-                editWindow.ShowDialog();
-            }
-        }, _ => SelectedLog != null);
+            editWindow.ShowDialog();
+
+        }, _ => SelectedTour != null && SelectedLog != null);
     }
 }

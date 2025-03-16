@@ -11,116 +11,116 @@ namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
-        private TourLog _tourLog;
-        public TourLog TourLog
+        private TourLog _selectedTourLog;
+        public TourLog SelectedTourLog
         {
-            get { return _tourLog; }
+            get { return _selectedTourLog; }
             set
             {
-                _tourLog = value;
-                RaisePropertyChanged(nameof(TourLog));
+                _selectedTourLog = value;
+                RaisePropertyChanged(nameof(SelectedTourLog));
             }
         }
 
-        public string Comment
+
+        public DateTime TimeStamp
         {
-            get { return TourLog?.Comment ?? string.Empty; }
+            get { return _selectedTourLog.TimeStamp; }
             set
             {
-                TourLog.Comment = value;
+                _selectedTourLog.TimeStamp = value;
+                RaisePropertyChanged(nameof(TimeStamp));
+            }
+        }
+
+
+        public string Comment
+        {
+            get { return SelectedTourLog.Comment; }
+            set
+            {
+                SelectedTourLog.Comment = value;
                 RaisePropertyChanged(nameof(Comment));
             }
         }
 
+
         public Difficulty SelectedDifficulty
         {
-            get { return TourLog?.Difficulty ?? Difficulty.Easy; } // Default to Easy if TourLog is null
+            get { return SelectedTourLog.Difficulty; } 
             set
             {
-                if (TourLog != null)
-                {
-                    TourLog.Difficulty = value;
-                    RaisePropertyChanged(nameof(SelectedDifficulty));
-                }
+                SelectedTourLog.Difficulty = value;
+                RaisePropertyChanged(nameof(SelectedDifficulty));
             }
         }
+
 
         public float DistanceTraveled
         {
-            get { return TourLog?.DistanceTraveled ?? 0; } // Default to 0 if TourLog is null
+            get { return SelectedTourLog.DistanceTraveled; }
             set
             {
-                if (TourLog != null)
-                {
-                    TourLog.DistanceTraveled = value;
-                    RaisePropertyChanged(nameof(DistanceTraveled));
-                }
+                SelectedTourLog.DistanceTraveled = value;
+                RaisePropertyChanged(nameof(DistanceTraveled));
             }
         }
 
-        public DateTime TimeTaken
+        public float TimeTaken
         {
-            get { return TourLog?.TimeTaken ?? DateTime.MinValue; } // Default to DateTime.MinValue if TourLog is null
+            get { return SelectedTourLog.TimeTaken; }
             set
             {
-                if (TourLog != null)
-                {
-                    TourLog.TimeTaken = value;
-                    RaisePropertyChanged(nameof(TimeTaken));
-                }
+                SelectedTourLog.TimeTaken = value;
+                RaisePropertyChanged(nameof(TimeTaken));
             }
         }
+
 
         public Rating SelectedRating
         {
-            get { return TourLog?.Rating ?? Rating.Bad; } // Default to Bad if TourLog is null
+            get { return SelectedTourLog.Rating; }
             set
             {
-                if (TourLog != null)
-                {
-                    TourLog.Rating = value;
-                    RaisePropertyChanged(nameof(SelectedRating));
-                }
+                SelectedTourLog.Rating = value;
+                RaisePropertyChanged(nameof(SelectedRating));
             }
         }
+
 
         public List<Difficulty> Difficulties { get; set; }
         public List<Rating> Ratings { get; set; }
 
-        public ICommand SaveCommand { get; }
-        public ICommand CancelCommand { get; }
-
         private readonly Action<TourLog> _saveCallback;
 
-        public EditTourLogViewModel(TourLog tourLog, Action<TourLog> saveCallback)
+
+        public EditTourLogViewModel(TourLog selectedTourLog, Action<TourLog> saveCallback)
         {
-            TourLog = tourLog ?? new TourLog();
+            SelectedTourLog = selectedTourLog ?? new TourLog();
             _saveCallback = saveCallback;
 
             // Initialize enums
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
             Ratings = new List<Rating> { Rating.Bad, Rating.Okay, Rating.Good, Rating.Great, Rating.Amazing };
-
-            // Initialize commands
-            SaveCommand = new RelayCommand(_ => Save());
-            CancelCommand = new RelayCommand(_ => Cancel());
         }
 
-        private void Save()
+
+        public ICommand ExecuteSave => new RelayCommand(_ =>
         {
             // Trigger the SaveChanges event
-            _saveCallback?.Invoke(TourLog);
-
+            _saveCallback?.Invoke(SelectedTourLog);
 
             // Close the window
             CloseWindow();
-        }
+        });
 
-        private void Cancel()
+
+        public ICommand ExecuteCancel => new RelayCommand(_ =>
         {
-            // Close the window without saving changes
+            // Close the window
             CloseWindow();
-        }
+        });
+
 
         private void CloseWindow()
         {

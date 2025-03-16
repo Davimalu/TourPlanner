@@ -1,15 +1,111 @@
 ﻿using System;
+using System.ComponentModel;
 using TourPlanner.Enums;
 
 namespace TourPlanner.Models
 {
-    public class TourLog
+    public class TourLog : INotifyPropertyChanged
     {
-        public DateTime TimeStamp { get; set; }
-        public string Comment { get; set; } = string.Empty;
-        public Difficulty Difficulty { get; set; }
-        public float DistanceTraveled { get; set; }
-        public DateTime TimeTaken { get; set; }
-        public Rating Rating { get; set; }
+        // TourLog needs to implement INotifyPropertyChanged to notify the UI when a property changes
+        // This isn't ideal but according to StackOverflow it's acceptable
+        // https://stackoverflow.com/questions/6922130/in-mvvm-model-should-the-model-implement-inotifypropertychanged-interface
+
+
+        private DateTime _timeStamp = DateTime.Now;
+        public DateTime TimeStamp
+        {
+            get => _timeStamp;
+            set
+            {
+                if (_timeStamp != value)
+                {
+                    _timeStamp = value;
+                    RaisePropertyChanged(nameof(TimeStamp));
+                }
+            }
+        }
+
+
+        private string _comment = string.Empty;
+        public string Comment
+        {
+            get => _comment;
+            set
+            {
+                if (_comment != value)
+                {
+                    _comment = value;
+                    RaisePropertyChanged(nameof(Comment));
+                }
+            }
+        }
+
+
+        private Difficulty _difficulty = Difficulty.Medium;
+        public Difficulty Difficulty
+        {
+            get => _difficulty;
+            set
+            {
+                if (_difficulty != value)
+                {
+                    _difficulty = value;
+                    RaisePropertyChanged(nameof(Difficulty));
+                }
+            }
+        }
+
+
+        private float _distanceTraveled;
+        public float DistanceTraveled
+        {
+            get => _distanceTraveled;
+            set
+            {
+                if (_distanceTraveled != value)
+                {
+                    _distanceTraveled = value;
+                    RaisePropertyChanged(nameof(DistanceTraveled));
+                }
+            }
+        }
+
+
+        private float _timeTaken;
+        public float TimeTaken
+        {
+            get => _timeTaken;
+            set
+            {
+                if (_timeTaken != value)
+                {
+                    _timeTaken = value;
+                    RaisePropertyChanged(nameof(TimeTaken));
+                }
+            }
+        }
+
+
+        private Rating _rating = Rating.Good;
+        public Rating Rating
+        {
+            get => _rating;
+            set
+            {
+                if (_rating != value)
+                {
+                    _rating = value;
+                    RaisePropertyChanged(nameof(Rating));
+                }
+            }
+        }
+
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

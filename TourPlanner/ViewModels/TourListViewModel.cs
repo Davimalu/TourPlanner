@@ -75,7 +75,7 @@ namespace TourPlanner.ViewModels
                             Comment = "Erster Log",
                             Difficulty = Difficulty.Easy,
                             DistanceTraveled = 10,
-                            TimeTaken = DateTime.Now,
+                            TimeTaken = 20,
                             Rating = Rating.Good
                         },
                         new TourLog
@@ -84,7 +84,7 @@ namespace TourPlanner.ViewModels
                             Comment = "Zweiter Log",
                             Difficulty = Difficulty.Medium,
                             DistanceTraveled = 15,
-                            TimeTaken = DateTime.Now,
+                            TimeTaken = 25,
                             Rating = Rating.Okay
                         }
                     }
@@ -118,7 +118,7 @@ namespace TourPlanner.ViewModels
                             Comment = "Erster Log",
                             Difficulty = Difficulty.Easy,
                             DistanceTraveled = 5,
-                            TimeTaken = DateTime.Now,
+                            TimeTaken = 16,
                             Rating = Rating.Good
                         },
                         new TourLog
@@ -127,7 +127,7 @@ namespace TourPlanner.ViewModels
                             Comment = "Zweiter Log",
                             Difficulty = Difficulty.Medium,
                             DistanceTraveled = 2,
-                            TimeTaken = DateTime.Now,
+                            TimeTaken = 28,
                             Rating = Rating.Okay
                         }
                     }

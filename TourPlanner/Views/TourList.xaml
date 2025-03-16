@@ -35,8 +35,8 @@
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewTourName, UpdateSourceTrigger=PropertyChanged}"/>
-            <Button Grid.Column="1" Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTour}"/>
-            <Button Grid.Column="2" Margin="5" Content="Delete" Command="{Binding Path=ExecuteDeleteTour}"/>
+            <Button Grid.Column="1" Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTour}" MinWidth="60"/>
+            <Button Grid.Column="2" Margin="5" Content="Delete" Command="{Binding Path=ExecuteDeleteTour}" MinWidth="60"/>
         </Grid>
     </Grid>
 </UserControl>

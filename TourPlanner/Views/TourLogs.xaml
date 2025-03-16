@@ -22,7 +22,7 @@
                             <TextBlock Text="{Binding Comment}" FontSize="14" Foreground="Black"/>
                             <TextBlock Text="{Binding Difficulty}" FontSize="12" Foreground="Gray"/>
                             <TextBlock Text="{Binding DistanceTraveled, StringFormat={}{0} km}" FontSize="12" Foreground="Gray"/>
-                            <TextBlock Text="{Binding TimeTaken, StringFormat={}{0:dd.MM.yyyy HH:mm}}" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{Binding TimeTaken, StringFormat='{}{0} h'}" FontSize="12" Foreground="Gray"/>
                             <TextBlock Text="{Binding Rating}" FontSize="12" Foreground="Gray"/>
                         </StackPanel>
                     </Border>
@@ -30,7 +30,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <!-- TextBox nimmt den restlichen Platz ein -->
@@ -38,12 +38,11 @@
                 <!-- Buttons -->
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewComment, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewLogName, UpdateSourceTrigger=PropertyChanged}"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTourLog}" Width="60"/>
-                <Button Margin="5" Content="Edit" Command="{Binding Path=ExecuteEditTourLog}" Width="60"/>
-                <Button Margin="5" Content="Save" Command="{Binding Path=ExecuteSaveTourLog}" Width="60"/>
-                <Button Margin="5" Content="Delete" Command="{Binding Path=ExecuteDeleteTourLog}" Width="60"/>
+                <Button Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTourLog}" MinWidth="60"/>
+                <Button Margin="5" Content="Edit" Command="{Binding Path=ExecuteEditTourLog}" MinWidth="60"/>
+                <Button Margin="5" Content="Delete" Command="{Binding Path=ExecuteDeleteTourLog}" MinWidth="60"/>
             </StackPanel>
         </Grid>
     </Grid>
