@@ -17,6 +17,7 @@ public partial class App : Application
         MenuBarViewModel menuBarViewModel = new MenuBarViewModel();
         SearchBarViewModel searchBarViewModel = new SearchBarViewModel();
         TourListViewModel tourListViewModel = new TourListViewModel();
+        TourLogsViewModel tourLogsViewModel = new TourLogsViewModel(tourListViewModel);
         MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(tourListViewModel);
 
         // Create the Views (and initialize them with the ViewModels)
@@ -25,7 +26,8 @@ public partial class App : Application
             DataContext = mainWindowViewModel,
             MenuBar = { DataContext = menuBarViewModel },
             SearchBar = { DataContext = searchBarViewModel },
-            TourList = { DataContext = tourListViewModel }
+            TourList = { DataContext = tourListViewModel },
+            TourLogs = { DataContext = tourLogsViewModel }
         };
 
         // Show the MainWindow
