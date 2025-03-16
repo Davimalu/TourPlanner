@@ -5,6 +5,7 @@ using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
 using TourPlanner.Models;
+using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
@@ -23,7 +24,7 @@ namespace TourPlanner.ViewModels
 
         public string Comment
         {
-            get { return TourLog.Comment; }
+            get { return TourLog?.Comment ?? string.Empty; }
             set
             {
                 TourLog.Comment = value;
@@ -33,41 +34,53 @@ namespace TourPlanner.ViewModels
 
         public Difficulty SelectedDifficulty
         {
-            get { return TourLog.Difficulty; }
+            get { return TourLog?.Difficulty ?? Difficulty.Easy; } // Default to Easy if TourLog is null
             set
             {
-                TourLog.Difficulty = value;
-                RaisePropertyChanged(nameof(SelectedDifficulty));
+                if (TourLog != null)
+                {
+                    TourLog.Difficulty = value;
+                    RaisePropertyChanged(nameof(SelectedDifficulty));
+                }
             }
         }
 
         public float DistanceTraveled
         {
-            get { return TourLog.DistanceTraveled; }
+            get { return TourLog?.DistanceTraveled ?? 0; } // Default to 0 if TourLog is null
             set
             {
-                TourLog.DistanceTraveled = value;
-                RaisePropertyChanged(nameof(DistanceTraveled));
+                if (TourLog != null)
+                {
+                    TourLog.DistanceTraveled = value;
+                    RaisePropertyChanged(nameof(DistanceTraveled));
+                }
             }
         }
 
         public DateTime TimeTaken
         {
-            get { return TourLog.TimeTaken; }
+            get { return TourLog?.TimeTaken ?? DateTime.MinValue; } // Default to DateTime.MinValue if TourLog is null
             set
             {
-                TourLog.TimeTaken = value;
-                RaisePropertyChanged(nameof(TimeTaken));
+                if (TourLog != null)
+                {
+                    TourLog.TimeTaken = value;
+                    RaisePropertyChanged(nameof(TimeTaken));
+                }
             }
         }
 
         public Rating SelectedRating
         {
-            get { return TourLog.Rating; }
+            get { return TourLog?.Rating ?? Rating.Bad; } // Default to Bad if TourLog is null
             set
             {
-                TourLog.Rating = value;
-                RaisePropertyChanged(nameof(SelectedRating));
+                if (TourLog != null)
+                {
+                    TourLog.Rating = value;
+                    RaisePropertyChanged(nameof(SelectedRating));
+                }
             }
         }
 
@@ -77,8 +90,13 @@ namespace TourPlanner.ViewModels
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        public EditTourLogViewModel()
+        private readonly Action<TourLog> _saveCallback;
+
+        public EditTourLogViewModel(TourLog tourLog, Action<TourLog> saveCallback)
         {
+            TourLog = tourLog ?? new TourLog();
+            _saveCallback = saveCallback;
+
             // Initialize enums
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
             Ratings = new List<Rating> { Rating.Bad, Rating.Okay, Rating.Good, Rating.Great, Rating.Amazing };
@@ -90,8 +108,11 @@ namespace TourPlanner.ViewModels
 
         private void Save()
         {
-            // Close the window and save changes
-            // (The main ViewModel will handle updating the log list)
+            // Trigger the SaveChanges event
+            _saveCallback?.Invoke(TourLog);
+
+
+            // Close the window
             CloseWindow();
         }
 

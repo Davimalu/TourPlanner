@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
@@ -39,22 +40,6 @@ namespace TourPlanner.ViewModels
             {
                 _selectedLog = value;
                 RaisePropertyChanged(nameof(SelectedLog));
-                if (SelectedLog != null)
-                {
-                    // Fülle die Eingabefelder mit den Daten des ausgewählten Logs
-                    NewComment = SelectedLog.Comment;
-                }
-            }
-        }
-
-        private bool _isEditing;
-        public bool IsEditing
-        {
-            get { return _isEditing; }
-            set
-            {
-                _isEditing = value;
-                RaisePropertyChanged(nameof(IsEditing));
             }
         }
 
@@ -113,21 +98,22 @@ namespace TourPlanner.ViewModels
             {
                 var editWindow = new EditTourLogWindow
                 {
-                    DataContext = new EditTourLogViewModel { TourLog = SelectedLog }
+                    DataContext = new EditTourLogViewModel(SelectedLog, updatedLog =>
+                    {
+                        // Update the selected log with the changes
+                        SelectedLog.Comment = updatedLog.Comment;
+                        SelectedLog.Difficulty = updatedLog.Difficulty;
+                        SelectedLog.DistanceTraveled = updatedLog.DistanceTraveled;
+                        SelectedLog.TimeTaken = updatedLog.TimeTaken;
+                        SelectedLog.Rating = updatedLog.Rating;
+
+                        // Notify the UI that the logs have changed
+                        RaisePropertyChanged(nameof(TourLogs));
+                    })
                 };
+
                 editWindow.ShowDialog();
             }
         }, _ => SelectedLog != null);
-
-        public ICommand ExecuteSaveTourLog => new RelayCommand(_ =>
-        {
-            if (SelectedLog != null)
-            {
-                SelectedLog.Comment = NewComment;
-                IsEditing = false;
-                NewComment = string.Empty;
-            }
-        }, _ => !string.IsNullOrEmpty(NewComment));
-
     }
 }

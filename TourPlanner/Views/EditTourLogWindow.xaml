@@ -7,11 +7,11 @@
         xmlns:local="clr-namespace:TourPlanner.ViewModels"
         mc:Ignorable="d"
         Title="Edit Tour Log" Height="300" Width="400">
-    
-    <Window.DataContext>
+
+    <!--<Window.DataContext>
         <local:EditTourLogViewModel/>
-    </Window.DataContext>
-    
+    </Window.DataContext>-->
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
