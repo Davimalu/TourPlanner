@@ -1,34 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
 using TourPlanner.Models;
-using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
-        private TourLog _selectedTourLog;
-        public TourLog SelectedTourLog
+        // The original TourLog before it was edited
+        private readonly TourLog _originalTourLog;
+
+
+        // The copy that will be edited
+        private TourLog _editableTourLog;
+        public TourLog EditableTourLog
         {
-            get { return _selectedTourLog; }
+            get { return _editableTourLog; }
             set
             {
-                _selectedTourLog = value;
-                RaisePropertyChanged(nameof(SelectedTourLog));
+                _editableTourLog = value;
+                RaisePropertyChanged(nameof(EditableTourLog));
             }
         }
 
 
         public DateTime TimeStamp
         {
-            get { return _selectedTourLog.TimeStamp; }
+            get { return EditableTourLog.TimeStamp; }
             set
             {
-                _selectedTourLog.TimeStamp = value;
+                EditableTourLog.TimeStamp = value;
                 RaisePropertyChanged(nameof(TimeStamp));
             }
         }
@@ -36,10 +38,10 @@ namespace TourPlanner.ViewModels
 
         public string Comment
         {
-            get { return SelectedTourLog.Comment; }
+            get { return EditableTourLog.Comment; }
             set
             {
-                SelectedTourLog.Comment = value;
+                EditableTourLog.Comment = value;
                 RaisePropertyChanged(nameof(Comment));
             }
         }
@@ -47,10 +49,10 @@ namespace TourPlanner.ViewModels
 
         public Difficulty SelectedDifficulty
         {
-            get { return SelectedTourLog.Difficulty; } 
+            get { return EditableTourLog.Difficulty; } 
             set
             {
-                SelectedTourLog.Difficulty = value;
+                EditableTourLog.Difficulty = value;
                 RaisePropertyChanged(nameof(SelectedDifficulty));
             }
         }
@@ -58,20 +60,20 @@ namespace TourPlanner.ViewModels
 
         public float DistanceTraveled
         {
-            get { return SelectedTourLog.DistanceTraveled; }
+            get { return EditableTourLog.DistanceTraveled; }
             set
             {
-                SelectedTourLog.DistanceTraveled = value;
+                EditableTourLog.DistanceTraveled = value;
                 RaisePropertyChanged(nameof(DistanceTraveled));
             }
         }
 
         public float TimeTaken
         {
-            get { return SelectedTourLog.TimeTaken; }
+            get { return EditableTourLog.TimeTaken; }
             set
             {
-                SelectedTourLog.TimeTaken = value;
+                EditableTourLog.TimeTaken = value;
                 RaisePropertyChanged(nameof(TimeTaken));
             }
         }
@@ -79,10 +81,10 @@ namespace TourPlanner.ViewModels
 
         public Rating SelectedRating
         {
-            get { return SelectedTourLog.Rating; }
+            get { return EditableTourLog.Rating; }
             set
             {
-                SelectedTourLog.Rating = value;
+                EditableTourLog.Rating = value;
                 RaisePropertyChanged(nameof(SelectedRating));
             }
         }
@@ -94,10 +96,18 @@ namespace TourPlanner.ViewModels
         private readonly Action<TourLog> _saveCallback;
 
 
-        public EditTourLogViewModel(TourLog selectedTourLog, Action<TourLog> saveCallback)
+        public EditTourLogViewModel(TourLog selectedTourLog)
         {
-            SelectedTourLog = selectedTourLog ?? new TourLog();
-            _saveCallback = saveCallback;
+            _originalTourLog = selectedTourLog; // Store the original TourLog
+            EditableTourLog = new TourLog() // Create a copy of the TourLog to edit
+            {
+                TimeStamp = selectedTourLog.TimeStamp,
+                Comment = selectedTourLog.Comment,
+                Difficulty = selectedTourLog.Difficulty,
+                DistanceTraveled = selectedTourLog.DistanceTraveled,
+                TimeTaken = selectedTourLog.TimeTaken,
+                Rating = selectedTourLog.Rating
+            }; 
 
             // Initialize enums
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
@@ -107,8 +117,13 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteSave => new RelayCommand(_ =>
         {
-            // Trigger the SaveChanges event
-            _saveCallback?.Invoke(SelectedTourLog);
+            // Copy the changes from the editable copy to the original
+            _originalTourLog.TimeStamp = EditableTourLog.TimeStamp;
+            _originalTourLog.Comment = EditableTourLog.Comment;
+            _originalTourLog.Difficulty = EditableTourLog.Difficulty;
+            _originalTourLog.DistanceTraveled = EditableTourLog.DistanceTraveled;
+            _originalTourLog.TimeTaken = EditableTourLog.TimeTaken;
+            _originalTourLog.Rating = EditableTourLog.Rating;
 
             // Close the window
             CloseWindow();
@@ -117,7 +132,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteCancel => new RelayCommand(_ =>
         {
-            // Close the window
+            // Close the window, discarding changes
             CloseWindow();
         });
 

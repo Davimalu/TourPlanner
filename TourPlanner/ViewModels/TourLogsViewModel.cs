@@ -1,8 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using TourPlanner.Commands;
-using TourPlanner.Enums;
 using TourPlanner.Models;
 using TourPlanner.Views;
 
@@ -73,18 +70,7 @@ namespace TourPlanner.ViewModels
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(SelectedLog!, updatedLog =>
-                {
-                    // Update the selected log with the changes
-                    SelectedLog!.Comment = updatedLog.Comment;
-                    SelectedLog!.Difficulty = updatedLog.Difficulty;
-                    SelectedLog!.DistanceTraveled = updatedLog.DistanceTraveled;
-                    SelectedLog!.TimeTaken = updatedLog.TimeTaken;
-                    SelectedLog!.Rating = updatedLog.Rating;
-
-                    // Notify the UI that the logs have changed
-                    RaisePropertyChanged(nameof(SelectedTour));
-                })
+                DataContext = new EditTourLogViewModel(SelectedLog!)
             };
 
             editWindow.ShowDialog();
