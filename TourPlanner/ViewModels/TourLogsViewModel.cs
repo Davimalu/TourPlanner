@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
@@ -21,6 +20,7 @@ namespace TourPlanner.ViewModels
             }
         }
 
+
         private string _newComment;
         public string NewComment
         {
@@ -31,6 +31,7 @@ namespace TourPlanner.ViewModels
                 RaisePropertyChanged(nameof(NewComment));
             }
         }
+
 
         private TourLog? _selectedLog;
         public TourLog? SelectedLog
@@ -43,31 +44,24 @@ namespace TourPlanner.ViewModels
             }
         }
 
-        public TourLogsViewModel()
+
+        private Tour? _selectedTour;
+        public Tour? SelectedTour
         {
-            // Initialize dummy logs
-            TourLogs = new ObservableCollection<TourLog>
+            get { return _selectedTour; }
+            set
             {
-                new TourLog
-                {
-                    TimeStamp = DateTime.Now,
-                    Comment = "Erster Log",
-                    Difficulty = Difficulty.Easy,
-                    DistanceTraveled = 10,
-                    TimeTaken = DateTime.Now,
-                    Rating = Rating.Good
-                },
-                new TourLog
-                {
-                    TimeStamp = DateTime.Now,
-                    Comment = "Zweiter Log",
-                    Difficulty = Difficulty.Medium,
-                    DistanceTraveled = 20,
-                    TimeTaken = DateTime.Now,
-                    Rating = Rating.Great
-                }
-            };
+                _selectedTour = value;
+                RaisePropertyChanged(nameof(SelectedTour));
+            }
         }
+
+
+        public TourLogsViewModel(TourListViewModel tourListViewModel)
+        {
+            tourListViewModel.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the TourListViewModel
+        }
+
 
         public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
@@ -83,6 +77,7 @@ namespace TourPlanner.ViewModels
             NewComment = string.Empty;
         }, _ => !string.IsNullOrEmpty(NewComment));
 
+
         public ICommand ExecuteDeleteTourLog => new RelayCommand(_ =>
         {
             if (SelectedLog != null)
@@ -91,6 +86,7 @@ namespace TourPlanner.ViewModels
             }
             SelectedLog = null;
         }, _ => SelectedLog != null);
+
 
         public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
         {

@@ -7,10 +7,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <UserControl.DataContext>
-        <local:TourLogsViewModel/>
-    </UserControl.DataContext>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -18,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <!-- ListView zur Anzeige der Tour Logs -->
-        <ListView Grid.Row="0" ItemsSource="{Binding TourLogs}" SelectedItem="{Binding SelectedLog, Mode=TwoWay}" Margin="10" Background="White">
+        <ListView Grid.Row="0" ItemsSource="{Binding SelectedTour.Logs}" SelectedItem="{Binding SelectedLog, Mode=TwoWay}" Margin="10" Background="White">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Border Background="#f0f0f0" CornerRadius="5" Padding="8" Margin="5">

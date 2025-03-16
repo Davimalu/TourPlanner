@@ -66,7 +66,28 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Bicycle,
                     Distance = 35,
                     EstimatedTime = 110,
-                    RouteInformation = new BitmapImage(new Uri("https://www.niederoesterreich.at/images/d5tn5wton7g-/54c38e4576bea605b3d94ba94a49d669.jpg"))
+                    RouteInformation = new BitmapImage(new Uri("https://www.niederoesterreich.at/images/d5tn5wton7g-/54c38e4576bea605b3d94ba94a49d669.jpg")),
+                    Logs = new ObservableCollection<TourLog>() 
+                    {
+                        new TourLog
+                        {
+                            TimeStamp = DateTime.Now,
+                            Comment = "Erster Log",
+                            Difficulty = Difficulty.Easy,
+                            DistanceTraveled = 10,
+                            TimeTaken = DateTime.Now,
+                            Rating = Rating.Good
+                        },
+                        new TourLog
+                        {
+                            TimeStamp = DateTime.Now,
+                            Comment = "Zweiter Log",
+                            Difficulty = Difficulty.Medium,
+                            DistanceTraveled = 15,
+                            TimeTaken = DateTime.Now,
+                            Rating = Rating.Okay
+                        }
+                    }
                 },
                 new Tour
                 {
@@ -88,7 +109,28 @@ namespace TourPlanner.ViewModels
                     TransportationType = Transport.Foot,
                     Distance = 7,
                     EstimatedTime = 110,
-                    RouteInformation = new BitmapImage(new Uri("https://vcdn.bergfex.at/images/resized/a0/c30bcdee9546ada0_c25240774a8f2541.jpg"))
+                    RouteInformation = new BitmapImage(new Uri("https://vcdn.bergfex.at/images/resized/a0/c30bcdee9546ada0_c25240774a8f2541.jpg")),
+                    Logs = new ObservableCollection<TourLog>()
+                    {
+                        new TourLog
+                        {
+                            TimeStamp = DateTime.Now,
+                            Comment = "Erster Log",
+                            Difficulty = Difficulty.Easy,
+                            DistanceTraveled = 5,
+                            TimeTaken = DateTime.Now,
+                            Rating = Rating.Good
+                        },
+                        new TourLog
+                        {
+                            TimeStamp = DateTime.Now,
+                            Comment = "Zweiter Log",
+                            Difficulty = Difficulty.Medium,
+                            DistanceTraveled = 2,
+                            TimeTaken = DateTime.Now,
+                            Rating = Rating.Okay
+                        }
+                    }
                 },
                 new Tour
                 {

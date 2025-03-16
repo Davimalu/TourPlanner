@@ -22,7 +22,7 @@ namespace TourPlanner.ViewModels
         public MainWindowViewModel(TourListViewModel tourList)
         {
             _tourList = tourList;
-            tourList.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour;
+            tourList.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the TourListViewModel
         }
     }
 }

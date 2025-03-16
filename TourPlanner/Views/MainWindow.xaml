@@ -118,17 +118,9 @@
                                   Background="Gray"/>
 
                     <!-- Bottom Column -->
-                    <DataGrid Grid.Row="2" ItemsSource="{Binding Path=Logs}" AutoGenerateColumns="True" 
-                              ColumnWidth="*" Margin="5" />
-
-
                     <Grid Grid.Row="2">
-                        <local:TourLogs Grid.Column="0"/>
+                        <local:TourLogs Grid.Column="0" x:Name="TourLogs"/>
                     </Grid>
-
-
-
-
             </Grid>
             </Grid>
         </Grid>
