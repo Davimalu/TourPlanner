@@ -56,50 +56,13 @@
                     <TabControl Grid.Row="0" Margin="5">
                         <TabItem Header="General">
                             <Grid Margin="10">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                    <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Padding="10" Background="White">
-                                        <StackPanel>
-                                            <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding SelectedTour.TourName, TargetNullValue=''}" Margin="0,0,0,10"/>
-
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-
-                                                <!-- Labels -->
-                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Description:" FontWeight="Bold"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Start Location:" FontWeight="Bold"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="End Location:" FontWeight="Bold"/>
-                                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Transportation:" FontWeight="Bold"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Distance:" FontWeight="Bold"/>
-                                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Estimated Time:" FontWeight="Bold"/>
-
-                                                <!-- Data Binding -->
-                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTour.TourDescription, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTour.StartLocation, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTour.EndLocation, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedTour.TransportationType, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedTour.Distance, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedTour.EstimatedTime, TargetNullValue=''}" TextWrapping="Wrap"/>
-                                            </Grid>
-                                        </StackPanel>
-                                    </Border>
-                                   </ScrollViewer>
+                                <local:TourDetails x:Name="TourDetails"/>
                             </Grid>
                         </TabItem>
                         <TabItem Header="Route">
-                            <Viewbox>
-                                <Image Stretch="Uniform" Source="{Binding Path=SelectedTour.RouteInformation}" />
-                            </Viewbox>
+                            <Grid>
+                                <local:Map x:Name="Map"/>
+                            </Grid>
                         </TabItem>
                         <TabItem Header="Misc">
                             <StackPanel>
