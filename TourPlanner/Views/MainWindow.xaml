@@ -53,7 +53,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Top Column -->
-                    <TabControl Grid.Row="0" Margin="5">
+                    <TabControl Grid.Row="0" Margin="10">
                         <TabItem Header="General">
                             <Grid Margin="10">
                                 <local:TourDetails x:Name="TourDetails"/>
