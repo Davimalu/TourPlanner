@@ -93,8 +93,6 @@ namespace TourPlanner.ViewModels
         public List<Difficulty> Difficulties { get; set; }
         public List<Rating> Ratings { get; set; }
 
-        private readonly Action<TourLog> _saveCallback;
-
 
         public EditTourLogViewModel(TourLog selectedTourLog)
         {
