@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
+using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
 using TourPlanner.Views;
 
@@ -11,6 +12,8 @@ namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
+        private readonly ISelectedTourService _selectedTourService;
+
         private ObservableCollection<Tour>? _tours;
         public ObservableCollection<Tour>? Tours
         {
@@ -43,16 +46,15 @@ namespace TourPlanner.ViewModels
             {
                 _selectedTour = value;
                 RaisePropertyChanged(nameof(SelectedTour));
-                SelectedTourChanged?.Invoke(SelectedTour);
+                _selectedTourService.SelectedTour = _selectedTour; // Update the selected tour in the service
             }
         }
 
-        public event Action<Tour?>? SelectedTourChanged;
 
-
-
-        public TourListViewModel()
+        public TourListViewModel(ISelectedTourService selectedTourService)
         {
+            _selectedTourService = selectedTourService;
+
             // TODO: Get this information from the database instead
 
             // Initialize dummy tours

@@ -8,11 +8,4 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Logic\**" />
-    <EmbeddedResource Remove="Logic\**" />
-    <None Remove="Logic\**" />
-    <Page Remove="Logic\**" />
-  </ItemGroup>
-
 </Project>

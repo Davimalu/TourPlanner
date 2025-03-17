@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
 using TourPlanner.Views;
 
@@ -7,6 +8,8 @@ namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
+        private readonly ISelectedTourService _selectedTourService;
+
         private string? _newLogName;
         public string? NewLogName
         {
@@ -43,9 +46,10 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourLogsViewModel(TourListViewModel tourListViewModel)
+        public TourLogsViewModel(ISelectedTourService selectedTourService)
         {
-            tourListViewModel.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the TourListViewModel
+            _selectedTourService = selectedTourService;
+            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the service
         }
 
 

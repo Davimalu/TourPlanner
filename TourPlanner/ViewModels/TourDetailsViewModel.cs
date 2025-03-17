@@ -1,9 +1,12 @@
-﻿using TourPlanner.Models;
+﻿using TourPlanner.Logic.Interfaces;
+using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {
     class TourDetailsViewModel : BaseViewModel
     {
+        private readonly ISelectedTourService _selectedTourService;
+
         private Tour? _selectedTour;
         public Tour? SelectedTour
         {
@@ -16,9 +19,10 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourDetailsViewModel(TourListViewModel tourListViewModel)
+        public TourDetailsViewModel(ISelectedTourService selectedTourService)
         {
-            tourListViewModel.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the TourListViewModel
+            _selectedTourService = selectedTourService;
+            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the service
         }
     }
 }
