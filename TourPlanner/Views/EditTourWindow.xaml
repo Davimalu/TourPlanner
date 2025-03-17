@@ -1,0 +1,61 @@
+﻿<Window x:Class="TourPlanner.Views.EditTourWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TourPlanner.ViewModels"
+        mc:Ignorable="d"
+        Title="Edit Tour" Height="300" Width="400">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- TourName -->
+        <Label Grid.Row="0" Grid.Column="0" Content="Name:"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TourName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <!-- Description -->
+        <Label Grid.Row="1" Grid.Column="0" Content="Description:"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TourDescription, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <!-- Start Location -->
+        <Label Grid.Row="2" Grid.Column="0" Content="Start Location:"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding StartLocation, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <!-- End Location -->
+        <Label Grid.Row="3" Grid.Column="0" Content="End Location:"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EndLocation, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <!-- Transport -->
+        <Label Grid.Row="4" Grid.Column="0" Content="Transport:"/>
+        <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Transports}" SelectedItem="{Binding SelectedTransport}" Margin="5"/>
+
+        <!-- Distance -->
+        <Label Grid.Row="5" Grid.Column="0" Content="Distance: "/>
+        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding TourDistance, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <!-- Estimated Time -->
+        <Label Grid.Row="6" Grid.Column="0" Content="Duration:"/>
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding EstimatedTime, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <!-- Save and Cancel Buttons -->
+        <StackPanel Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
+            <Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Window>

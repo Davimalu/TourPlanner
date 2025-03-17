@@ -5,6 +5,7 @@ using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
 using TourPlanner.Models;
+using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
@@ -172,6 +173,18 @@ namespace TourPlanner.ViewModels
                 Tours.Remove(SelectedTour);
             }
             SelectedTour = null;
+        }, _ => SelectedTour != null);
+
+
+        public ICommand ExecuteEditTour => new RelayCommand(_ =>
+        {
+            var editWindow = new EditTourWindow()
+            {
+                DataContext = new EditTourViewModel(SelectedTour!)
+            };
+
+            editWindow.ShowDialog();
+
         }, _ => SelectedTour != null);
     }
 }

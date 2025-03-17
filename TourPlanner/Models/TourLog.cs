@@ -17,11 +17,8 @@ namespace TourPlanner.Models
             get => _timeStamp;
             set
             {
-                if (_timeStamp != value)
-                {
-                    _timeStamp = value;
-                    RaisePropertyChanged(nameof(TimeStamp));
-                }
+                _timeStamp = value;
+                RaisePropertyChanged(nameof(TimeStamp));
             }
         }
 
@@ -32,11 +29,8 @@ namespace TourPlanner.Models
             get => _comment;
             set
             {
-                if (_comment != value)
-                {
-                    _comment = value;
-                    RaisePropertyChanged(nameof(Comment));
-                }
+                _comment = value;
+                RaisePropertyChanged(nameof(Comment));
             }
         }
 
@@ -47,11 +41,8 @@ namespace TourPlanner.Models
             get => _difficulty;
             set
             {
-                if (_difficulty != value)
-                {
-                    _difficulty = value;
-                    RaisePropertyChanged(nameof(Difficulty));
-                }
+                _difficulty = value;
+                RaisePropertyChanged(nameof(Difficulty));
             }
         }
 
@@ -62,11 +53,8 @@ namespace TourPlanner.Models
             get => _distanceTraveled;
             set
             {
-                if (_distanceTraveled != value)
-                {
-                    _distanceTraveled = value;
-                    RaisePropertyChanged(nameof(DistanceTraveled));
-                }
+                _distanceTraveled = value;
+                RaisePropertyChanged(nameof(DistanceTraveled));
             }
         }
 
@@ -77,11 +65,8 @@ namespace TourPlanner.Models
             get => _timeTaken;
             set
             {
-                if (_timeTaken != value)
-                {
-                    _timeTaken = value;
-                    RaisePropertyChanged(nameof(TimeTaken));
-                }
+                _timeTaken = value;
+                RaisePropertyChanged(nameof(TimeTaken));
             }
         }
 
@@ -92,11 +77,8 @@ namespace TourPlanner.Models
             get => _rating;
             set
             {
-                if (_rating != value)
-                {
-                    _rating = value;
-                    RaisePropertyChanged(nameof(Rating));
-                }
+                _rating = value;
+                RaisePropertyChanged(nameof(Rating));
             }
         }
 
