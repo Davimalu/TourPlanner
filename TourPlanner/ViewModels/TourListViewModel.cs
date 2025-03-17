@@ -11,8 +11,8 @@ namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
-        private ObservableCollection<Tour> _tours;
-        public ObservableCollection<Tour> Tours
+        private ObservableCollection<Tour>? _tours;
+        public ObservableCollection<Tour>? Tours
         {
             get { return _tours; }
             set
@@ -23,8 +23,8 @@ namespace TourPlanner.ViewModels
         }
 
 
-        private string _newTourName;
-        public string NewTourName
+        private string? _newTourName;
+        public string? NewTourName
         {
             get { return _newTourName; }
             set
@@ -161,7 +161,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
         {
-            Tours.Add(new Tour() { TourName = NewTourName });
+            Tours?.Add(new Tour() { TourName = NewTourName! });
             NewTourName = string.Empty;
         }, _ => !string.IsNullOrEmpty(NewTourName));
 
@@ -170,7 +170,7 @@ namespace TourPlanner.ViewModels
         {
             if (SelectedTour != null)
             {
-                Tours.Remove(SelectedTour);
+                Tours?.Remove(SelectedTour);
             }
             SelectedTour = null;
         }, _ => SelectedTour != null);
