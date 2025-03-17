@@ -13,7 +13,7 @@ namespace TourPlanner.ViewModels
 
 
         // The copy that will be edited
-        private Tour _editableTour;
+        private Tour _editableTour = null!;
         public Tour EditableTour
         {
             get { return _editableTour; }

@@ -85,8 +85,8 @@ namespace TourPlanner.Models
             }
         }
 
-        private BitmapImage _routeInformation;
-        public BitmapImage RouteInformation
+        private BitmapImage? _routeInformation;
+        public BitmapImage? RouteInformation
         {
             get => _routeInformation;
             set

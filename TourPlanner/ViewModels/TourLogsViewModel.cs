@@ -7,8 +7,8 @@ namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
-        private string _newLogName;
-        public string NewLogName
+        private string? _newLogName;
+        public string? NewLogName
         {
             get { return _newLogName; }
             set
@@ -53,7 +53,7 @@ namespace TourPlanner.ViewModels
         {
             SelectedTour!.Logs.Add(new TourLog
             {
-                Comment = NewLogName,
+                Comment = NewLogName!,
             });
             NewLogName = string.Empty;
         }, _ => SelectedTour != null && !string.IsNullOrEmpty(NewLogName));
