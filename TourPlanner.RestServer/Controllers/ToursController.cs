@@ -24,7 +24,7 @@ namespace TourPlanner.RestServer.Controllers
                 TransportationType = Transport.Bicycle,
                 Distance = 35,
                 EstimatedTime = 110,
-                Logs = new ObservableCollection<TourLog>()
+                Logs = new List<TourLog>()
                 {
                     new TourLog
                     {
@@ -69,7 +69,7 @@ namespace TourPlanner.RestServer.Controllers
                 TransportationType = Transport.Foot,
                 Distance = 7,
                 EstimatedTime = 110,
-                Logs = new ObservableCollection<TourLog>()
+                Logs = new List<TourLog>()
                 {
                     new TourLog
                     {
@@ -145,6 +145,52 @@ namespace TourPlanner.RestServer.Controllers
             _tours.Add(newTour); // Add the new tour to the in-memory collection
 
             return CreatedAtAction(nameof(GetTourById), new { id = newTour.TourId }, newTour);
+        }
+
+        // PUT: api/tours/{id}
+        [HttpPut("{id}")]
+        public ActionResult UpdateTour(int id, [FromBody] Tour updatedTour)
+        {
+            // Check if the ID in the route matches the TourId in the body
+            if (updatedTour.TourId != id)
+            {
+                return BadRequest("Tour ID mismatch");
+            }
+
+            // Find the existing tour in the in-memory collection
+            var tour = _tours.FirstOrDefault(t => t.TourId == id);
+            if (tour == null)
+            {
+                return NotFound();
+            }
+
+            // Update the properties of the existing tour
+            tour.TourName = updatedTour.TourName;
+            tour.TourDescription = updatedTour.TourDescription;
+            tour.StartLocation = updatedTour.StartLocation;
+            tour.EndLocation = updatedTour.EndLocation;
+            tour.TransportationType = updatedTour.TransportationType;
+            tour.Distance = updatedTour.Distance;
+            tour.EstimatedTime = updatedTour.EstimatedTime;
+            tour.Logs = updatedTour.Logs;
+
+            return NoContent();
+        }
+
+        // DELETE: api/tours/{id}
+        [HttpDelete("{id}")]
+        public ActionResult DeleteTour(int id)
+        {
+            // Find the tour in the in-memory collection
+            var tour = _tours.FirstOrDefault(t => t.TourId == id);
+            if (tour == null)
+            {
+                return NotFound();
+            }
+
+            _tours.Remove(tour); // Remove the tour from the in-memory collection
+
+            return NoContent();
         }
     }
 }

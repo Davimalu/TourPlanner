@@ -8,6 +8,17 @@ namespace TourPlanner.Models
 {
     public class Tour : INotifyPropertyChanged
     {
+        private int _tourId;
+        public int TourId
+        {
+            get => _tourId;
+            set
+            {
+                _tourId = value;
+                RaisePropertyChanged(nameof(TourId));
+            }
+        }
+
         private string _tourName = string.Empty;
         public string TourName
         {

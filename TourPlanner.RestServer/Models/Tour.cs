@@ -13,6 +13,6 @@ namespace TourPlanner.RestServer.Models
         public Transport TransportationType { get; set; }
         public float Distance { get; set; }
         public float EstimatedTime { get; set; }
-        public ObservableCollection<TourLog> Logs { get; set; }
+        public List<TourLog> Logs { get; set; }
     }
 }
