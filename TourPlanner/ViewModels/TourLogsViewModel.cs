@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
 using TourPlanner.Views;
@@ -9,6 +10,7 @@ namespace TourPlanner.ViewModels
     public class TourLogsViewModel : BaseViewModel
     {
         private readonly ISelectedTourService _selectedTourService;
+        private readonly IWindowService _windowService = WindowService.Instance;
 
         private string? _newLogName;
         public string? NewLogName
@@ -72,13 +74,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
         {
-            var editWindow = new EditTourLogWindow
-            {
-                DataContext = new EditTourLogViewModel(SelectedLog!)
-            };
-
-            editWindow.ShowDialog();
-
+            _windowService.SpawnEditTourLogWindow(SelectedLog!);
         }, _ => SelectedTour != null && SelectedLog != null);
     }
 }
