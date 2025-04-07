@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
 using TourPlanner.Enums;
+using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
 using TourPlanner.Views;
@@ -13,6 +14,8 @@ namespace TourPlanner.ViewModels
     public class TourListViewModel : BaseViewModel
     {
         private readonly ISelectedTourService _selectedTourService;
+        private readonly IWindowService _windowService = WindowService.Instance;
+
 
         private ObservableCollection<Tour>? _tours;
         public ObservableCollection<Tour>? Tours
@@ -180,13 +183,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteEditTour => new RelayCommand(_ =>
         {
-            var editWindow = new EditTourWindow()
-            {
-                DataContext = new EditTourViewModel(SelectedTour!)
-            };
-
-            editWindow.ShowDialog();
-
+            _windowService.SpawnEditTourWindow(SelectedTour!);
         }, _ => SelectedTour != null);
     }
 }
