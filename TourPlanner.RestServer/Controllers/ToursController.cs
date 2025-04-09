@@ -216,20 +216,20 @@ namespace TourPlanner.RestServer.Controllers
             return Ok(tour.Logs);
         }
 
-        // GET: api/tours/{tourId}/logs/{logId}
-        [HttpGet("{tourId}/logs/{logId}")]
-        public ActionResult<TourLog> GetTourLogById(int tourId, int logId)
+        // GET: api/tours/logs/{logId}
+        [HttpGet("logs/{logId}")]
+        public ActionResult<TourLog> GetTourLogById(int logId)
         {
-            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
-            if (tour == null)
+            TourLog? log = null;
+
+            foreach (Tour tour in _tours)
             {
-                return NotFound($"Tour with id {tourId} not found");
+                log = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
             }
 
-            var log = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
             if (log == null)
             {
-                return NotFound($"Log with id {logId} not found for tour {tourId}");
+                return NotFound($"Log with id {logId} not found");
             }
 
             return Ok(log);
@@ -253,20 +253,20 @@ namespace TourPlanner.RestServer.Controllers
             return CreatedAtAction(nameof(GetTourLogById), new { tourId = tourId, logId = newLog.LogId }, newLog);
         }
 
-        // PUT: api/tours/{tourId}/logs/{logId}
-        [HttpPut("{tourId}/logs/{logId}")]
-        public ActionResult<TourLog> UpdateTourLog(int tourId, int logId, [FromBody] TourLog updatedLog)
+        // PUT: api/tours/logs/{logId}
+        [HttpPut("logs/{logId}")]
+        public ActionResult<TourLog> UpdateTourLog(int logId, [FromBody] TourLog updatedLog)
         {
-            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
-            if (tour == null)
+            TourLog? existingLog = null;
+
+            foreach (Tour tour in _tours)
             {
-                return NotFound($"Tour with id {tourId} not found.");
+                existingLog = tour.Logs.FirstOrDefault(l => l.LogId == logId);
             }
 
-            var existingLog = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
             if (existingLog == null)
             {
-                return NotFound($"Log with id {logId} not found for tour {tourId}.");
+                return NotFound($"Log with id {logId} not found");
             }
 
             // Check if the logId in the URL matches the LogId in the body (if provided)
@@ -286,23 +286,26 @@ namespace TourPlanner.RestServer.Controllers
             return Ok(existingLog);
         }
 
-        // DELETE: api/tours/{tourId}/logs/{logId}
-        [HttpDelete("{tourId}/logs/{logId}")]
-        public ActionResult DeleteTourLog(int tourId, int logId)
+        // DELETE: api/tours/logs/{logId}
+        [HttpDelete("logs/{logId}")]
+        public ActionResult DeleteTourLog(int logId)
         {
-            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
-            if (tour == null)
+            TourLog? log = null;
+
+            foreach (Tour tour in _tours)
             {
-                return NotFound($"Tour with id {tourId} not found.");
+                log = tour.Logs.FirstOrDefault(l => l.LogId == logId);
+
+                if (log != null)
+                {
+                    tour.Logs.Remove(log);
+                }
             }
 
-            var log = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
             if (log == null)
             {
-                return NotFound($"Log with id {logId} not found for tour {tourId}.");
+                return NotFound($"Log with id {logId} not found");
             }
-
-            tour.Logs.Remove(log);
 
             return NoContent();
         }

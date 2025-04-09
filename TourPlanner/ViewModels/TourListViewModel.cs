@@ -110,7 +110,7 @@ namespace TourPlanner.ViewModels
         {
             try
             {
-                var tourList = await _tourService.GetAllToursAsync();
+                var tourList = await _tourService.GetToursAsync();
                 Tours = new ObservableCollection<Tour>(tourList ?? new List<Tour>());
             }
             catch (Exception ex)

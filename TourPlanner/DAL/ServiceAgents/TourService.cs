@@ -23,7 +23,7 @@ namespace TourPlanner.DAL.ServiceAgents
             _logger = LoggerFactory.GetLogger<TourService>();
         }
 
-        public async Task<List<Tour>?> GetAllToursAsync()
+        public async Task<List<Tour>?> GetToursAsync()
         {
             _logger.Debug("Fetching all tours from API...");
             HttpResponseMessage response = await _httpClient.GetAsync("/api/Tours");
