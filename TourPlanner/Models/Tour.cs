@@ -8,6 +8,17 @@ namespace TourPlanner.Models
 {
     public class Tour : INotifyPropertyChanged
     {
+        private int _tourId;
+        public int TourId
+        {
+            get => _tourId;
+            set
+            {
+                _tourId = value;
+                RaisePropertyChanged(nameof(TourId));
+            }
+        }
+
         private string _tourName = string.Empty;
         public string TourName
         {
@@ -105,6 +116,24 @@ namespace TourPlanner.Models
                 _logs = value;
                 RaisePropertyChanged(nameof(Logs));
             }
+        }
+
+        // Constructor
+        public Tour() { }
+
+        // Copy constructor
+        public Tour(Tour tour)
+        {
+            TourId = tour.TourId;
+            TourName = tour.TourName;
+            TourDescription = tour.TourDescription;
+            StartLocation = tour.StartLocation;
+            EndLocation = tour.EndLocation;
+            TransportationType = tour.TransportationType;
+            Distance = tour.Distance;
+            EstimatedTime = tour.EstimatedTime;
+            RouteInformation = tour.RouteInformation;
+            Logs = new ObservableCollection<TourLog>(tour.Logs);
         }
 
 

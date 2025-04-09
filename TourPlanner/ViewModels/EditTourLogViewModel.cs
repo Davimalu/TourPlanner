@@ -1,13 +1,20 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
+        private readonly ITourLogService _tourLogService = new TourLogService();
+        private readonly ILoggerWrapper _logger;
+
         // The original TourLog before it was edited
         private readonly TourLog _originalTourLog;
 
@@ -25,67 +32,14 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public DateTime TimeStamp
+        private Tour _selectedTour = null!;
+        public Tour SelectedTour
         {
-            get { return EditableTourLog.TimeStamp; }
+            get { return _selectedTour; }
             set
             {
-                EditableTourLog.TimeStamp = value;
-                RaisePropertyChanged(nameof(TimeStamp));
-            }
-        }
-
-
-        public string Comment
-        {
-            get { return EditableTourLog.Comment; }
-            set
-            {
-                EditableTourLog.Comment = value;
-                RaisePropertyChanged(nameof(Comment));
-            }
-        }
-
-
-        public Difficulty SelectedDifficulty
-        {
-            get { return EditableTourLog.Difficulty; } 
-            set
-            {
-                EditableTourLog.Difficulty = value;
-                RaisePropertyChanged(nameof(SelectedDifficulty));
-            }
-        }
-
-
-        public float DistanceTraveled
-        {
-            get { return EditableTourLog.DistanceTraveled; }
-            set
-            {
-                EditableTourLog.DistanceTraveled = value;
-                RaisePropertyChanged(nameof(DistanceTraveled));
-            }
-        }
-
-        public float TimeTaken
-        {
-            get { return EditableTourLog.TimeTaken; }
-            set
-            {
-                EditableTourLog.TimeTaken = value;
-                RaisePropertyChanged(nameof(TimeTaken));
-            }
-        }
-
-
-        public Rating SelectedRating
-        {
-            get { return EditableTourLog.Rating; }
-            set
-            {
-                EditableTourLog.Rating = value;
-                RaisePropertyChanged(nameof(SelectedRating));
+                _selectedTour = value;
+                RaisePropertyChanged(nameof(SelectedTour));
             }
         }
 
@@ -94,18 +48,13 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(TourLog selectedTourLog)
+        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog)
         {
+            _logger = LoggerFactory.GetLogger<TourListViewModel>();
+
+            _selectedTour = selectedTour;
             _originalTourLog = selectedTourLog; // Store the original TourLog
-            EditableTourLog = new TourLog() // Create a copy of the TourLog to edit
-            {
-                TimeStamp = selectedTourLog.TimeStamp,
-                Comment = selectedTourLog.Comment,
-                Difficulty = selectedTourLog.Difficulty,
-                DistanceTraveled = selectedTourLog.DistanceTraveled,
-                TimeTaken = selectedTourLog.TimeTaken,
-                Rating = selectedTourLog.Rating
-            }; 
+            EditableTourLog = new TourLog(_originalTourLog); // Create a copy of the TourLog to edit
 
             // Initialize enums
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
@@ -113,15 +62,45 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public ICommand ExecuteSave => new RelayCommand(_ =>
+        public ICommand ExecuteSave => new RelayCommandAsync(async _ =>
         {
-            // Copy the changes from the editable copy to the original
-            _originalTourLog.TimeStamp = EditableTourLog.TimeStamp;
-            _originalTourLog.Comment = EditableTourLog.Comment;
-            _originalTourLog.Difficulty = EditableTourLog.Difficulty;
-            _originalTourLog.DistanceTraveled = EditableTourLog.DistanceTraveled;
-            _originalTourLog.TimeTaken = EditableTourLog.TimeTaken;
-            _originalTourLog.Rating = EditableTourLog.Rating;
+            // Check if the TourLog already exists in the SelectedTour (i.e. are we updating an existing TourLog or creating a new one?)
+            TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == EditableTourLog.LogId);
+
+            // TourLog already exists -> update it
+            if (existingTourLog != null)
+            {
+                TourLog? updatedTourLog = await _tourLogService.UpdateTourLogAsync(EditableTourLog);
+
+                if (updatedTourLog != null)
+                {
+                    // Update the local TourLog in the SelectedTour
+                    int index = _selectedTour.Logs.IndexOf(existingTourLog);
+                    if (index >= 0)
+                    {
+                        _selectedTour.Logs[index] = updatedTourLog;
+                    }
+                }
+                else
+                {
+                    _logger.Error($"Failed to update TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                }
+            }
+            // TourLog doesn't exist -> create it
+            else
+            {
+                TourLog? newTourLog = await _tourLogService.CreateTourLogAsync(SelectedTour.TourId, EditableTourLog);
+
+                if (newTourLog != null)
+                {
+                    // Add the new TourLog to the SelectedTour
+                    _selectedTour.Logs.Add(newTourLog);
+                }
+                else
+                {
+                    _logger.Error($"Failed to create TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                }
+            }
 
             // Close the window
             CloseWindow();

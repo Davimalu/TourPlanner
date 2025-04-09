@@ -1,5 +1,9 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.DAL.ServiceAgents;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
@@ -11,6 +15,8 @@ namespace TourPlanner.ViewModels
     {
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService = WindowService.Instance;
+        private readonly ITourLogService _tourLogService = new TourLogService();
+        private readonly ILoggerWrapper _logger;
 
         private string? _newLogName;
         public string? NewLogName
@@ -52,29 +58,40 @@ namespace TourPlanner.ViewModels
         {
             _selectedTourService = selectedTourService;
             _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the service
+
+            _logger = LoggerFactory.GetLogger<TourListViewModel>();
         }
 
 
         public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
-            SelectedTour!.Logs.Add(new TourLog
-            {
-                Comment = NewLogName!,
-            });
+            _windowService.SpawnEditTourLogWindow(SelectedTour!, new TourLog() { Comment = NewLogName! });
             NewLogName = string.Empty;
         }, _ => SelectedTour != null && !string.IsNullOrEmpty(NewLogName));
 
 
-        public ICommand ExecuteDeleteTourLog => new RelayCommand(_ =>
+        public ICommand ExecuteDeleteTourLog => new RelayCommandAsync(async _ =>
         {
-            SelectedTour!.Logs.Remove(SelectedLog!);
+            var success = await _tourLogService.DeleteTourLogAsync(SelectedLog!.LogId);
+
+            if (success)
+            {
+                _logger.Info($"Deleted log with ID {SelectedLog.LogId}: {SelectedLog.Comment} from Tour with ID {SelectedTour!.TourId}: {SelectedTour.TourName}");
+
+                // Remove the log from the local tour
+                SelectedTour.Logs.Remove(SelectedLog);
+            }
+            else
+            {
+                _logger.Error($"Failed to delete log with ID {SelectedLog.LogId}: {SelectedLog.Comment} from Tour with ID {SelectedTour!.TourId}: {SelectedTour.TourName}");
+            }
             SelectedLog = null;
         }, _ => SelectedTour != null && SelectedLog != null);
 
 
         public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
         {
-            _windowService.SpawnEditTourLogWindow(SelectedLog!);
+            _windowService.SpawnEditTourLogWindow(SelectedTour!, SelectedLog!);
         }, _ => SelectedTour != null && SelectedLog != null);
     }
 }

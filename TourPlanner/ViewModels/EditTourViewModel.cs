@@ -1,15 +1,22 @@
 ﻿using System.Windows.Input;
 using System.Windows;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
+        private readonly ITourService _tourService = new TourService();
+        private readonly ILoggerWrapper _logger;
+
         // The original Tour before it was edited
-        private readonly Tour _originalTour;
+        private Tour _originalTour;
 
 
         // The copy that will be edited
@@ -25,109 +32,44 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public string TourName
-        {
-            get { return EditableTour.TourName; }
-            set
-            {
-                EditableTour.TourName = value;
-                RaisePropertyChanged(nameof(TourName));
-            }
-        }
-
-        public string TourDescription
-        {
-            get { return EditableTour.TourDescription; }
-            set
-            {
-                EditableTour.TourDescription = value;
-                RaisePropertyChanged(nameof(TourDescription));
-            }
-        }
-
-        public string StartLocation
-        {
-            get { return EditableTour.StartLocation; }
-            set
-            {
-                EditableTour.StartLocation = value;
-                RaisePropertyChanged(nameof(StartLocation));
-            }
-        }
-
-        public string EndLocation
-        {
-            get { return EditableTour.EndLocation; }
-            set
-            {
-                EditableTour.EndLocation = value;
-                RaisePropertyChanged(nameof(EndLocation));
-            }
-        }
-
-        public Transport SelectedTransport
-        {
-            get { return EditableTour.TransportationType; }
-            set
-            {
-                EditableTour.TransportationType = value;
-                RaisePropertyChanged(nameof(SelectedTransport));
-            }
-        }
-
-        public float TourDistance
-        {
-            get { return EditableTour.Distance; }
-            set
-            {
-                EditableTour.Distance = value;
-                RaisePropertyChanged(nameof(TourDistance));
-            }
-        }
-
-        public float EstimatedTime
-        {
-            get { return EditableTour.EstimatedTime; }
-            set
-            {
-                EditableTour.EstimatedTime = value;
-                RaisePropertyChanged(nameof(EstimatedTime));
-            }
-        }
-
-
         public List<Transport> Transports { get; set; }
 
         public EditTourViewModel(Tour selectedTour)
         {
             _originalTour = selectedTour; // Store the original Tour
-            EditableTour = new Tour() // Create a copy of the Tour to edit
-            {
-                TourName = selectedTour.TourName,
-                TourDescription = selectedTour.TourDescription,
-                StartLocation = selectedTour.StartLocation,
-                EndLocation = selectedTour.EndLocation,
-                TransportationType = selectedTour.TransportationType,
-                Distance = selectedTour.Distance,
-                EstimatedTime = selectedTour.EstimatedTime
-            };
+            EditableTour = new Tour(_originalTour); // Create a copy of the Tour to edit
 
+            _logger = LoggerFactory.GetLogger<EditTourViewModel>();
 
             // Initialize enums
             Transports = new List<Transport> { Transport.Bicycle, Transport.Car, Transport.Foot, Transport.Motorcycle };
         }
 
 
-        public ICommand ExecuteSave => new RelayCommand(_ =>
+        public ICommand ExecuteSave => new RelayCommandAsync(async _ =>
         {
-            // Copy the changes from the editable copy to the original
-            _originalTour.TourName = EditableTour.TourName;
-            _originalTour.TourDescription = EditableTour.TourDescription;
-            _originalTour.StartLocation = EditableTour.StartLocation;
-            _originalTour.EndLocation = EditableTour.EndLocation;
-            _originalTour.TransportationType = EditableTour.TransportationType;
-            _originalTour.Distance = EditableTour.Distance;
-            _originalTour.EstimatedTime = EditableTour.EstimatedTime;
+            // Check if the Tour already exists (i.e. are we updating an existing Tour or creating a new one?)
+
+            // Tour doesn't exist -> create it
+            if (_originalTour.TourId == -1)
+            {
+                Tour? newTour = await _tourService.CreateTourAsync(EditableTour);
+
+                if (newTour == null)
+                {
+                    _logger.Error($"Failed to create Tour: {EditableTour.TourName}");
+                }
+            }
+            // Tour already exists -> update it
+            else
+            {
+                Tour? updatedTour = await _tourService.UpdateTourAsync(EditableTour);
+
+                if (updatedTour == null)
+                {
+                    _logger.Error($"Failed to update Tour with ID {EditableTour.TourId}: {EditableTour.TourName}");
+                }
+            }
 
             // Close the window
             CloseWindow();

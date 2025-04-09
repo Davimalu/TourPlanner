@@ -11,6 +11,17 @@ namespace TourPlanner.Models
         // https://stackoverflow.com/questions/6922130/in-mvvm-model-should-the-model-implement-inotifypropertychanged-interface
 
 
+        private int _logId;
+        public int LogId
+        {
+            get => _logId;
+            set
+            {
+                _logId = value;
+                RaisePropertyChanged(nameof(LogId));
+            }
+        }
+
         private DateTime _timeStamp = DateTime.Now;
         public DateTime TimeStamp
         {
@@ -80,6 +91,21 @@ namespace TourPlanner.Models
                 _rating = value;
                 RaisePropertyChanged(nameof(Rating));
             }
+        }
+
+        // Constructor
+        public TourLog() { }
+
+        // Copy constructor
+        public TourLog(TourLog tourLog)
+        {
+            LogId = tourLog.LogId;
+            TimeStamp = tourLog.TimeStamp;
+            Comment = tourLog.Comment;
+            Difficulty = tourLog.Difficulty;
+            DistanceTraveled = tourLog.DistanceTraveled;
+            TimeTaken = tourLog.TimeTaken;
+            Rating = tourLog.Rating;
         }
 
 

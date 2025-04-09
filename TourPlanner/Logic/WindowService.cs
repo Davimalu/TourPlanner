@@ -38,11 +38,11 @@ namespace TourPlanner.Logic
         }
 
 
-        public void SpawnEditTourLogWindow(TourLog selectedTourLog)
+        public void SpawnEditTourLogWindow(Tour selectedTour, TourLog selectedTourLog)
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(selectedTourLog)
+                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog)
             };
 
             editWindow.ShowDialog();
