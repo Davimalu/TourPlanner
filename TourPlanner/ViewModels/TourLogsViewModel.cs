@@ -16,6 +16,7 @@ namespace TourPlanner.ViewModels
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService = WindowService.Instance;
         private readonly ITourService _tourService = new TourService();
+        private readonly ITourLogService _tourLogService = new TourLogService();
         private readonly ILoggerWrapper _logger;
 
         private string? _newLogName;

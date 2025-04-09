@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents
 {
-    public class TourLogService
+    public class TourLogService : ITourLogService
     {
         private readonly string _baseUrl = "http://localhost:5168";
         private readonly HttpClient _httpClient;
@@ -26,7 +23,7 @@ namespace TourPlanner.DAL.ServiceAgents
             _logger = LoggerFactory.GetLogger<TourLogService>();
         }
 
-        public async Task<List<TourLogService>?> GetTourLogsAsync(int tourId)
+        public async Task<List<TourLog>?> GetTourLogsAsync(int tourId)
         {
             _logger.Debug("Fetching all tour logs from API...");
             HttpResponseMessage response = await _httpClient.GetAsync($"/api/tours/{tourId}/logs");
@@ -34,7 +31,7 @@ namespace TourPlanner.DAL.ServiceAgents
             if (response.IsSuccessStatusCode)
             {
                 string json = await response.Content.ReadAsStringAsync();
-                List<TourLogService>? tourLogList = JsonSerializer.Deserialize<List<TourLogService>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                List<TourLog>? tourLogList = JsonSerializer.Deserialize<List<TourLog>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 _logger.Info($"Received {tourLogList?.Count ?? '0'} tour logs from API");
 
@@ -46,7 +43,7 @@ namespace TourPlanner.DAL.ServiceAgents
             }
         }
 
-        public async Task<TourLog?> GetTourLogById(int logId)
+        public async Task<TourLog?> GetTourLogByIdAsync(int logId)
         {
             _logger.Debug($"Fetching tour log with ID {logId} from API...");
             HttpResponseMessage response = await _httpClient.GetAsync($"/api/tours/logs/{logId}");
@@ -66,7 +63,7 @@ namespace TourPlanner.DAL.ServiceAgents
             }
         }
 
-        public async Task<TourLog?> CreateTourLogAsnyc(int tourId, TourLog newLog)
+        public async Task<TourLog?> CreateTourLogAsync(int tourId, TourLog newLog)
         {
             _logger.Debug($"Creating new tour log for tour with ID {tourId}...");
 
