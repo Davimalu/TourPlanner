@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
 using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
 using TourPlanner.Logic;
@@ -17,7 +18,7 @@ namespace TourPlanner.ViewModels
     {
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService = WindowService.Instance;
-        private readonly TourService _tourService = new TourService();
+        private readonly ITourService _tourService = new TourService();
 
 
         private ObservableCollection<Tour>? _tours;
@@ -71,7 +72,7 @@ namespace TourPlanner.ViewModels
             try
             {
                 // Await the async call to get the list of tours
-                var tourList = await _tourService.GetToursAsync();
+                var tourList = await _tourService.GetAllToursAsync();
                 Tours = new ObservableCollection<Tour>(tourList);
             }
             catch (Exception ex)
