@@ -58,6 +58,7 @@ namespace TourPlanner.RestServer.Controllers
                 TransportationType = Transport.Car,
                 Distance = 75,
                 EstimatedTime = 200,
+                Logs = new List<TourLog>()
             },
             new Tour
             {
@@ -102,7 +103,8 @@ namespace TourPlanner.RestServer.Controllers
                 EndLocation = "Baden bei Wien",
                 TransportationType = Transport.Bicycle,
                 Distance = 28,
-                EstimatedTime = 70
+                EstimatedTime = 70,
+                Logs = new List<TourLog>()
             },
             new Tour
             {
@@ -113,10 +115,14 @@ namespace TourPlanner.RestServer.Controllers
                 EndLocation = "Leopoldsberg",
                 TransportationType = Transport.Foot,
                 Distance = 5,
-                EstimatedTime = 60
+                EstimatedTime = 60,
+                Logs = new List<TourLog>()
             }
         };
 
+        // ------------------------------
+        // Tour Endpoints
+        // ------------------------------
 
         // GET: api/tours
         [HttpGet]
@@ -189,6 +195,114 @@ namespace TourPlanner.RestServer.Controllers
             }
 
             _tours.Remove(tour); // Remove the tour from the in-memory collection
+
+            return NoContent();
+        }
+
+        // ------------------------------
+        // TourLog Endpoints (Sub-resource of Tours)
+        // ------------------------------
+
+        // GET: api/tours/{tourId}/logs
+        [HttpGet("{tourId}/logs")]
+        public ActionResult<IEnumerable<TourLog>> GetTourLogs(int tourId)
+        {
+            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
+            if (tour == null)
+            {
+                return NotFound($"Tour with id {tourId} not found");
+            }
+
+            return Ok(tour.Logs);
+        }
+
+        // GET: api/tours/{tourId}/logs/{logId}
+        [HttpGet("{tourId}/logs/{logId}")]
+        public ActionResult<TourLog> GetTourLogById(int tourId, int logId)
+        {
+            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
+            if (tour == null)
+            {
+                return NotFound($"Tour with id {tourId} not found");
+            }
+
+            var log = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
+            if (log == null)
+            {
+                return NotFound($"Log with id {logId} not found for tour {tourId}");
+            }
+
+            return Ok(log);
+        }
+
+        // POST: api/tours/{tourId}/logs
+        [HttpPost("{tourId}/logs")]
+        public ActionResult<TourLog> CreateTourLog(int tourId, [FromBody] TourLog newLog)
+        {
+            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
+            if (tour == null)
+            {
+                return NotFound($"Tour with id {tourId} not found.");
+            }
+
+            // Generate a new LogId - this will later be handled by the database
+            newLog.LogId = tour.Logs.Count + 1;
+
+            tour.Logs.Add(newLog); // Add the new log to the tour's logs in the in-memory collection
+
+            return CreatedAtAction(nameof(GetTourLogById), new { tourId = tourId, logId = newLog.LogId }, newLog);
+        }
+
+        // PUT: api/tours/{tourId}/logs/{logId}
+        [HttpPut("{tourId}/logs/{logId}")]
+        public ActionResult<TourLog> UpdateTourLog(int tourId, int logId, [FromBody] TourLog updatedLog)
+        {
+            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
+            if (tour == null)
+            {
+                return NotFound($"Tour with id {tourId} not found.");
+            }
+
+            var existingLog = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
+            if (existingLog == null)
+            {
+                return NotFound($"Log with id {logId} not found for tour {tourId}.");
+            }
+
+            // Check if the logId in the URL matches the LogId in the body (if provided)
+            if (updatedLog.LogId != logId)
+            {
+                return BadRequest("Log ID mismatch");
+            }
+
+            // Update the properties of the existing log with the new values in the in-memory collection
+            existingLog.Comment = updatedLog.Comment;
+            existingLog.Difficulty = updatedLog.Difficulty;
+            existingLog.DistanceTraveled = updatedLog.DistanceTraveled;
+            existingLog.TimeTaken = updatedLog.TimeTaken;
+            existingLog.Rating = updatedLog.Rating;
+            existingLog.TimeStamp = updatedLog.TimeStamp;
+
+            return Ok(existingLog);
+        }
+
+        // DELETE: api/tours/{tourId}/logs/{logId}
+        [HttpDelete("{tourId}/logs/{logId}")]
+        public ActionResult DeleteTourLog(int tourId, int logId)
+        {
+            var tour = _tours.FirstOrDefault(t => t.TourId == tourId); // Retrieve the tour by ID from the in-memory collection
+            if (tour == null)
+            {
+                return NotFound($"Tour with id {tourId} not found.");
+            }
+
+            var log = tour.Logs.FirstOrDefault(l => l.LogId == logId); // Retrieve the log by ID from the tour's logs
+            if (log == null)
+            {
+                return NotFound($"Log with id {logId} not found for tour {tourId}.");
+            }
+
+            tour.Logs.Remove(log);
 
             return NoContent();
         }

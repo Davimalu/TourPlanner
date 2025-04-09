@@ -10,6 +10,6 @@ namespace TourPlanner.Logic.Interfaces
     internal interface IWindowService
     {
         public void SpawnEditTourWindow(Tour selectedTour);
-        public void SpawnEditTourLogWindow (TourLog selectedTourLog);
+        public void SpawnEditTourLogWindow (Tour selectedTour, TourLog selectedTourLog);
     }
 }

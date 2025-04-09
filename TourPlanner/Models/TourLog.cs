@@ -93,6 +93,21 @@ namespace TourPlanner.Models
             }
         }
 
+        // Constructor
+        public TourLog() { }
+
+        // Copy constructor
+        public TourLog(TourLog tourLog)
+        {
+            LogId = tourLog.LogId;
+            TimeStamp = tourLog.TimeStamp;
+            Comment = tourLog.Comment;
+            Difficulty = tourLog.Difficulty;
+            DistanceTraveled = tourLog.DistanceTraveled;
+            TimeTaken = tourLog.TimeTaken;
+            Rating = tourLog.Rating;
+        }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -1,13 +1,20 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
+        private readonly ITourService _tourService = new TourService();
+        private readonly ILoggerWrapper _logger;
+
         // The original TourLog before it was edited
         private readonly TourLog _originalTourLog;
 
@@ -21,6 +28,18 @@ namespace TourPlanner.ViewModels
             {
                 _editableTourLog = value;
                 RaisePropertyChanged(nameof(EditableTourLog));
+            }
+        }
+
+
+        private Tour _selectedTour = null!;
+        public Tour SelectedTour
+        {
+            get { return _selectedTour; }
+            set
+            {
+                _selectedTour = value;
+                RaisePropertyChanged(nameof(SelectedTour));
             }
         }
 
@@ -94,18 +113,13 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(TourLog selectedTourLog)
+        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog)
         {
+            _logger = LoggerFactory.GetLogger<TourListViewModel>();
+
+            _selectedTour = selectedTour;
             _originalTourLog = selectedTourLog; // Store the original TourLog
-            EditableTourLog = new TourLog() // Create a copy of the TourLog to edit
-            {
-                TimeStamp = selectedTourLog.TimeStamp,
-                Comment = selectedTourLog.Comment,
-                Difficulty = selectedTourLog.Difficulty,
-                DistanceTraveled = selectedTourLog.DistanceTraveled,
-                TimeTaken = selectedTourLog.TimeTaken,
-                Rating = selectedTourLog.Rating
-            }; 
+            EditableTourLog = new TourLog(_originalTourLog); // Create a copy of the TourLog to edit
 
             // Initialize enums
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
@@ -113,7 +127,7 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public ICommand ExecuteSave => new RelayCommand(_ =>
+        public ICommand ExecuteSave => new RelayCommandAsync(async _ =>
         {
             // Copy the changes from the editable copy to the original
             _originalTourLog.TimeStamp = EditableTourLog.TimeStamp;
@@ -122,6 +136,29 @@ namespace TourPlanner.ViewModels
             _originalTourLog.DistanceTraveled = EditableTourLog.DistanceTraveled;
             _originalTourLog.TimeTaken = EditableTourLog.TimeTaken;
             _originalTourLog.Rating = EditableTourLog.Rating;
+
+            // Check if the TourLog already exists in the SelectedTour (i.e. is this an update or a new entry?)
+            TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == _originalTourLog.LogId);
+
+            // Add the TourLog to the Tour if it doesn't exist
+            if (existingTourLog == null)
+            {
+                _selectedTour.Logs.Add(_originalTourLog);
+            }
+
+            // Save the changes via the API
+            Tour? updatedTour = await _tourService.UpdateTourAsync(_selectedTour);
+
+            if (updatedTour != null)
+            {
+                // Log the update
+                _logger.Info($"TourLog {_originalTourLog.LogId} from Tour {updatedTour.TourId}: {updatedTour.TourName} updated successfully");
+            }
+            else
+            {
+                // Log the error
+                _logger.Error($"Failed to update TourLog {_originalTourLog.LogId}");
+            }
 
             // Close the window
             CloseWindow();

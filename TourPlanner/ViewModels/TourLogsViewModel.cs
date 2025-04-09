@@ -65,7 +65,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
-            _windowService.SpawnEditTourLogWindow(new TourLog() { Comment = NewLogName! });
+            _windowService.SpawnEditTourLogWindow(SelectedTour!, new TourLog() { Comment = NewLogName! });
             NewLogName = string.Empty;
         }, _ => SelectedTour != null && !string.IsNullOrEmpty(NewLogName));
 
@@ -92,7 +92,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
         {
-            _windowService.SpawnEditTourLogWindow(SelectedLog!);
+            _windowService.SpawnEditTourLogWindow(SelectedTour!, SelectedLog!);
         }, _ => SelectedTour != null && SelectedLog != null);
     }
 }
