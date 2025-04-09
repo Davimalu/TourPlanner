@@ -149,7 +149,7 @@ namespace TourPlanner.RestServer.Controllers
 
         // PUT: api/tours/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateTour(int id, [FromBody] Tour updatedTour)
+        public ActionResult<Tour> UpdateTour(int id, [FromBody] Tour updatedTour)
         {
             // Check if the ID in the route matches the TourId in the body
             if (updatedTour.TourId != id)
@@ -174,7 +174,7 @@ namespace TourPlanner.RestServer.Controllers
             tour.EstimatedTime = updatedTour.EstimatedTime;
             tour.Logs = updatedTour.Logs;
 
-            return NoContent();
+            return Ok(tour);
         }
 
         // DELETE: api/tours/{id}

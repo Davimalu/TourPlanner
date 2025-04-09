@@ -93,6 +93,7 @@ namespace TourPlanner.DAL.ServiceAgents
             string json = JsonSerializer.Serialize(tour);
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             HttpResponseMessage response = await _httpClient.PutAsync($"/api/Tours/{tour.TourId}", content);
+
             if (response.IsSuccessStatusCode)
             {
                 string responseJson = await response.Content.ReadAsStringAsync();

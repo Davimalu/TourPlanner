@@ -1,5 +1,9 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.DAL.ServiceAgents;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
@@ -11,6 +15,8 @@ namespace TourPlanner.ViewModels
     {
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService = WindowService.Instance;
+        private readonly ITourService _tourService = new TourService();
+        private readonly ILoggerWrapper _logger;
 
         private string? _newLogName;
         public string? NewLogName
@@ -52,22 +58,34 @@ namespace TourPlanner.ViewModels
         {
             _selectedTourService = selectedTourService;
             _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the service
+
+            _logger = LoggerFactory.GetLogger<TourListViewModel>();
         }
 
 
         public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
-            SelectedTour!.Logs.Add(new TourLog
-            {
-                Comment = NewLogName!,
-            });
+            _windowService.SpawnEditTourLogWindow(new TourLog() { Comment = NewLogName! });
             NewLogName = string.Empty;
         }, _ => SelectedTour != null && !string.IsNullOrEmpty(NewLogName));
 
 
-        public ICommand ExecuteDeleteTourLog => new RelayCommand(_ =>
+        public ICommand ExecuteDeleteTourLog => new RelayCommandAsync(async _ =>
         {
-            SelectedTour!.Logs.Remove(SelectedLog!);
+            TourLog tmp = SelectedLog!; // Store the selected log in a temporary variable, so it can be accessed after the deletion for logging
+
+            SelectedTour!.Logs.Remove(SelectedLog!); // Remove the log from the local tour
+            Tour? updatedTour = await _tourService.UpdateTourAsync(SelectedTour); // Update the tour (now without the log) via the REST API
+
+            if (updatedTour != null)
+            {
+                _logger.Info($"Deleted log with ID {tmp.LogId}: {tmp.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+            }
+            else
+            {
+                _logger.Error($"Failed to delete log with ID {tmp.LogId}: {tmp.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+            }
+
             SelectedLog = null;
         }, _ => SelectedTour != null && SelectedLog != null);
 
