@@ -299,6 +299,7 @@ namespace TourPlanner.RestServer.Controllers
                 if (log != null)
                 {
                     tour.Logs.Remove(log);
+                    break;
                 }
             }
 

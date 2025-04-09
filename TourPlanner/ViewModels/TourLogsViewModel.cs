@@ -15,7 +15,6 @@ namespace TourPlanner.ViewModels
     {
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService = WindowService.Instance;
-        private readonly ITourService _tourService = new TourService();
         private readonly ITourLogService _tourLogService = new TourLogService();
         private readonly ILoggerWrapper _logger;
 
@@ -73,20 +72,19 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteDeleteTourLog => new RelayCommandAsync(async _ =>
         {
-            TourLog tmp = SelectedLog!; // Store the selected log in a temporary variable, so it can be accessed after the deletion for logging
+            var success = await _tourLogService.DeleteTourLogAsync(SelectedLog!.LogId);
 
-            SelectedTour!.Logs.Remove(SelectedLog!); // Remove the log from the local tour
-            Tour? updatedTour = await _tourService.UpdateTourAsync(SelectedTour); // Update the tour (now without the log) via the REST API
-
-            if (updatedTour != null)
+            if (success)
             {
-                _logger.Info($"Deleted log with ID {tmp.LogId}: {tmp.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                _logger.Info($"Deleted log with ID {SelectedLog.LogId}: {SelectedLog.Comment} from Tour with ID {SelectedTour!.TourId}: {SelectedTour.TourName}");
+
+                // Remove the log from the local tour
+                SelectedTour.Logs.Remove(SelectedLog);
             }
             else
             {
-                _logger.Error($"Failed to delete log with ID {tmp.LogId}: {tmp.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                _logger.Error($"Failed to delete log with ID {SelectedLog.LogId}: {SelectedLog.Comment} from Tour with ID {SelectedTour!.TourId}: {SelectedTour.TourName}");
             }
-
             SelectedLog = null;
         }, _ => SelectedTour != null && SelectedLog != null);
 
