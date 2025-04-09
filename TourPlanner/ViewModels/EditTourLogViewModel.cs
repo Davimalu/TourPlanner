@@ -12,7 +12,7 @@ namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
-        private readonly ITourService _tourService = new TourService();
+        private readonly ITourLogService _tourLogService = new TourLogService();
         private readonly ILoggerWrapper _logger;
 
         // The original TourLog before it was edited
@@ -129,35 +129,42 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteSave => new RelayCommandAsync(async _ =>
         {
-            // Copy the changes from the editable copy to the original
-            _originalTourLog.TimeStamp = EditableTourLog.TimeStamp;
-            _originalTourLog.Comment = EditableTourLog.Comment;
-            _originalTourLog.Difficulty = EditableTourLog.Difficulty;
-            _originalTourLog.DistanceTraveled = EditableTourLog.DistanceTraveled;
-            _originalTourLog.TimeTaken = EditableTourLog.TimeTaken;
-            _originalTourLog.Rating = EditableTourLog.Rating;
+            // Check if the TourLog already exists in the SelectedTour (i.e. are we updating an existing TourLog or creating a new one?)
+            TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == EditableTourLog.LogId);
 
-            // Check if the TourLog already exists in the SelectedTour (i.e. is this an update or a new entry?)
-            TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == _originalTourLog.LogId);
-
-            // Add the TourLog to the Tour if it doesn't exist
-            if (existingTourLog == null)
+            // TourLog already exists -> update it
+            if (existingTourLog != null)
             {
-                _selectedTour.Logs.Add(_originalTourLog);
-            }
+                TourLog? updatedTourLog = await _tourLogService.UpdateTourLogAsync(EditableTourLog);
 
-            // Save the changes via the API
-            Tour? updatedTour = await _tourService.UpdateTourAsync(_selectedTour);
-
-            if (updatedTour != null)
-            {
-                // Log the update
-                _logger.Info($"TourLog {_originalTourLog.LogId} from Tour {updatedTour.TourId}: {updatedTour.TourName} updated successfully");
+                if (updatedTourLog != null)
+                {
+                    // Update the local TourLog in the SelectedTour
+                    int index = _selectedTour.Logs.IndexOf(existingTourLog);
+                    if (index >= 0)
+                    {
+                        _selectedTour.Logs[index] = updatedTourLog;
+                    }
+                }
+                else
+                {
+                    _logger.Error($"Failed to update TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                }
             }
+            // TourLog doesn't exist -> create it
             else
             {
-                // Log the error
-                _logger.Error($"Failed to update TourLog {_originalTourLog.LogId}");
+                TourLog? newTourLog = await _tourLogService.CreateTourLogAsync(SelectedTour.TourId, EditableTourLog);
+
+                if (newTourLog != null)
+                {
+                    // Add the new TourLog to the SelectedTour
+                    _selectedTour.Logs.Add(newTourLog);
+                }
+                else
+                {
+                    _logger.Error($"Failed to create TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                }
             }
 
             // Close the window

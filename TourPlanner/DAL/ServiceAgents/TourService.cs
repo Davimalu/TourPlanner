@@ -39,7 +39,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to get tours from API");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to get tours from API. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
             }
         }
 
@@ -59,7 +60,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to get tour from API");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to get tour with ID {id} from API. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody}");
             }
         }
 
@@ -82,7 +84,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to create tour");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to create tour. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody}");
             }
         }
 
@@ -105,7 +108,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to update tour");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to update tour with ID {tour.TourId}. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody}");
             }
         }
 

@@ -262,6 +262,10 @@ namespace TourPlanner.RestServer.Controllers
             foreach (Tour tour in _tours)
             {
                 existingLog = tour.Logs.FirstOrDefault(l => l.LogId == logId);
+                if (existingLog != null)
+                {
+                    break; // Exit the loop if the log is found
+                }
             }
 
             if (existingLog == null)

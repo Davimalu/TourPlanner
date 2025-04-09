@@ -39,7 +39,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to get tour logs from API");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to get tour logs from API. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
             }
         }
 
@@ -59,7 +60,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to get tour log from API");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to get tour log from API. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
             }
         }
 
@@ -82,17 +84,18 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to create tour log");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to create tour log. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
             }
         }
 
-        public async Task<TourLog?> UpdateTourLogAsync(int logId, TourLog updatedLog)
+        public async Task<TourLog?> UpdateTourLogAsync(TourLog updatedLog)
         {
-            _logger.Debug($"Updating tour log with ID {logId}...");
+            _logger.Debug($"Updating tour log with ID {updatedLog.LogId}...");
 
             string json = JsonSerializer.Serialize(updatedLog);
             HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await _httpClient.PutAsync($"/api/tours/logs/{logId}", content);
+            HttpResponseMessage response = await _httpClient.PutAsync($"/api/tours/logs/{updatedLog.LogId}", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -105,7 +108,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to update tour log");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to update tour log. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
             }
         }
 
@@ -121,7 +125,8 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             else
             {
-                throw new Exception("Failed to delete tour log");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to delete tour log. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
             }
         }
     }
