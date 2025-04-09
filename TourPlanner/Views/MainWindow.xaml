@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:TourPlanner.Views"
         xmlns:viewModel="clr-namespace:TourPlanner.ViewModels"
         mc:Ignorable="d"
-        Title="Tour Planner" Height="450" Width="800">
+        Title="Tour Planner" Height="800" Width="1400"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"> <!-- Use the WPF UI library namespace to tell the XAML compiler that we'll use WPF UI controls -->
 
     <Grid>
         <Grid.RowDefinitions>

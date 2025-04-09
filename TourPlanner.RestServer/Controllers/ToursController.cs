@@ -31,20 +31,20 @@ namespace TourPlanner.RestServer.Controllers
                         LogId = 1,
                         TimeStamp = DateTime.Now,
                         Comment = "Erster Log",
-                        Difficulty = Difficulty.Easy,
+                        Difficulty = 1,
                         DistanceTraveled = 10,
                         TimeTaken = 20,
-                        Rating = Rating.Good
+                        Rating = 0
                     },
                     new TourLog
                     {
                         LogId = 2,
                         TimeStamp = DateTime.Now,
                         Comment = "Zweiter Log",
-                        Difficulty = Difficulty.Medium,
+                        Difficulty = 3,
                         DistanceTraveled = 15,
                         TimeTaken = 25,
-                        Rating = Rating.Okay
+                        Rating = 0
                     }
                 }
             },
@@ -77,20 +77,20 @@ namespace TourPlanner.RestServer.Controllers
                         LogId = 3,
                         TimeStamp = DateTime.Now,
                         Comment = "Erster Log",
-                        Difficulty = Difficulty.Easy,
+                        Difficulty = 0,
                         DistanceTraveled = 5,
                         TimeTaken = 16,
-                        Rating = Rating.Good
+                        Rating = 0
                     },
                     new TourLog
                     {
                         LogId = 4,
                         TimeStamp = DateTime.Now,
                         Comment = "Zweiter Log",
-                        Difficulty = Difficulty.Medium,
+                        Difficulty = 4,
                         DistanceTraveled = 2,
                         TimeTaken = 28,
-                        Rating = Rating.Okay
+                        Rating = 0
                     }
                 }
             },

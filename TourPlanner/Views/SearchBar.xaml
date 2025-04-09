@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TourPlanner.ViewModels"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.DataContext>
@@ -16,7 +17,16 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <TextBox Grid.Column="0" Margin="5" Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Grid.Column="1" Margin="5" Content="Search" Command="{Binding Path=ExecuteSearch}"/>
+        <ui:TextBox Grid.Column="0"
+                    Margin="5"
+                    Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
+                    PlaceholderText="Search..."
+                    />
+
+        <ui:Button Grid.Column="1"
+                   Margin="5"
+                   Content="Search"
+                   Command="{Binding Path=ExecuteSearch}"/>
     </Grid>
 </UserControl>
+
