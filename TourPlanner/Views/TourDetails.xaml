@@ -12,7 +12,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Padding="10" Background="White">
                 <StackPanel>
-                    <ui:TextBlock FontSize="18" FontWeight="Bold" Text="{Binding SelectedTour.TourName, TargetNullValue=''}" Margin="0,0,0,10"/>
+                    <TextBlock  FontSize="24" Foreground="Black" FontWeight="Bold" Text="{Binding SelectedTour.TourName, TargetNullValue=''}" Margin="0,0,0,10"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -29,20 +29,43 @@
                         </Grid.RowDefinitions>
 
                         <!-- Labels -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Description:" FontWeight="Bold"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Start Location:" FontWeight="Bold"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="End Location:" FontWeight="Bold"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Transportation:" FontWeight="Bold"/>
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Distance:" FontWeight="Bold"/>
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Estimated Time:" FontWeight="Bold"/>
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="TextDescription24" />
+                            <TextBlock Text="Description:" FontWeight="Bold"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="LocationLive24" />
+                            <TextBlock Text="Start Location:" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Location24" /> <!-- MyLocation24 -->
+                            <TextBlock Text="End Location:" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="VehicleSubway24" />
+                            <TextBlock Text="Transportation:" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Run24" />
+                            <TextBlock Text="Distance:" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="0 0 10 0">
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Clock24" />
+                            <TextBlock Text="Estimated Time:" FontWeight="Bold" />
+                        </StackPanel>
 
                         <!-- Data Binding -->
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTour.TourDescription, TargetNullValue=''}" TextWrapping="Wrap"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTour.StartLocation, TargetNullValue=''}" TextWrapping="Wrap"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTour.EndLocation, TargetNullValue=''}" TextWrapping="Wrap"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedTour.TransportationType, TargetNullValue=''}" TextWrapping="Wrap"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedTour.Distance, TargetNullValue=''}" TextWrapping="Wrap"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedTour.EstimatedTime, TargetNullValue=''}" TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedTour.Distance, StringFormat={}{0} km, TargetNullValue=''}" TextWrapping="Wrap"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedTour.EstimatedTime, StringFormat={}{0} h, TargetNullValue=''}" TextWrapping="Wrap"/>
                     </Grid>
                 </StackPanel>
             </Border>
