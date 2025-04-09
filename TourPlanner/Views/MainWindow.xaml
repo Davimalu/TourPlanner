@@ -29,7 +29,7 @@
         <Grid Grid.Row="2">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="300" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -38,13 +38,26 @@
                 <local:TourList Grid.Column="0" x:Name="TourList"/>
 
                 <!-- GridSplitter for resizing -->
+                <!-- Custom Style: Presents a thin (1px) centered gray line visually,
+                     but provides a wider (15px) interaction area for easier mouse grabbing.
+                     The Control Template is necessary to decouple the visual style from the interaction area. -->
                 <GridSplitter Grid.Column="1"
-                              Width="5"
-                              Margin="0 5 0 5"
-                              HorizontalAlignment="Center"
+                              Width="15"                    
+                              Margin="0 5 0 5"             
+                              HorizontalAlignment="Center"   
                               VerticalAlignment="Stretch"
-                              Background="Gray"/>
-    
+                              Background="Transparent">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="{x:Type GridSplitter}">
+                            <Border Background="Transparent">
+                                <Rectangle Fill="#E0E0E0"  
+                                           Width="1"       
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
+
                 <!-- Right Column -->
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
@@ -55,17 +68,35 @@
 
                     <!-- Top Column -->
                     <TabControl Grid.Row="0" Margin="10">
-                        <TabItem Header="General">
+                        <TabItem IsSelected="True">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="BookInformation24" />
+                                    <TextBlock Text="Route Information" />
+                                </StackPanel>
+                            </TabItem.Header>
                             <Grid Margin="10">
                                 <local:TourDetails x:Name="TourDetails"/>
                             </Grid>
                         </TabItem>
-                        <TabItem Header="Route">
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="Map24" />
+                                    <TextBlock Text="Map" />
+                                </StackPanel>
+                            </TabItem.Header>
                             <Grid>
                                 <local:Map x:Name="Map"/>
                             </Grid>
                         </TabItem>
-                        <TabItem Header="Misc">
+                        <TabItem>
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="TextboxMore24" />
+                                    <TextBlock Text="Misc." />
+                                </StackPanel>
+                            </TabItem.Header>
                             <StackPanel>
                                 <TextBlock>Placeholder for Misc.</TextBlock>
                             </StackPanel>
@@ -74,12 +105,22 @@
 
                     <!-- Grid Splitter for resizing -->
                     <GridSplitter Grid.Row="1"
-                                  Height="5"
-                                  Margin="5 0 5 0"
-                                  HorizontalAlignment="Stretch"
+                                  Height="15"                    
+                                  Margin="5 0 5 5"             
+                                  HorizontalAlignment="Stretch"   
                                   VerticalAlignment="Center"
                                   ResizeDirection="Rows"
-                                  Background="Gray"/>
+                                  Background="Transparent">
+                        <GridSplitter.Template>
+                            <ControlTemplate TargetType="{x:Type GridSplitter}">
+                                <Border Background="Transparent">
+                                    <Rectangle Fill="#E0E0E0"  
+                                               Height="1"       
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </GridSplitter.Template>
+                    </GridSplitter>
 
                     <!-- Bottom Column -->
                     <Grid Grid.Row="2">
