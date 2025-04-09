@@ -73,8 +73,11 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
         {
-            _windowService.SpawnEditTourWindow(new Tour() { TourName = NewTourName! });
+            _windowService.SpawnEditTourWindow(new Tour() { TourName = NewTourName!, TourId = -1 }); // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
             NewTourName = string.Empty;
+
+            // Refresh the list of tours
+            LoadToursAsync();
         }, _ => !string.IsNullOrEmpty(NewTourName));
 
 
@@ -100,6 +103,9 @@ namespace TourPlanner.ViewModels
         public ICommand ExecuteEditTour => new RelayCommand(_ =>
         {
             _windowService.SpawnEditTourWindow(SelectedTour!);
+
+            // Refresh the list of tours
+            LoadToursAsync();
         }, _ => SelectedTour != null);
 
 

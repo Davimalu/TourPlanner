@@ -118,6 +118,24 @@ namespace TourPlanner.Models
             }
         }
 
+        // Constructor
+        public Tour() { }
+
+        // Copy constructor
+        public Tour(Tour tour)
+        {
+            TourId = tour.TourId;
+            TourName = tour.TourName;
+            TourDescription = tour.TourDescription;
+            StartLocation = tour.StartLocation;
+            EndLocation = tour.EndLocation;
+            TransportationType = tour.TransportationType;
+            Distance = tour.Distance;
+            EstimatedTime = tour.EstimatedTime;
+            RouteInformation = tour.RouteInformation;
+            Logs = new ObservableCollection<TourLog>(tour.Logs);
+        }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
