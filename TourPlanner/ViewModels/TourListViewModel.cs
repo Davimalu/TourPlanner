@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
+using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
