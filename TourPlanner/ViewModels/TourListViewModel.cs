@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.DAL.ServiceAgents;
-using TourPlanner.Enums;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Models;
@@ -19,9 +18,11 @@ namespace TourPlanner.ViewModels
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService = WindowService.Instance;
         private readonly ITourService _tourService = new TourService();
+        private readonly ILoggerWrapper _logger;
 
 
         private ObservableCollection<Tour>? _tours;
+
         public ObservableCollection<Tour>? Tours
         {
             get { return _tours; }
@@ -34,6 +35,7 @@ namespace TourPlanner.ViewModels
 
 
         private string? _newTourName;
+
         public string? NewTourName
         {
             get { return _newTourName; }
@@ -46,6 +48,7 @@ namespace TourPlanner.ViewModels
 
 
         private Tour? _selectedTour;
+
         public Tour? SelectedTour
         {
             get { return _selectedTour; }
@@ -61,40 +64,35 @@ namespace TourPlanner.ViewModels
         public TourListViewModel(ISelectedTourService selectedTourService)
         {
             _selectedTourService = selectedTourService;
+            _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
-            // Get a list of all tours from the REST API
+            // Get a list of all tours from the REST API when the ViewModel is created
             LoadToursAsync();
-        }
-
-
-        private async void LoadToursAsync()
-        {
-            try
-            {
-                // Await the async call to get the list of tours
-                var tourList = await _tourService.GetAllToursAsync();
-                Tours = new ObservableCollection<Tour>(tourList);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error loading tours: {ex.Message}");
-            }
         }
 
 
         public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
         {
-            Tours?.Add(new Tour() { TourName = NewTourName! });
+            _windowService.SpawnEditTourWindow(new Tour() { TourName = NewTourName! });
             NewTourName = string.Empty;
         }, _ => !string.IsNullOrEmpty(NewTourName));
 
 
-        public ICommand ExecuteDeleteTour => new RelayCommand(_ =>
+        public ICommand ExecuteDeleteTour => new RelayCommandAsync(async _ =>
         {
-            if (SelectedTour != null)
+            var success = await _tourService.DeleteTourAsync(SelectedTour!.TourId); // Delete the tour via the REST API
+
+            if (success)
             {
-                Tours?.Remove(SelectedTour);
+                _logger.Info($"Deleted tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                Tours?.Remove(SelectedTour); // Remove the tour from the local collection
             }
+            else
+            {
+                _logger.Error($"Failed to delete tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                return;
+            }
+            
             SelectedTour = null;
         }, _ => SelectedTour != null);
 
@@ -103,5 +101,22 @@ namespace TourPlanner.ViewModels
         {
             _windowService.SpawnEditTourWindow(SelectedTour!);
         }, _ => SelectedTour != null);
+
+
+        /// <summary>
+        /// Helper method to load all tours from the REST API because the constructor cannot be async
+        /// </summary>
+        private async void LoadToursAsync()
+        {
+            try
+            {
+                var tourList = await _tourService.GetAllToursAsync();
+                Tours = new ObservableCollection<Tour>(tourList ?? new List<Tour>());
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error loading tours: {ex.Message}");
+            }
+        }
     }
 }
