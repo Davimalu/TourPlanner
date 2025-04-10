@@ -4,31 +4,51 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TourPlanner.ViewModels"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        
+        <ui:DataGrid Grid.Row="0"
+                  ItemsSource="{Binding SelectedTour.Logs}"
+                  SelectedItem="{Binding SelectedLog, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  Margin="10">
+            
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Header="Timestamp"
+                                    Binding="{Binding TimeStamp, StringFormat='yyyy-MM-dd HH:mm'}"
+                                    Width="Auto"/>
 
-        <!-- ListView zur Anzeige der Tour Logs -->
-        <ListView Grid.Row="0" ItemsSource="{Binding SelectedTour.Logs}" SelectedItem="{Binding SelectedLog, Mode=TwoWay}" Margin="10" Background="White">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Border Background="#f0f0f0" CornerRadius="5" Padding="8" Margin="5">
-                        <StackPanel>
-                            <TextBlock Text="{Binding Comment}" FontSize="14" Foreground="Black"/>
-                            <TextBlock Text="{Binding Difficulty}" FontSize="12" Foreground="Gray"/>
-                            <TextBlock Text="{Binding DistanceTraveled, StringFormat={}{0} km}" FontSize="12" Foreground="Gray"/>
-                            <TextBlock Text="{Binding TimeTaken, StringFormat='{}{0} h'}" FontSize="12" Foreground="Gray"/>
-                            <TextBlock Text="{Binding Rating}" FontSize="12" Foreground="Gray"/>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                <DataGridTextColumn Header="Difficulty"
+                                    Binding="{Binding Difficulty}"
+                                    Width="SizeToHeader"/>
+
+                <DataGridTextColumn Header="Distance (km)"
+                                    Binding="{Binding DistanceTraveled, StringFormat={}{0} km}"
+                                    Width="Auto"/>
+
+                <DataGridTextColumn Header="Time (hrs)"
+                                    Binding="{Binding TimeTaken, StringFormat={}{0} h}"
+                                    Width="Auto"/>
+
+                <DataGridTextColumn Header="Rating"
+                                    Binding="{Binding Rating, StringFormat='N1'}"
+                                    Width="SizeToHeader"/>
+
+                <DataGridTextColumn Header="Comment"
+                                    Binding="{Binding Comment}"
+                                    Width="*"/> 
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
 
         <Grid Grid.Row="1" Margin="10 0 10 10">
             <Grid.ColumnDefinitions>
