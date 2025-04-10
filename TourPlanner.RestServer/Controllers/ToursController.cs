@@ -31,20 +31,20 @@ namespace TourPlanner.RestServer.Controllers
                         LogId = 1,
                         TimeStamp = DateTime.Now,
                         Comment = "Erster Log",
-                        Difficulty = Difficulty.Easy,
+                        Difficulty = 1,
                         DistanceTraveled = 10,
                         TimeTaken = 20,
-                        Rating = Rating.Good
+                        Rating = 2
                     },
                     new TourLog
                     {
                         LogId = 2,
                         TimeStamp = DateTime.Now,
                         Comment = "Zweiter Log",
-                        Difficulty = Difficulty.Medium,
+                        Difficulty = 3,
                         DistanceTraveled = 15,
                         TimeTaken = 25,
-                        Rating = Rating.Okay
+                        Rating = (float)3.5
                     }
                 }
             },
@@ -77,20 +77,20 @@ namespace TourPlanner.RestServer.Controllers
                         LogId = 3,
                         TimeStamp = DateTime.Now,
                         Comment = "Erster Log",
-                        Difficulty = Difficulty.Easy,
+                        Difficulty = 0,
                         DistanceTraveled = 5,
                         TimeTaken = 16,
-                        Rating = Rating.Good
+                        Rating = 0
                     },
                     new TourLog
                     {
                         LogId = 4,
                         TimeStamp = DateTime.Now,
                         Comment = "Zweiter Log",
-                        Difficulty = Difficulty.Medium,
+                        Difficulty = 4,
                         DistanceTraveled = 2,
                         TimeTaken = 28,
-                        Rating = Rating.Okay
+                        Rating = 1
                     }
                 }
             },
@@ -245,8 +245,16 @@ namespace TourPlanner.RestServer.Controllers
                 return NotFound($"Tour with id {tourId} not found.");
             }
 
-            // Generate a new LogId - this will later be handled by the database
-            newLog.LogId = tour.Logs.Count + 1;
+            // Generate a new LogId - this sucks, will be replaced by the database later
+            int index = 0;
+            foreach (Tour tmpTour in _tours)
+            {
+                foreach (TourLog tmpLog in tmpTour.Logs)
+                {
+                    index++;
+                }
+            }
+            newLog.LogId = index + 1;
 
             tour.Logs.Add(newLog); // Add the new log to the tour's logs in the in-memory collection
 

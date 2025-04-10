@@ -5,8 +5,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TourPlanner.ViewModels"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="Edit Tour Log" Height="300" Width="400">
+        Title="Edit Tour Log" Height="525" Width="400">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -16,40 +17,46 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
 
         <!-- TimeStamp -->
-        <Label Grid.Row="0" Grid.Column="0" Content="Time Stamp:"/>
-        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding EditableTourLog.TimeStamp, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <Label Grid.Row="0" Content="Time Stamp:" Target="{Binding ElementName=DateField}"/>
+        <DatePicker Grid.Row="1" Name="DateField" SelectedDate="{Binding EditableTourLog.TimeStamp, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- Comment -->
-        <Label Grid.Row="1" Grid.Column="0" Content="Comment:"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding EditableTourLog.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <Label Grid.Row="2" Content="Comment:" Target="{Binding ElementName=CommentField}"/>
+        <TextBox Grid.Row="3" Name="CommentField" Text="{Binding EditableTourLog.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- Difficulty -->
-        <Label Grid.Row="2" Grid.Column="0" Content="Difficulty:"/>
-        <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Difficulties}" SelectedItem="{Binding EditableTourLog.Difficulty}" Margin="5"/>
+        <Label Grid.Row="4" Content="Difficulty:" Target="{Binding ElementName=DifficultySlider}"/>
+        <Slider Grid.Row="5" Name="DifficultySlider" Value="{Binding EditableTourLog.Difficulty, Mode=TwoWay}" Minimum="0" Maximum="5" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Margin="5"></Slider>
 
         <!-- Distance Traveled -->
-        <Label Grid.Row="3" Grid.Column="0" Content="Distance Traveled:"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EditableTourLog.DistanceTraveled, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <Label Grid.Row="6" Content="Distance Traveled:" Target="{Binding ElementName=DistanceField}"/>
+        <!-- The TextBlock is rendered on top of the TextBox to overlay the "km" label -->
+        <!-- The padding to the right on the TextBox ensures that the text doesn't overlap with the static suffix -->
+        <TextBox Grid.Row="7" Name="DistanceField" Text="{Binding EditableTourLog.DistanceTraveled, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
+        <TextBlock Grid.Row="7" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
 
         <!-- Time Taken -->
-        <Label Grid.Row="4" Grid.Column="0" Content="Time Taken:"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditableTourLog.TimeTaken, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <Label Grid.Row="8" Content="Time Taken:" Target="{Binding ElementName=TimeField}"/>
+        <TextBox Grid.Row="9" Name="TimeField" Text="{Binding EditableTourLog.TimeTaken, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
+        <TextBlock Grid.Row="9" Text="h" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
 
         <!-- Rating -->
-        <Label Grid.Row="5" Grid.Column="0" Content="Rating:"/>
-        <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding Ratings}" SelectedItem="{Binding EditableTourLog.Rating}" Margin="5"/>
+        <Label Grid.Row="10" Content="Rating:" Target="{Binding ElementName=RatingSlider}"/>
+        <ui:RatingControl Name="RatingSlider" Grid.Row="11" Margin="5" Value="{Binding EditableTourLog.Rating, Mode=TwoWay}"/>
 
         <!-- Save and Cancel Buttons -->
-        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="13" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
             <Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
         </StackPanel>

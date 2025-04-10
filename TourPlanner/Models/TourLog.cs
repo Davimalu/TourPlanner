@@ -46,8 +46,8 @@ namespace TourPlanner.Models
         }
 
 
-        private Difficulty _difficulty = Difficulty.Medium;
-        public Difficulty Difficulty
+        private int _difficulty = 3;
+        public int Difficulty
         {
             get => _difficulty;
             set
@@ -82,8 +82,8 @@ namespace TourPlanner.Models
         }
 
 
-        private Rating _rating = Rating.Good;
-        public Rating Rating
+        private float _rating = 0;
+        public float Rating
         {
             get => _rating;
             set
