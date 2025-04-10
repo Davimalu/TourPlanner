@@ -58,7 +58,7 @@
                 <!-- Buttons -->
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewLogName, UpdateSourceTrigger=PropertyChanged}"/>
+            <ui:TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewLogName, UpdateSourceTrigger=PropertyChanged}"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Margin="5" Content="Add" Command="{Binding Path=ExecuteAddNewTourLog}" MinWidth="60"/>
                 <Button Margin="5" Content="Edit" Command="{Binding Path=ExecuteEditTourLog}" MinWidth="60"/>

@@ -12,7 +12,12 @@
     </UserControl.DataContext>
 
     <Grid>
-        <Menu FontSize="14">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <Menu Grid.Column="0" FontSize="14">
             <!-- File Menu -->
             <ui:MenuItem Header="File" Icon="{ui:SymbolIcon DocumentSplitHint24}">
                 <MenuItem Header="New" />
@@ -27,5 +32,15 @@
             <!-- Help Menu -->
             <ui:MenuItem Header="Help" Icon="{ui:SymbolIcon ChatHelp24}" />
         </Menu>
+        
+        <ui:ToggleSwitch Grid.Column="1"
+                         x:Name="ThemeToggleSwitch"
+                         OffContent="Light"
+                         OnContent="Dark" 
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center"  
+                         Margin="0,0,10,0"
+                         Click="ThemeToggleSwitch_Click">
+        </ui:ToggleSwitch>
     </Grid>
 </UserControl>

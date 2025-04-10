@@ -30,19 +30,19 @@
 
         <!-- TourName -->
         <Label Grid.Row="0" Content="Name:" Target="{Binding ElementName=NameField}"/>
-        <TextBox Grid.Row="1" Name="NameField" Text="{Binding EditableTour.TourName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <ui:TextBox Grid.Row="1" Name="NameField" Text="{Binding EditableTour.TourName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- Description -->
         <Label Grid.Row="2" Content="Description:" Target="{Binding ElementName=DescriptionField}"/>
-        <TextBox Grid.Row="3" Name="DescriptionField" Text="{Binding EditableTour.TourDescription, UpdateSourceTrigger=PropertyChanged}" Margin="5" TextWrapping="Wrap"/>
+        <ui:TextBox Grid.Row="3" Name="DescriptionField" Text="{Binding EditableTour.TourDescription, UpdateSourceTrigger=PropertyChanged}" Margin="5" TextWrapping="Wrap"/>
 
         <!-- Start Location -->
         <Label Grid.Row="4" Grid.Column="0" Content="Start Location:" Target="{Binding ElementName=StartLocationField}"/>
-        <TextBox Grid.Row="5" Name="StartLocationField" Text="{Binding EditableTour.StartLocation, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <ui:TextBox Grid.Row="5" Name="StartLocationField" Text="{Binding EditableTour.StartLocation, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- End Location -->
         <Label Grid.Row="6" Content="End Location:" Target="{Binding ElementName=EndLocationField}"/>
-        <TextBox Grid.Row="7" Name="EndLocationField" Text="{Binding EditableTour.EndLocation, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <ui:TextBox Grid.Row="7" Name="EndLocationField" Text="{Binding EditableTour.EndLocation, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- Transport -->
         <Label Grid.Row="8" Content="Transport:" Target="{Binding ElementName=TransportField}"/>
@@ -50,18 +50,18 @@
 
         <!-- Distance -->
         <Label Grid.Row="10" Content="Distance:" Target="{Binding ElementName=DistanceField}"/>
-        <TextBox Grid.Row="11" Name="DistanceField" Text="{Binding EditableTour.Distance, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
-        <TextBlock Grid.Row="11" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
+        <ui:TextBox Grid.Row="11" Name="DistanceField" Text="{Binding EditableTour.Distance, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
+        <ui:TextBlock Grid.Row="11" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
 
         <!-- Estimated Time -->
         <Label Grid.Row="12" Content="Duration:" Target="{Binding ElementName=EstimatedTimeField}"/>
-        <TextBox Grid.Row="13" Name="EstimatedTimeField" Text="{Binding EditableTour.EstimatedTime, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
-        <TextBlock Grid.Row="13" Text="h" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
+        <ui:TextBox Grid.Row="13" Name="EstimatedTimeField" Text="{Binding EditableTour.EstimatedTime, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
+        <ui:TextBlock Grid.Row="13" Text="h" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
 
         <!-- Save and Cancel Buttons -->
         <StackPanel Grid.Row="15" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
-            <Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
+            <ui:Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
+            <ui:Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
         </StackPanel>
     </Grid>
 </Window>

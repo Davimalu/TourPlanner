@@ -18,15 +18,15 @@
         <ui:ListView Grid.Row="0" ItemsSource="{Binding Tours}" SelectedItem="{Binding SelectedTour, Mode=TwoWay}" Margin="10">
             <ui:ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit"
+                    <ui:MenuItem Header="Edit"
                               Command="{Binding ExecuteEditTour}"/>
-                    <MenuItem Header="Delete"
+                    <ui:MenuItem Header="Delete"
                               Command="{Binding ExecuteDeleteTour}"/>
                 </ContextMenu>
             </ui:ListView.ContextMenu>
             <ui:ListView.ItemTemplate >
                 <DataTemplate DataType="{x:Type models:Tour}">
-                    <TextBlock Margin="8,4" Text="{Binding TourName}"/>
+                    <ui:TextBlock Margin="8,4" Text="{Binding TourName}"/>
                 </DataTemplate>
             </ui:ListView.ItemTemplate>
         </ui:ListView>

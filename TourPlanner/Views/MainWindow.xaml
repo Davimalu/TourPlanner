@@ -72,7 +72,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Margin="0,0,6,0" Symbol="BookInformation24" />
-                                    <TextBlock Text="Route Information" />
+                                    <ui:TextBlock Text="Route Information" />
                                 </StackPanel>
                             </TabItem.Header>
                             <Grid Margin="10">
@@ -83,7 +83,7 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Margin="0,0,6,0" Symbol="Map24" />
-                                    <TextBlock Text="Map" />
+                                    <ui:TextBlock Text="Map" />
                                 </StackPanel>
                             </TabItem.Header>
                             <Grid>
@@ -94,11 +94,11 @@
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Margin="0,0,6,0" Symbol="TextboxMore24" />
-                                    <TextBlock Text="Misc." />
+                                    <ui:TextBlock Text="Misc." />
                                 </StackPanel>
                             </TabItem.Header>
                             <StackPanel>
-                                <TextBlock>Placeholder for Misc.</TextBlock>
+                                <ui:TextBlock>Placeholder for Misc.</ui:TextBlock>
                             </StackPanel>
                         </TabItem>
                     </TabControl>
