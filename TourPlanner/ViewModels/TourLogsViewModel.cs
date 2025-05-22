@@ -6,6 +6,7 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
+using TourPlanner.Model;
 using TourPlanner.Models;
 using TourPlanner.Views;
 

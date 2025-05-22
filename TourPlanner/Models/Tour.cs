@@ -1,147 +1,72 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Media.Imaging;
-using TourPlanner.Enums;
+﻿// Path: D:\Projects\Karl\TourPlanner-develop\TourPlanner.Model\Tour.cs
+using System;
+using TourPlanner.Models; // Optional, for other types if needed in the future
 
-namespace TourPlanner.Models
+namespace TourPlanner.Model
 {
-    public class Tour : INotifyPropertyChanged
+    public class Tour
     {
-        private int _tourId;
-        public int TourId
+        // Basic identification and description
+        public Guid Id { get; set; } // A unique identifier for each tour
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        // Origin information
+        public string From { get; set; } // Textual representation of the start (e.g., "Vienna, Austria")
+        public double FromLat { get; set; } // Latitude of the starting point
+        public double FromLon { get; set; } // Longitude of the starting point
+
+        // Destination information
+        public string To { get; set; }   // Textual representation of the end (e.g., "Salzburg, Austria")
+        public double ToLat { get; set; }   // Latitude of the ending point
+        public double ToLon { get; set; }   // Longitude of the ending point
+
+        // Route and travel information
+        public double Distance { get; set; } // Estimated distance in kilometers or miles
+        public TimeSpan EstimatedTime { get; set; } // Estimated time for the tour
+        public string TransportType { get; set; } // e.g., "Car", "Bicycle", "Walking"
+
+        // Additional details (optional, extend as needed)
+        public string RouteInformation { get; set; } // Could be a polyline, or detailed instructions
+        public string ImagePath { get; set; } // Path to an image representing the tour map or destination
+        
+        public int TourId { get; set; }
+        public string TourName { get; set; }
+        public List<TourLog> Logs { get; set; }
+
+        // Default constructor (good practice)
+        public Tour()
         {
-            get => _tourId;
-            set
-            {
-                _tourId = value;
-                RaisePropertyChanged(nameof(TourId));
-            }
+            Id = Guid.NewGuid(); // Ensure every new tour gets a unique ID by default
+            Name = string.Empty;
+            Description = string.Empty;
+            From = string.Empty;
+            To = string.Empty;
+            TransportType = string.Empty;
+            RouteInformation = string.Empty;
+            ImagePath = string.Empty;
+        }
+        
+        public Tour(Tour other)
+        {
+            if (other == null) 
+                throw new ArgumentNullException(nameof(other));
+
+            Id = other.Id;
+            TourName = other.TourName;
+            // make a shallow copy of logs (or deep copy, as your app requires)
+            Logs = new List<TourLog>(other.Logs);
+            // copy any other properties...
         }
 
-        private string _tourName = string.Empty;
-        public string TourName
-        {
-            get => _tourName;
-            set
-            {
-                _tourName = value;
-                RaisePropertyChanged(nameof(TourName));
-            }
-        }
-
-        private string _tourDescription = string.Empty;
-        public string TourDescription
-        {
-            get => _tourDescription;
-            set
-            {
-                _tourDescription = value;
-                RaisePropertyChanged(nameof(TourDescription));
-            }
-        }
-
-        private string _startLocation = string.Empty;
-        public string StartLocation
-        {
-            get => _startLocation;
-            set
-            {
-                _startLocation = value;
-                RaisePropertyChanged(nameof(StartLocation));
-            }
-        }
-
-        private string _endLocation = string.Empty;
-        public string EndLocation
-        {
-            get => _endLocation;
-            set
-            {
-                _endLocation = value;
-                RaisePropertyChanged(nameof(EndLocation));
-            }
-        }
-
-        private Transport _transportationType;
-        public Transport TransportationType
-        {
-            get => _transportationType;
-            set
-            {
-                _transportationType = value;
-                RaisePropertyChanged(nameof(TransportationType));
-            }
-        }
-
-        private float _distance;
-        public float Distance
-        {
-            get => _distance;
-            set
-            {
-                _distance = value;
-                RaisePropertyChanged(nameof(Distance));
-            }
-        }
-
-        private float _estimatedTime;
-        public float EstimatedTime
-        {
-            get => _estimatedTime;
-            set
-            {
-                _estimatedTime = value;
-                RaisePropertyChanged(nameof(EstimatedTime));
-            }
-        }
-
-        private BitmapImage? _routeInformation;
-        public BitmapImage? RouteInformation
-        {
-            get => _routeInformation;
-            set
-            {
-                _routeInformation = value;
-                RaisePropertyChanged(nameof(RouteInformation));
-            }
-        }
-
-        private ObservableCollection<TourLog> _logs = new ObservableCollection<TourLog>();
-        public ObservableCollection<TourLog> Logs
-        {
-            get => _logs;
-            set
-            {
-                _logs = value;
-                RaisePropertyChanged(nameof(Logs));
-            }
-        }
-
-        // Constructor
-        public Tour() { }
-
-        // Copy constructor
-        public Tour(Tour tour)
-        {
-            TourId = tour.TourId;
-            TourName = tour.TourName;
-            TourDescription = tour.TourDescription;
-            StartLocation = tour.StartLocation;
-            EndLocation = tour.EndLocation;
-            TransportationType = tour.TransportationType;
-            Distance = tour.Distance;
-            EstimatedTime = tour.EstimatedTime;
-            RouteInformation = tour.RouteInformation;
-            Logs = new ObservableCollection<TourLog>(tour.Logs);
-        }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void RaisePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        // You might also consider adding a parameterized constructor for convenience:
+        // public Tour(string name, string from, string to, /* other params */)
+        // {
+        //     Id = Guid.NewGuid();
+        //     Name = name;
+        //     From = from;
+        //     To = to;
+        //     // ... initialize other properties
+        // }
     }
 }

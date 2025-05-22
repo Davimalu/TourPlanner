@@ -6,6 +6,7 @@ using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Model;
 using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels

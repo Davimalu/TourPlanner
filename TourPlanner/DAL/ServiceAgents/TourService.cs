@@ -4,6 +4,7 @@ using System.Text.Json;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Model;
 using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents

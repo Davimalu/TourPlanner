@@ -1,4 +1,5 @@
 ﻿using TourPlanner.Logic.Interfaces;
+using TourPlanner.Model;
 using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
