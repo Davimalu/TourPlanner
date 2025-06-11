@@ -19,8 +19,15 @@ namespace TourPlanner.RestServer.Models
         [Required]
         public string EndLocation { get; set; } = String.Empty;
         public Transport TransportationType { get; set; }
-        public float Distance { get; set; }
+        public double Distance { get; set; }
         public float EstimatedTime { get; set; }
+        
+        // FIX: Add coordinate properties to be saved in the database
+        public double StartLat { get; set; }
+        public double StartLon { get; set; }
+        public double EndLat { get; set; }
+        public double EndLon { get; set; }
+
         public List<TourLog>? Logs { get; set; }
     }
 }

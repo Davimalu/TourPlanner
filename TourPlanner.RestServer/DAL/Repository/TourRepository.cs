@@ -73,6 +73,11 @@ public class TourRepository : ITourRepository
         tour.TransportationType = updatedTour.TransportationType;
         tour.Distance = updatedTour.Distance;
         tour.EstimatedTime = updatedTour.EstimatedTime;
+        
+        tour.StartLat = updatedTour.StartLat;
+        tour.StartLon = updatedTour.StartLon;
+        tour.EndLat = updatedTour.EndLat;
+        tour.EndLon = updatedTour.EndLon;
 
         // ------------------------------
         // Handle updating the TourLogs (simply doing tour.Logs = updatedTour.Logs; throws an exception)

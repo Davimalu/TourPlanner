@@ -1,5 +1,6 @@
 ﻿using NSubstitute;
 using TourPlanner.Logic.Interfaces;
+using TourPlanner.Model;
 using TourPlanner.Models;
 using TourPlanner.ViewModels;
 

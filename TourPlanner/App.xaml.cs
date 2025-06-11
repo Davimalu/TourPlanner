@@ -24,13 +24,11 @@ public partial class App : Application
         TourListViewModel tourListViewModel = new TourListViewModel(selectedTourService);
         TourLogsViewModel tourLogsViewModel = new TourLogsViewModel(selectedTourService);
         TourDetailsViewModel tourDetailsViewModel = new TourDetailsViewModel(selectedTourService);
-        MapViewModel mapViewModel = new MapViewModel(selectedTourService);
+        MapViewModel mapViewModel = new MapViewModel(selectedTourService); // ViewModel for the main map tab
         MainWindowViewModel mainWindowViewModel = new MainWindowViewModel();
         
-        Views.Map mapView = new Views.Map
-        {
-            DataContext = mapViewModel // Set its DataContext
-        };
+        // FIX: DO NOT create a separate MapView instance here.
+        // The MainWindow.xaml already defines the Map control. We just need to give it the right ViewModel.
 
         // Create the Views (and initialize them with the ViewModels)
         MainWindow mainWindow = new MainWindow
@@ -40,7 +38,8 @@ public partial class App : Application
             SearchBar = { DataContext = searchBarViewModel },
             TourList = { DataContext = tourListViewModel },
             TourDetails = { DataContext = tourDetailsViewModel },
-            Map = { Content = mapView }, // <--- CORRECTED: Assign the mapView instance
+            // FIX: Set the DataContext of the existing Map control in MainWindow
+            Map = { DataContext = mapViewModel }, 
             TourLogs = { DataContext = tourLogsViewModel }
         };
 
@@ -48,4 +47,3 @@ public partial class App : Application
         mainWindow.Show();
     }
 }
-

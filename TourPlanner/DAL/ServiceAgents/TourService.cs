@@ -34,7 +34,7 @@ namespace TourPlanner.DAL.ServiceAgents
                 string json = await response.Content.ReadAsStringAsync();
                 List<Tour>? tourList = JsonSerializer.Deserialize<List<Tour>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                _logger.Info($"Received {tourList?.Count ?? '0'} tours from API");
+                _logger.Info($"Received {tourList?.Count ?? 0} tours from API");
 
                 return tourList;
             }
@@ -70,7 +70,10 @@ namespace TourPlanner.DAL.ServiceAgents
         {
             _logger.Debug($"Creating new tour: {tour.TourName}...");
 
+            // FIX: Removed explicit options. The model now has correct property names.
             string json = JsonSerializer.Serialize(tour);
+            _logger.Debug($"Serialized JSON for Create: {json}");
+
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             HttpResponseMessage response = await _httpClient.PostAsync("/api/Tours", content);
 
@@ -94,7 +97,10 @@ namespace TourPlanner.DAL.ServiceAgents
         {
             _logger.Debug($"Updating tour with ID {tour.TourId}: {tour.TourName}...");
 
+            // FIX: Removed explicit options. The model now has correct property names.
             string json = JsonSerializer.Serialize(tour);
+            _logger.Debug($"Serialized JSON for Update: {json}");
+            
             StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             HttpResponseMessage response = await _httpClient.PutAsync($"/api/Tours/{tour.TourId}", content);
 

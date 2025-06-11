@@ -10,7 +10,7 @@ namespace TourPlanner.Logic
 
         public event Action<Tour?> SelectedTourChanged;
         
-                // ← This is the missing interface member:
+        // ← This is the missing interface member:
         public Tour? SelectedTour {
             get => _currentSelectedTour;
             set => SelectTour(value);
@@ -26,12 +26,12 @@ namespace TourPlanner.Logic
             if (!ReferenceEquals(_currentSelectedTour, tour))
             {
                 _currentSelectedTour = tour;
-                System.Diagnostics.Debug.WriteLine($"SelectedTourService: Tour selection changed to -> {(_currentSelectedTour?.Name ?? "None")}");
+                System.Diagnostics.Debug.WriteLine($"SelectedTourService: Tour selection changed to -> {(_currentSelectedTour?.TourName ?? "None")}");
                 SelectedTourChanged?.Invoke(_currentSelectedTour);
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"SelectedTourService: Tour re-selected or selection unchanged -> {(_currentSelectedTour?.Name ?? "None")}");
+                System.Diagnostics.Debug.WriteLine($"SelectedTourService: Tour re-selected or selection unchanged -> {(_currentSelectedTour?.TourName ?? "None")}");
                 // Optionally, you might still want to invoke if properties of the same tour instance changed
                 // and subscribers need to react. For a simple selection change, this is usually not needed.
                 // SelectedTourChanged?.Invoke(_currentSelectedTour);
