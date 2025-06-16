@@ -65,7 +65,7 @@
                         <ui:TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTour.EndLocation, TargetNullValue=''}" TextWrapping="Wrap"/>
                         <ui:TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedTour.TransportationType, TargetNullValue=''}" TextWrapping="Wrap"/>
                         <ui:TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedTour.Distance, StringFormat={}{0} km, TargetNullValue=''}" TextWrapping="Wrap"/>
-                        <ui:TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedTour.EstimatedTime, StringFormat={}{0} h, TargetNullValue=''}" TextWrapping="Wrap"/>
+                        <ui:TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedTour.EstimatedTime, StringFormat={}{0} min, TargetNullValue=''}" TextWrapping="Wrap"/>
                     </Grid>
                 </StackPanel>
             </Border>

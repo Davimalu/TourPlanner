@@ -1,6 +1,5 @@
 ﻿// FILE: TourPlanner\Views\Map.xaml.cs
-using System;
-using System.IO;
+
 using Microsoft.Web.WebView2.Core;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,19 +20,19 @@ namespace TourPlanner.Views
         {
             if (!e.IsSuccess)
             {
-                MessageBox.Show($"WebView2 initialization failed. Error: {e.InitializationException?.Message}", "WebView2 Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"WebView2 initialization failed. Error: {e.InitializationException?.Message}",
+                    "WebView2 Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string mapPath = Path.Combine(baseDirectory, "MapResources", "map.html");
-            webView.CoreWebView2.Navigate(mapPath);
-
-            // At this point, webView.CoreWebView2 is ready.
-            // Check if our DataContext (the ViewModel) has been set.
+            var mapFolder = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory, "MapResources");
+            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                hostName: "appassets",
+                folderPath: mapFolder,
+                accessKind: Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow
+            );
             if (this.DataContext is MapViewModel vm)
             {
-                // Pass the control to the ViewModel for initialization.
                 await vm.InitializeWebViewAsync(webView);
             }
         }
