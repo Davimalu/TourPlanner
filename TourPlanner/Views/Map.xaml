@@ -9,7 +9,7 @@
              DataContextChanged="OnDataContextChanged">
     <Grid>
         <!-- The Source property ensures initialization. The code-behind will handle communication. -->
-        <wv2:WebView2 x:Name="webView"/>    
-
+        <wv2:WebView2 x:Name="webView"
+                      Source="https://appassets/map.html" />
     </Grid>
 </UserControl>

@@ -33,7 +33,7 @@ namespace TourPlanner.RestServer
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                context.Database.EnsureCreated(); //geändert von EnsureCreated zu Migrate
+                context.Database.EnsureCreated();
             }
             
             app.UseMiddleware<ExceptionHandlerMiddleware>();
