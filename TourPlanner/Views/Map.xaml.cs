@@ -1,6 +1,4 @@
-﻿// FILE: TourPlanner\Views\Map.xaml.cs
-
-using Microsoft.Web.WebView2.Core;
+﻿using Microsoft.Web.WebView2.Core;
 using System.Windows;
 using System.Windows.Controls;
 using TourPlanner.ViewModels;
@@ -12,11 +10,15 @@ namespace TourPlanner.Views
         public Map()
         {
             InitializeComponent();
-            // This event tells us when the WebView2 control's backend is ready.
-            webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
+            
+            // The WPF Control for WebView2 is created instantly, but the underlying browser process (CoreWebView2) starts up asynchronously (and takes longer).
+            // This event tells us when the WebView2 process is ready to use.
+            WebView.CoreWebView2InitializationCompleted += HandleCoreWebView2Initialized;
         }
+        
+        // The following code is completely specific to WPF and WebView2. Thus, we think it's okay to put it in the Code Behind.
 
-        private async void WebView_CoreWebView2InitializationCompleted(object? sender, CoreWebView2InitializationCompletedEventArgs e)
+        private async void HandleCoreWebView2Initialized(object? sender, CoreWebView2InitializationCompletedEventArgs e)
         {
             if (!e.IsSuccess)
             {
@@ -24,25 +26,21 @@ namespace TourPlanner.Views
                     "WebView2 Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var mapFolder = System.IO.Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory, "MapResources");
-            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+            
+            // Construct the path to the folder containing the map resources
+            var mapFolderPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MapResources");
+            
+            // Redirect all requests to the "appassets" domain to the local folder (instead of the "real" internet)
+            WebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
                 hostName: "appassets",
-                folderPath: mapFolder,
+                folderPath: mapFolderPath,
                 accessKind: Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow
             );
+            
+            // Check if the DataContext was correctly set and call the method handling the rest of the logic
             if (this.DataContext is MapViewModel vm)
             {
-                await vm.InitializeWebViewAsync(webView);
-            }
-        }
-
-        // This handles the case where the DataContext is set *after* the WebView is already initialized.
-        private async void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (webView != null && webView.CoreWebView2 != null && e.NewValue is MapViewModel vm)
-            {
-                await vm.InitializeWebViewAsync(webView);
+                await vm.InitializeWebViewAsync(WebView);
             }
         }
     }

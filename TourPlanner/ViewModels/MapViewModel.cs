@@ -75,9 +75,9 @@ namespace TourPlanner.ViewModels
             _isWebViewReady = true;
 
             // If a tour was selected before the map was fully ready, display its route now.
-            if (_selectedTourService?.CurrentSelectedTour != null)
+            if (_selectedTourService?.SelectedTour != null)
             {
-                await DisplayTourRoute(_selectedTourService.CurrentSelectedTour); // Assuming CurrentTour is the property name
+                await DisplayTourRoute(_selectedTourService.SelectedTour); // Assuming CurrentTour is the property name
             }
         }
         
