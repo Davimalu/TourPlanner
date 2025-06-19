@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
@@ -8,7 +7,6 @@ using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {

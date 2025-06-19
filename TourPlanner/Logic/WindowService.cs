@@ -1,6 +1,6 @@
-﻿using TourPlanner.Logic.Interfaces;
+﻿using TourPlanner.DAL.Interfaces;
+using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
 using TourPlanner.ViewModels;
 using TourPlanner.Views;
 
@@ -8,6 +8,14 @@ namespace TourPlanner.Logic
 {
     internal class WindowService : IWindowService
     {
+        private readonly ITourLogService _tourLogService;
+        
+        public WindowService(ITourLogService tourLogService)
+        {
+            _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
+        }
+        
+        
         public void SpawnEditTourWindow(Tour selectedTour)
         {
             var editWindow = new EditTourWindow()
@@ -23,7 +31,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog)
+                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog, _tourLogService)
             };
 
             editWindow.ShowDialog();
