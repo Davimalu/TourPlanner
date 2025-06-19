@@ -7,13 +7,14 @@ using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
+using IORSService = TourPlanner.DAL.Interfaces.IORSService;
 
 namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
         private readonly ITourService _tourService;
-        private readonly IOSRService _iosrService;
+        private readonly IORSService _iosrService;
         private readonly ILoggerWrapper _logger;
         
         public ICommand FindStartLocationCommand { get; }
@@ -38,7 +39,7 @@ namespace TourPlanner.ViewModels
         private (double lon, double lat)? _startPoint;
         private (double lon, double lat)? _endPoint;
 
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOSRService iosrService)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IORSService iosrService)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _iosrService = iosrService ?? throw new ArgumentNullException(nameof(iosrService));

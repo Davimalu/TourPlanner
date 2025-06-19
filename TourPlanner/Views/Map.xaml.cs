@@ -25,6 +25,7 @@ namespace TourPlanner.Views
             try
             {
                 // Set the WebView2 control in the service so that it can be used by the ViewModel
+                // From an architectural perspective, this is a bit questionable, but since the WebViewService is so tightly coupled to the WebView2 control, we think it's okay to do it this way
                 _webViewService.SetWebView(WebView);
             
                 // Ensure the WebView2 control is initialized before proceeding

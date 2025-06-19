@@ -5,13 +5,14 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
+using TourPlanner.DAL.Interfaces;
 using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents;
 
-public class OSRService : IOSRService
+public class IORSService : Interfaces.IORSService
 {
     private readonly HttpClient _http = new();
     private readonly string _apiKey;
@@ -45,7 +46,7 @@ public class OSRService : IOSRService
 
 // FILE: DAL/ServiceAgents/MapService.cs
 
-    public OSRService()
+    public IORSService()
     {
         try
         {

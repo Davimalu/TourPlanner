@@ -1,9 +1,9 @@
 using TourPlanner.Enums;
 using TourPlanner.Models;
 
-namespace TourPlanner.DAL.ServiceAgents;
+namespace TourPlanner.DAL.Interfaces;
 
-public interface IOSRService
+public interface IORSService
 {
     string GetProfileForTransportType(Transport transportType);
 
