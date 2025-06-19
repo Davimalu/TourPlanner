@@ -30,10 +30,10 @@ public class WebViewService : IWebViewService
     {
         _webView = webView;
     }
-
+    
     
     /// <summary>
-    /// <para>Ensure CoreWebView2 (the backend for WebView2) is ready - the WPF UI component is initialized immediately, but the backend - the actual browser - is initialized asynchronously and can take a little longer</para>
+    /// <para>Ensure CoreWebView2 (the backend for WebView2) is ready - the WPF Control for WebView2 is created instantly, but the underlying browser process (CoreWebView2) starts up asynchronously (and takes longer)</para>
     /// <para>Set up the event handler to receive messages from JavaScript</para>
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>

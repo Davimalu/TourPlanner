@@ -33,6 +33,8 @@ public partial class App : Application
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<IOSRService, OSRService>();
+        services.AddSingleton<IMapService, MapService>();
+        services.AddSingleton<IWebViewService, WebViewService>();
         
         services.AddTransient<HttpClient>();
         
