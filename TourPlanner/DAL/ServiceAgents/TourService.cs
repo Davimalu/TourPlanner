@@ -1,25 +1,25 @@
-﻿using System.Diagnostics;
+﻿using System.Net;
 using System.Net.Http;
-using System.Text.Json;
+using System.Net.Http.Json;
+using TourPlanner.config.Interfaces;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
+using TourPlanner.Model.Exceptions;
 
 namespace TourPlanner.DAL.ServiceAgents
 {
     class TourService : ITourService
     {
-        private readonly string _baseUrl = "http://localhost:29271"; // TODO: Move this to config file
         private readonly HttpClient _httpClient;
 
         private readonly ILoggerWrapper _logger;
 
-        public TourService()
+        public TourService(HttpClient httpClient, ITourPlannerConfig tourPlannerConfig)
         {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(_baseUrl);
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _httpClient.BaseAddress = new Uri(tourPlannerConfig.ApiBaseUrl);
 
             _logger = LoggerFactory.GetLogger<TourService>();
         }
@@ -27,103 +27,78 @@ namespace TourPlanner.DAL.ServiceAgents
         public async Task<List<Tour>?> GetToursAsync()
         {
             _logger.Debug("Fetching all tours from API...");
-            HttpResponseMessage response = await _httpClient.GetAsync("/api/Tours");
-
-            if (response.IsSuccessStatusCode)
+            
+            try
             {
-                string json = await response.Content.ReadAsStringAsync();
-                List<Tour>? tourList = JsonSerializer.Deserialize<List<Tour>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                _logger.Info($"Received {tourList?.Count ?? 0} tours from API");
-
-                return tourList;
+                var tours = await _httpClient.GetFromJsonAsync<List<Tour>>("/api/Tours");
+                
+                // Return an empty list instead of null for collections
+                var result = tours ?? new List<Tour>();
+                
+                _logger.Info($"Received {result.Count} tours from API");
+                return result;
             }
-            else
+            catch (HttpRequestException ex)
             {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to get tours from API. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody} ");
+                _logger.Error($"Failed to get tours from API. Status: {ex.StatusCode}", ex);
+                throw new ApiServiceException("Failed to get tours from API.", ex.StatusCode ?? HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
         public async Task<Tour?> GetTourByIdAsync(int id)
         {
             _logger.Debug($"Fetching tour with ID {id} from API...");
-            HttpResponseMessage response = await _httpClient.GetAsync($"/api/Tours/{id}");
-
-            if (response.IsSuccessStatusCode)
+            
+            try
             {
-                string json = await response.Content.ReadAsStringAsync();
-                Tour? tour = JsonSerializer.Deserialize<Tour>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                _logger.Info($"Received tour with ID {tour?.TourId}: {tour?.TourName} from API");
-
-                return tour;
+                return await _httpClient.GetFromJsonAsync<Tour>($"/api/Tours/{id}");
             }
-            else
+            catch (HttpRequestException ex)
             {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to get tour with ID {id} from API. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody}");
+                _logger.Error($"Failed to get tour with ID {id}. Status: {ex.StatusCode}", ex);
+                throw new ApiServiceException($"Failed to get tour with ID {id} from API.", ex.StatusCode ?? HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
         public async Task<Tour?> CreateTourAsync(Tour tour)
         {
             _logger.Debug($"Creating new tour: {tour.TourName}...");
-
-            // FIX: Removed explicit options. The model now has correct property names.
-            string json = JsonSerializer.Serialize(tour);
-            _logger.Debug($"Serialized JSON for Create: {json}");
-
-            StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await _httpClient.PostAsync("/api/Tours", content);
-
+            
+            // PostAsJsonAsync handles serializing the 'tour' object
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/api/Tours", tour);
+            
             if (response.IsSuccessStatusCode)
             {
-                string responseJson = await response.Content.ReadAsStringAsync();
-                Tour? createdTour = JsonSerializer.Deserialize<Tour>(responseJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
+                Tour? createdTour = await response.Content.ReadFromJsonAsync<Tour>();
                 _logger.Info($"Created new tour with ID {createdTour?.TourId}: {createdTour?.TourName}");
-
                 return createdTour;
             }
-            else
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to create tour. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody}");
-            }
+            
+            await HandleFailedResponse(response, $"Failed to create tour with ID {tour.Id}");
+            return null; // Unreachable code
         }
 
         public async Task<Tour?> UpdateTourAsync(Tour tour)
         {
             _logger.Debug($"Updating tour with ID {tour.TourId}: {tour.TourName}...");
-
-            // FIX: Removed explicit options. The model now has correct property names.
-            string json = JsonSerializer.Serialize(tour);
-            _logger.Debug($"Serialized JSON for Update: {json}");
             
-            StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await _httpClient.PutAsync($"/api/Tours/{tour.TourId}", content);
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"/api/Tours/{tour.TourId}", tour);
 
             if (response.IsSuccessStatusCode)
             {
-                string responseJson = await response.Content.ReadAsStringAsync();
-                Tour? updatedTour = JsonSerializer.Deserialize<Tour>(responseJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
+                Tour? updatedTour = await response.Content.ReadFromJsonAsync<Tour>();
                 _logger.Info($"Updated tour with ID {updatedTour?.TourId}: {updatedTour?.TourName}");
-
                 return updatedTour;
             }
-            else
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to update tour with ID {tour.TourId}. Status Code: {(int)response.StatusCode} ({response.ReasonPhrase}). Response Body: {responseBody}");
-            }
+            
+            await HandleFailedResponse(response, $"Failed to update tour with ID {tour.TourId}.");
+            return null; // Unreachable code
         }
-
+        
         public async Task<bool> DeleteTourAsync(int id)
         {
             _logger.Debug($"Deleting tour with ID {id}...");
-
+            
             HttpResponseMessage response = await _httpClient.DeleteAsync($"/api/Tours/{id}");
 
             if (response.IsSuccessStatusCode)
@@ -131,11 +106,19 @@ namespace TourPlanner.DAL.ServiceAgents
                 _logger.Info($"Deleted tour with ID {id}");
                 return true;
             }
-            else
-            {
-                _logger.Error($"Failed to delete tour with ID {id}");
-                return false;
-            }
+            
+            await HandleFailedResponse(response, $"Failed to delete tour with ID {id}.");
+            return false; // Unreachable code
+        }
+        
+        
+        private async Task HandleFailedResponse(HttpResponseMessage response, string errorMessage)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            
+            _logger.Error($"{errorMessage} Status: {response.StatusCode}. Response: {responseContent}");
+            
+            throw new ApiServiceException(errorMessage, response.StatusCode, responseContent);
         }
     }
 }

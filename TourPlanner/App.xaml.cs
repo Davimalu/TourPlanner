@@ -1,6 +1,10 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using System.Net.Http;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using TourPlanner.config;
+using TourPlanner.config.Interfaces;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.ViewModels;
@@ -13,6 +17,30 @@ namespace TourPlanner;
 /// </summary>
 public partial class App : Application
 {
+    public static IServiceProvider ServiceProvider { get; private set; }
+    
+    public App()
+    {
+        var services = new ServiceCollection();
+        ConfigureServices(services);
+        ServiceProvider = services.BuildServiceProvider();
+    }
+    
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Services
+        services.AddSingleton<ISelectedTourService, SelectedTourService>();
+        services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
+        
+        services.AddTransient<HttpClient>();
+        
+        // DAL Services
+        services.AddSingleton<ITourService, TourService>();
+        services.AddSingleton<ITourLogService, TourLogService>();
+        
+        // ViewModels
+    }
+    
     private void Application_Startup(object sender, StartupEventArgs e)
     {
         // Services
