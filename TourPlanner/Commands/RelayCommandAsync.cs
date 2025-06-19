@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using TourPlanner.DAL.ServiceAgents;
+﻿using System.Windows.Input;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 
@@ -30,7 +24,9 @@ namespace TourPlanner.Commands
             _logger = LoggerFactory.GetLogger<RelayCommandAsync>();
         }
 
-        // The ICommand interface requires this event:
+        /// <summary>
+        /// event that is raised when the ability to execute the command changes
+        /// </summary>
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
