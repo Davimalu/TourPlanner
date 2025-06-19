@@ -40,6 +40,12 @@ public partial class App : Application
         services.AddSingleton<ITourLogService, TourLogService>();
         
         // ViewModels
+        services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<MenuBarViewModel>();
+        services.AddSingleton<SearchBarViewModel>();
+        services.AddSingleton<TourListViewModel>();
+        services.AddSingleton<TourDetailsViewModel>();
+        services.AddSingleton<TourLogsViewModel>();
     }
     
     private void Application_Startup(object sender, StartupEventArgs e)
@@ -48,13 +54,7 @@ public partial class App : Application
         ISelectedTourService selectedTourService = new SelectedTourService();
 
         // Create the ViewModels
-        MenuBarViewModel menuBarViewModel = new MenuBarViewModel();
-        SearchBarViewModel searchBarViewModel = new SearchBarViewModel();
-        TourListViewModel tourListViewModel = new TourListViewModel(selectedTourService);
-        TourLogsViewModel tourLogsViewModel = new TourLogsViewModel(selectedTourService);
-        TourDetailsViewModel tourDetailsViewModel = new TourDetailsViewModel(selectedTourService);
         MapViewModel mapViewModel = new MapViewModel(selectedTourService); // ViewModel for the main map tab
-        MainWindowViewModel mainWindowViewModel = new MainWindowViewModel();
         
         // FIX: DO NOT create a separate MapView instance here.
         // The MainWindow.xaml already defines the Map control. We just need to give it the right ViewModel.
@@ -62,14 +62,14 @@ public partial class App : Application
         // Create the Views (and initialize them with the ViewModels)
         MainWindow mainWindow = new MainWindow
         {
-            DataContext = mainWindowViewModel,
-            MenuBar = { DataContext = menuBarViewModel },
-            SearchBar = { DataContext = searchBarViewModel },
-            TourList = { DataContext = tourListViewModel },
-            TourDetails = { DataContext = tourDetailsViewModel },
+            DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>(),
+            MenuBar = { DataContext = ServiceProvider.GetRequiredService<MenuBarViewModel>() },
+            SearchBar = { DataContext = ServiceProvider.GetRequiredService<SearchBarViewModel>() },
+            TourList = { DataContext = ServiceProvider.GetRequiredService<TourListViewModel>() },
+            TourDetails = { DataContext = ServiceProvider.GetRequiredService<TourDetailsViewModel>() },
             // FIX: Set the DataContext of the existing Map control in MainWindow
             Map = { DataContext = mapViewModel }, 
-            TourLogs = { DataContext = tourLogsViewModel }
+            TourLogs = { DataContext = ServiceProvider.GetRequiredService<TourLogsViewModel>() }
         };
 
         // Show the MainWindow

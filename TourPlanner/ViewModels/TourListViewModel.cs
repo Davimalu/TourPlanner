@@ -2,10 +2,8 @@
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
-using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 
@@ -14,8 +12,8 @@ namespace TourPlanner.ViewModels
     public class TourListViewModel : BaseViewModel
     {
         private readonly ISelectedTourService _selectedTourService;
-        private readonly IWindowService _windowService = WindowService.Instance; // TODO: Use DI
-        private readonly ITourService _tourService = new TourService(); // TODO: Use DI
+        private readonly IWindowService _windowService;
+        private readonly ITourService _tourService;
         private readonly ILoggerWrapper _logger;
 
 
@@ -56,9 +54,11 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService)
+        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService)
         {
-            _selectedTourService = selectedTourService;
+            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
+            _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
+            _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             // Get a list of all tours from the REST API when the ViewModel is created
