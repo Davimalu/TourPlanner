@@ -7,10 +7,10 @@ public class TourPlannerConfig : ITourPlannerConfig
 {
     private readonly IConfiguration _configuration;
     
-    public TourPlannerConfig(IConfiguration configuration)
+    public TourPlannerConfig()
     {
         _configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: true)
             .Build();
     }
     

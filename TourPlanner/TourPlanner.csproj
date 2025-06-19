@@ -39,7 +39,7 @@
   <ItemGroup>
     <None Remove="config\appsettings.json" />
     <Content Include="config\appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
