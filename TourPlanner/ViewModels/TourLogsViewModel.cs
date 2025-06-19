@@ -8,17 +8,17 @@ using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Models;
-using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
         private readonly ISelectedTourService _selectedTourService;
-        private readonly IWindowService _windowService = WindowService.Instance;
-        private readonly ITourLogService _tourLogService = new TourLogService();
+        private readonly IWindowService _windowService = WindowService.Instance; // TODO: Use DI
+        private readonly ITourLogService _tourLogService = new TourLogService(); // TODO: Use DI
         private readonly ILoggerWrapper _logger;
 
+        
         private string? _newLogName;
         public string? NewLogName
         {

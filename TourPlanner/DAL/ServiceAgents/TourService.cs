@@ -11,7 +11,7 @@ namespace TourPlanner.DAL.ServiceAgents
 {
     class TourService : ITourService
     {
-        private readonly string _baseUrl = "http://localhost:5168";
+        private readonly string _baseUrl = "http://localhost:29271"; // TODO: Move this to config file
         private readonly HttpClient _httpClient;
 
         private readonly ILoggerWrapper _logger;
