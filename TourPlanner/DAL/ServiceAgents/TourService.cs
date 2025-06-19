@@ -74,7 +74,7 @@ namespace TourPlanner.DAL.ServiceAgents
                 return createdTour;
             }
             
-            await HandleFailedResponse(response, $"Failed to create tour with ID {tour.Id}");
+            await HandleFailedResponse(response, $"Failed to create tour with ID {tour.TourId}");
             return null; // Unreachable code
         }
 

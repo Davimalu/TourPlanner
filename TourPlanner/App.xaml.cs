@@ -31,6 +31,7 @@ public partial class App : Application
         // Services
         services.AddSingleton<ISelectedTourService, SelectedTourService>();
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
+        services.AddSingleton<IWindowService, WindowService>();
         
         services.AddTransient<HttpClient>();
         
