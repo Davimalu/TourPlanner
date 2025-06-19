@@ -12,14 +12,15 @@ namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
-        private readonly ITourService _tourService = new TourService();
-        private readonly MapService _mapService = new MapService();
+        private readonly ITourService _tourService;
+        private readonly IMapService _mapService;
         private readonly ILoggerWrapper _logger;
         
         public ICommand FindStartLocationCommand { get; }
         public ICommand FindEndLocationCommand { get; }
 
-        private Tour _originalTour;
+
+        // Copy of the original Tour to edit (to avoid changing the original UNTIL the user saves)
         private Tour _editableTour = null!;
         public Tour EditableTour
         {
@@ -27,19 +28,26 @@ namespace TourPlanner.ViewModels
             set { _editableTour = value; RaisePropertyChanged(nameof(EditableTour)); }
         }
         
+        public List<Transport> Transports { get; set; }
+        
+        
+        
+        
         public MapViewModel MapViewModel { get; }
 
         private (double lon, double lat)? _startPoint;
         private (double lon, double lat)? _endPoint;
 
-        public List<Transport> Transports { get; set; }
-
-        public EditTourViewModel(Tour selectedTour)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IMapService mapService)
         {
-            _originalTour = selectedTour;
-            EditableTour = new Tour(_originalTour);
-
+            _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
+            _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+            
             _logger = LoggerFactory.GetLogger<EditTourViewModel>();
+            
+            EditableTour = new Tour(selectedTour); // Create a copy of the Tour to edit (so that if the user cancels, the original Tour remains unchanged)
+            
+            
             
             MapViewModel = new MapViewModel(null);
             System.Diagnostics.Debug.WriteLine("EditTourViewModel: Subscribing to MapClicked event.");
@@ -52,10 +60,15 @@ namespace TourPlanner.ViewModels
                     CalculateAndDrawRoute();
                 }
             };
-
-            Transports = new List<Transport> { Transport.Car, Transport.Bicycle, Transport.Foot };
+            
             FindStartLocationCommand = new RelayCommandAsync(async _ => await GeocodeAddress(true));
             FindEndLocationCommand = new RelayCommandAsync(async _ => await GeocodeAddress(false));
+            
+            
+            
+            
+            // Initialize enums (WPF can't bind to enums directly, so we use lists)
+            Transports = new List<Transport> { Transport.Car, Transport.Bicycle, Transport.Foot, Transport.Motorcycle };
         }
         
         private async Task GeocodeAddress(bool isStart)
@@ -155,23 +168,43 @@ namespace TourPlanner.ViewModels
             }
         }
 
+        
         public ICommand ExecuteSave => new RelayCommandAsync(async _ =>
         {
-            if (_originalTour.TourId == 0 || _originalTour.TourId == -1)
+            // Check if the Tour already exists (i.e. are we updating an existing Tour or creating a new one?)
+            
+            // An invalid TourId means we are creating a new Tour
+            if (EditableTour.TourId <= 0)
             {
                 Tour? newTour = await _tourService.CreateTourAsync(EditableTour);
-                if (newTour == null) _logger.Error($"Failed to create Tour: {EditableTour.TourName}");
+
+                if (newTour == null)
+                {
+                    _logger.Error($"Failed to create Tour: {EditableTour.TourName}");
+                }
             }
+            // Otherwise, we are updating an existing Tour
             else
             {
                 Tour? updatedTour = await _tourService.UpdateTourAsync(EditableTour);
-                if (updatedTour == null) _logger.Error($"Failed to update Tour with ID {EditableTour.TourId}: {EditableTour.TourName}");
+
+                if (updatedTour == null)
+                {
+                    _logger.Error($"Failed to update Tour with ID {EditableTour.TourId}: {EditableTour.TourName}");
+                }
             }
+            
             CloseWindow();
         });
 
-        public ICommand ExecuteCancel => new RelayCommand(_ => CloseWindow());
+        
+        public ICommand ExecuteCancel => new RelayCommand(_ =>
+        {
+            // Close the window, discarding changes
+            CloseWindow();
+        });
 
+        
         private void CloseWindow()
         {
             foreach (Window window in Application.Current.Windows)

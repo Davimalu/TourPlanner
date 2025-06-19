@@ -11,7 +11,7 @@ using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents;
 
-public class MapService
+public class MapService : IMapService
 {
     private readonly HttpClient _http = new();
     private readonly string _apiKey;
@@ -80,7 +80,7 @@ public class MapService
         }
     }
 
-    private string GetProfileForTransportType(Transport transportType)
+    public string GetProfileForTransportType(Transport transportType)
     {
         return transportType switch
         {
