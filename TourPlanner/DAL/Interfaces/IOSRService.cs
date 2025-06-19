@@ -3,7 +3,7 @@ using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents;
 
-public interface IMapService
+public interface IOSRService
 {
     string GetProfileForTransportType(Transport transportType);
 

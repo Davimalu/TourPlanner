@@ -13,7 +13,7 @@ namespace TourPlanner.ViewModels
     class EditTourViewModel : BaseViewModel
     {
         private readonly ITourService _tourService;
-        private readonly IMapService _mapService;
+        private readonly IOSRService _iosrService;
         private readonly ILoggerWrapper _logger;
         
         public ICommand FindStartLocationCommand { get; }
@@ -38,10 +38,10 @@ namespace TourPlanner.ViewModels
         private (double lon, double lat)? _startPoint;
         private (double lon, double lat)? _endPoint;
 
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IMapService mapService)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOSRService iosrService)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
-            _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+            _iosrService = iosrService ?? throw new ArgumentNullException(nameof(iosrService));
             
             _logger = LoggerFactory.GetLogger<EditTourViewModel>();
             
@@ -76,7 +76,7 @@ namespace TourPlanner.ViewModels
             string address = isStart ? EditableTour.StartLocation : EditableTour.EndLocation;
             if (string.IsNullOrWhiteSpace(address)) return;
 
-            var coordinates = await _mapService.GetCoordinatesFromAddressAsync(address);
+            var coordinates = await _iosrService.GetCoordinatesFromAddressAsync(address);
             if (coordinates.HasValue)
             {
                 var (lon, lat) = coordinates.Value;
@@ -154,7 +154,7 @@ namespace TourPlanner.ViewModels
         {
             if (_startPoint == null || _endPoint == null) return;
 
-            var routeInfo = await _mapService.GetRouteAsync(EditableTour.TransportationType, _startPoint.Value, _endPoint.Value);
+            var routeInfo = await _iosrService.GetRouteAsync(EditableTour.TransportationType, _startPoint.Value, _endPoint.Value);
 
             if (routeInfo != null)
             {

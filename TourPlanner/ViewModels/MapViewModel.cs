@@ -23,7 +23,7 @@ namespace TourPlanner.ViewModels
     public class MapViewModel : INotifyPropertyChanged
     {
         private readonly ISelectedTourService? _selectedTourService;
-        private readonly MapService _mapService = new MapService();
+        private readonly OSRService _osrService = new OSRService();
         private WebView2? _webViewControl;
         private bool _isWebViewReady = false; // Use a more descriptive name
 
@@ -126,7 +126,7 @@ namespace TourPlanner.ViewModels
             var endPoint = (tour.EndLon, tour.EndLat);
 
             System.Diagnostics.Debug.WriteLine($"MapViewModel: Displaying route for '{tour.TourName}'.");
-            var routeInfo = await _mapService.GetRouteAsync(tour.TransportationType, startPoint, endPoint);
+            var routeInfo = await _osrService.GetRouteAsync(tour.TransportationType, startPoint, endPoint);
 
             if (routeInfo != null)
             {

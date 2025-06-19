@@ -11,7 +11,7 @@ using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents;
 
-public class MapService : IMapService
+public class OSRService : IOSRService
 {
     private readonly HttpClient _http = new();
     private readonly string _apiKey;
@@ -45,7 +45,7 @@ public class MapService : IMapService
 
 // FILE: DAL/ServiceAgents/MapService.cs
 
-    public MapService()
+    public OSRService()
     {
         try
         {
