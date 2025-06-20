@@ -78,8 +78,8 @@ public class OrsService : IOrsService
         var requestBody = JsonSerializer.Serialize(new
         {
             coordinates = new[] {
-                new[] { start.Latitude, start.Longitude },
-                new[] { end.Latitude, end.Longitude }
+                new[] { start.Longitude, start.Latitude },
+                new[] { end.Longitude, end.Latitude }
             }
         });
         
@@ -199,8 +199,8 @@ public class OrsService : IOrsService
         }
 
         var coordsStruct = new GeoCoordinate(
-            coords[0].GetDouble(),  // Longitude
-            coords[1].GetDouble() // Latitude
+            coords[1].GetDouble(), // Latitude
+            coords[0].GetDouble() // Longitude
         );
         
         return new GeoCode(orsResponse.Features[0].Properties.Label, coordsStruct);
