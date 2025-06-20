@@ -1,5 +1,4 @@
 ﻿using TourPlanner.DAL.Interfaces;
-using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.ViewModels;
@@ -12,14 +11,14 @@ namespace TourPlanner.Logic
         private readonly ITourLogService _tourLogService;
         private readonly ITourService _tourService;
         private readonly IOrsService _osrService;
-        private readonly MapViewModel _mapViewModel;
+        private readonly IMapService _mapService;
         
-        public WindowService(ITourLogService tourLogService, ITourService tourService, IOrsService iosrService, MapViewModel mapViewModel)
+        public WindowService(ITourLogService tourLogService, ITourService tourService, IOrsService iosrService, IMapService mapViewModel)
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _osrService = iosrService ?? throw new ArgumentNullException(nameof(iosrService));
-            _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
+            _mapService = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
         }
         
         
@@ -27,7 +26,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourWindow()
             {
-                DataContext = new EditTourViewModel(_mapViewModel, selectedTour, _tourService, _osrService)
+                DataContext = new EditTourViewModel(selectedTour, _tourService, _osrService, _mapService)
             };
 
             editWindow.ShowDialog();

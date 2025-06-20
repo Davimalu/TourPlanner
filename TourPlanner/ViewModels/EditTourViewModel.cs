@@ -4,6 +4,7 @@ using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
@@ -12,9 +13,9 @@ namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
-        private readonly MapViewModel _mapViewModel; // TODO: Is it okay for one ViewModel to depend on another ViewModel?
         private readonly ITourService _tourService;
         private readonly IOrsService _osrService;
+        private readonly IMapService _mapService;
         private readonly ILoggerWrapper _logger;
         
         public List<Transport> Transports { get; set; }
@@ -32,63 +33,22 @@ namespace TourPlanner.ViewModels
         }
 
         
-        public EditTourViewModel(MapViewModel mapViewModel, Tour selectedTour, ITourService tourService, IOrsService orsService)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService)
         {
-            _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _osrService = orsService ?? throw new ArgumentNullException(nameof(orsService));
+            _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
 
             _logger = LoggerFactory.GetLogger<EditTourViewModel>();
 
             EditableTour = new Tour(selectedTour); // Create a copy of the Tour to edit (so that if the user cancels, the original Tour remains unchanged)
 
-            InitializeMap();
-            
             // Initialize enums (WPF can't bind to enums directly, so we use lists)
             Transports = new List<Transport>
             {
                 Transport.Car, Transport.Bicycle, Transport.Walking, Transport.Wheelchair, Transport.ElectricBicycle,
                 Transport.Mountainbike, Transport.Roadbike, Transport.Truck, Transport.Hiking
             };
-        }
-
-
-        private async void InitializeMap()
-        {
-            try
-            {
-                _mapViewModel.MapClicked += OnMapClicked; // Subscribe to the MapClicked event
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Failed to initialize MapViewModel: {ex.Message}");
-                Application.Current.Shutdown();
-            }
-        }
-        
-
-        private void OnMapClicked(object? sender, GeoCoordinate e)
-        {
-            _logger.Debug($"OnMapClicked Event received! Lat: {e.Latitude}, Lon: {e.Longitude}");
-            
-            if (EditableTour.StartCoordinates == null)
-            {
-                EditableTour.StartCoordinates = e;
-                EditableTour.StartLocation = $"Coord: {e.Latitude:F5}, {e.Longitude:F5}";
-            }
-            else if (EditableTour.EndCoordinates == null)
-            {
-                EditableTour.EndCoordinates = e;
-                EditableTour.EndLocation = $"Coord: {e.Latitude:F5}, {e.Longitude:F5}";
-            }
-            else
-            {
-                // Reset start and end coordinates if both are already set
-                EditableTour.StartCoordinates = e;
-                EditableTour.EndCoordinates = null;
-                EditableTour.StartLocation = $"Coord: {e.Latitude:F5}, {e.Longitude:F5}";
-                EditableTour.EndLocation = "";
-            }
         }
         
         
@@ -111,7 +71,11 @@ namespace TourPlanner.ViewModels
             EditableTour.Distance = Math.Round(routeInfo.Distance / 1000, 2);
             EditableTour.EstimatedTime = (float)Math.Round(routeInfo.Duration / 60, 0);
             
-            // TODO: Draw the route on the map
+            // Draw the route on the map
+            await _mapService.ClearMapAsync(); // Clear existing markers and routes
+            await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)EditableTour.StartCoordinates, "Start", EditableTour.StartLocation));
+            await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)EditableTour.EndCoordinates, "End", EditableTour.EndLocation));
+            await _mapService.DrawRouteAsync(routeInfo.RouteGeometry);
         });
 
 
@@ -165,6 +129,9 @@ namespace TourPlanner.ViewModels
             // Update the tour's fields with the geocoded coordinates
             EditableTour.StartCoordinates = coordinates.Coordinates;
             EditableTour.StartLocation = coordinates.Label;
+            
+            // Add marker on the map for the start location
+            await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "Start", coordinates.Label));
         });
         
         
@@ -182,6 +149,9 @@ namespace TourPlanner.ViewModels
             // Update the tour's fields with the geocoded coordinates
             EditableTour.EndCoordinates = coordinates.Coordinates;
             EditableTour.EndLocation = coordinates.Label;
+            
+            // Add marker on the map for the end location
+            await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "End", coordinates.Label));
         });
 
 
