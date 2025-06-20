@@ -46,28 +46,6 @@ namespace TourPlanner.ViewModels
         
         
         /// <summary>
-        /// Initializes the MapViewModel by ensuring the Map is ready and displaying the selected tour's route if available
-        /// </summary>
-        public async Task InitializeAsync()
-        {
-            try
-            {
-                // If a tour was already selected before the initialization, display its route
-                if (_selectedTourService?.SelectedTour != null)
-                {
-                    await DisplayTourRouteAsync(_selectedTourService.SelectedTour);
-                }
-                
-                _logger.Info("MapViewModel initialized successfully");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Failed to initialize MapViewModel: {ex.Message}", ex);
-            }
-        }
-        
-        
-        /// <summary>
         /// Handles changes to the selected tour and updates the map accordingly
         /// </summary>
         /// <param name="selectedTour">The newly selected tour</param>

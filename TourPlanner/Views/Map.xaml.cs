@@ -37,6 +37,9 @@ namespace TourPlanner.Views
                     folderPath: mapFolderPath,
                     accessKind: Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow
                 );
+                
+                // Navigate to the local HTML file that contains the map
+                WebView.CoreWebView2.Navigate("https://appassets/map.html");
             }
             catch (Exception ex)
             {
