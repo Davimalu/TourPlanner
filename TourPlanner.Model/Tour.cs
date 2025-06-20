@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
@@ -19,6 +21,8 @@ namespace TourPlanner.Model
         // TODO: Determine why the JSONPropertyName attributes are necessary here
         
         private int _tourId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("tourId")]
         public int TourId
         {
@@ -32,6 +36,7 @@ namespace TourPlanner.Model
         
         private string _tourName = string.Empty;
         [JsonPropertyName("tourName")]
+        [Required]
         public string TourName
         {
             get => _tourName;
@@ -56,6 +61,7 @@ namespace TourPlanner.Model
         
         private string _startLocation = string.Empty;
         [JsonPropertyName("startLocation")]
+        [Required]
         public string StartLocation
         {
             get => _startLocation;
@@ -68,6 +74,7 @@ namespace TourPlanner.Model
         
         private string _endLocation = string.Empty;
         [JsonPropertyName("endLocation")]
+        [Required]
         public string EndLocation
         {
             get => _endLocation;
@@ -114,7 +121,7 @@ namespace TourPlanner.Model
         }
 
         private GeoCoordinate? _startCoordinates;
-        [JsonIgnore]
+        [JsonPropertyName("startCoordinates")]
         public GeoCoordinate? StartCoordinates
         {
             get => _startCoordinates;
@@ -126,7 +133,7 @@ namespace TourPlanner.Model
         }
         
         private GeoCoordinate? _endCoordinates;
-        [JsonIgnore]
+        [JsonPropertyName("endCoordinates")]
         public GeoCoordinate? EndCoordinates
         {
             get => _endCoordinates;

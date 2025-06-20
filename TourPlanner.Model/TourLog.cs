@@ -1,10 +1,14 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TourPlanner.Model
 {
     public class TourLog : INotifyPropertyChanged
     {
         private int _logId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int LogId
         {
             get => _logId;

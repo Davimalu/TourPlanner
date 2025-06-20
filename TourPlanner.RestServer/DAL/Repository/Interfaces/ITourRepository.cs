@@ -1,4 +1,4 @@
-﻿using TourPlanner.RestServer.Models;
+﻿using TourPlanner.Model;
 
 namespace TourPlanner.RestServer.DAL.Repository.Interfaces;
 

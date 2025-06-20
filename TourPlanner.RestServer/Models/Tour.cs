@@ -1,8 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using TourPlanner.Enums;
 using TourPlanner.Model.Enums;
 
 namespace TourPlanner.RestServer.Models

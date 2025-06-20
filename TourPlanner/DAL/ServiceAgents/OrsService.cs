@@ -26,7 +26,7 @@ public class OrsService : IOrsService
     {
         _httpClient = http ?? throw new ArgumentNullException(nameof(http));
         
-        _logger = LoggerFactory.GetLogger<TourLogService>();
+        _logger = LoggerFactory.GetLogger<OrsService>();
         
         // Get the API key from the configuration file
         _apiKey = tourPlannerConfig.OpenRouteServiceApiKey ?? throw new ArgumentNullException(nameof(tourPlannerConfig.OpenRouteServiceApiKey), "OpenRouteService API key is not configured.");
@@ -78,8 +78,8 @@ public class OrsService : IOrsService
         var requestBody = JsonSerializer.Serialize(new
         {
             coordinates = new[] {
-                new[] { start.Longitude, start.Latitude },
-                new[] { end.Longitude, end.Latitude }
+                new[] { start.Latitude, start.Longitude },
+                new[] { end.Latitude, end.Longitude }
             }
         });
         
@@ -97,7 +97,7 @@ public class OrsService : IOrsService
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            _logger.Error($"ORS Route calculation failed with status code {response.StatusCode}: {errorContent}");
+            _logger.Error($"ORS Route calculation failed with status code '{response.StatusCode}': {errorContent}");
             return null;
         }
         
