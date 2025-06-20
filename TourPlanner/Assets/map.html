@@ -68,8 +68,8 @@
                 console.log(`Marker added at: Lat ${lat}, Lon ${lon}`);
             }
             
-            function setMapCenter(lat, lon, zoom) {
-                map.setView([lat, lon], zoom);
+            function flyToLocation(lat, lon, zoom) {
+                map.flyTo([lat, lon], zoom)
                 
                 console.log(`Map view set to: Lat ${lat}, Lon ${lon}, Zoom ${zoom}`);
             }

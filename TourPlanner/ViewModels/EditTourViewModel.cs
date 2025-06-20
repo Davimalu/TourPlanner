@@ -132,6 +132,7 @@ namespace TourPlanner.ViewModels
             
             // Add marker on the map for the start location
             await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "Start", coordinates.Label));
+            await _mapService.SetViewToCoordinatesAsync(coordinates.Coordinates);
         });
         
         
@@ -152,6 +153,7 @@ namespace TourPlanner.ViewModels
             
             // Add marker on the map for the end location
             await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "End", coordinates.Label));
+            await _mapService.SetViewToCoordinatesAsync(coordinates.Coordinates);
         });
 
 

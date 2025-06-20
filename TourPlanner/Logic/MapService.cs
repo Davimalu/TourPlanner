@@ -47,6 +47,34 @@ public class MapService : IMapService
             return false;
         }
     }
+
+
+    /// <summary>
+    /// Sets the map view to the specified coordinates and zoom level
+    /// </summary>
+    /// <param name="coordinates">Coordinates to center the map on</param>
+    /// <param name="zoomLevel">Zoom level to set the map to (defaults to 15)</param>
+    /// <returns></returns>
+    public async Task<bool> SetViewToCoordinatesAsync(GeoCoordinate coordinates, int zoomLevel = 15)
+    {
+        if (!_webViewService.IsReady)
+        {
+            _logger.Warn("Failed to add marker: WebView is not ready.");
+            return false;
+        }
+        
+        try 
+        {
+            var result = await _webViewService.CallFunctionAsync("flyToLocation", coordinates.Latitude, coordinates.Longitude, zoomLevel);
+            _logger.Debug($"Set map view to coordinates ({coordinates.Latitude}, {coordinates.Longitude})");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to set view to coordinates: {ex.Message}", ex);
+            return false;
+        }
+    }
     
     
     /// <summary>
