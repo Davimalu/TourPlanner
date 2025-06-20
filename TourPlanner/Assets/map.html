@@ -55,7 +55,7 @@
             
             function addMarker(lat, lon, title, description) {
                 // Create a marker at the specified coordinates
-                var marker = L.marker([lat, lng]).addTo(map);
+                var marker = L.marker([lat, lon]).addTo(map);
 
                 // If title and description are provided, bind them to the marker's popup
                 if (title || description) {
@@ -67,17 +67,6 @@
                 
                 console.log(`Marker added at: Lat ${lat}, Lon ${lon}`);
             }
-            
-            
-            function clearMarkers() {
-                markers.forEach(marker => {
-                    map.removeLayer(marker);
-                });
-                markers = [];
-                
-                console.log("All markers cleared.");
-            }
-            
             
             function setMapCenter(lat, lon, zoom) {
                 map.setView([lat, lon], zoom);
@@ -109,8 +98,11 @@
         
             // 6. Function to clear markers and route
             function clearMap() {
-                if(startMarker) map.removeLayer(startMarker);
-                if(endMarker) map.removeLayer(endMarker);
+                markers.forEach(marker => {
+                    map.removeLayer(marker);
+                });
+                markers = [];
+                
                 if(routeLayer) map.removeLayer(routeLayer);
                 startMarker = null;
                 endMarker = null;

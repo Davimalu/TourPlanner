@@ -6,6 +6,7 @@ using TourPlanner.config.Interfaces;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Model;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
 using TourPlanner.Models;
@@ -134,11 +135,11 @@ public class OrsService : IOrsService
 
     
     /// <summary>
-    /// Asynchronously retrieves the geographical coordinates (latitude and longitude) for a given address using the OpenRouteService Geocoding API.
+    /// Asynchronously retrieves the GeoCode (geographical coordinates, latitude and longitude, and the place's label) for a given address using the OpenRouteService Geocoding API.
     /// </summary>
     /// <param name="address">The address to geocode</param>
-    /// <returns>The best matching coordinates as a <see cref="GeoCoordinate"/> struct, or null if the address is invalid or not found</returns>
-    public async Task<GeoCoordinate?> GetCoordinatesFromAddressAsync(string address)
+    /// <returns>The best matching place as a <see cref="GeoCode"/> class, or null if the address is invalid or not found</returns>
+    public async Task<GeoCode?> GetGeoCodeFromAddressAsync(string address)
     {
         if (string.IsNullOrWhiteSpace(address))
         {
@@ -165,7 +166,7 @@ public class OrsService : IOrsService
             var jsonString = await response.Content.ReadAsStringAsync();
             var orsResponse = JsonSerializer.Deserialize<OrsGeocodeResponse>(jsonString);
             
-            return ExtractCoordinatesFromOrsResponse(orsResponse);
+            return ExtractGeoCodeFromOrsResponse(orsResponse);
         }
         catch (Exception ex)
         {
@@ -176,11 +177,11 @@ public class OrsService : IOrsService
     
     
     /// <summary>
-    /// Extracts the geographical coordinates from the ORS geocoding response
+    /// Extracts the geographical coordinates + the location's label from the ORS geocoding response
     /// </summary>
-    /// <param name="orsResponse">The deserialized ORS geocoding response containing features with geometry</param>
-    /// <returns>The coordinates as a <see cref="GeoCoordinate"/> struct, or null if the response is invalid</returns>
-    private GeoCoordinate? ExtractCoordinatesFromOrsResponse(OrsGeocodeResponse? orsResponse)
+    /// <param name="orsResponse">The deserialized ORS geocoding response containing features with geometry and properties</param>
+    /// <returns>The location as a <see cref="GeoCode"/> class, or null if the response is invalid</returns>
+    private GeoCode? ExtractGeoCodeFromOrsResponse(OrsGeocodeResponse? orsResponse)
     {
         if ( orsResponse?.Features == null || !orsResponse.Features.Any())
         {
@@ -201,8 +202,8 @@ public class OrsService : IOrsService
             coords[0].GetDouble(),  // Longitude
             coords[1].GetDouble() // Latitude
         );
-
-        return coordsStruct;
+        
+        return new GeoCode(orsResponse.Features[0].Properties.Label, coordsStruct);
     }
     
     
@@ -242,8 +243,8 @@ public class OrsService : IOrsService
     /// </summary>
     private class OrsGeocodeProperties
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("label")]
+        public string Label { get; set; }
         [JsonPropertyName("country")]
         public string Country { get; set; }
         [JsonPropertyName("region")]

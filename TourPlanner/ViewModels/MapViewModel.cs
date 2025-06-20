@@ -1,26 +1,19 @@
-﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Wpf;
-using System.Text.Json;
-using System.Web;
-using TourPlanner.DAL.Interfaces;
+﻿using TourPlanner.DAL.Interfaces;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Structs;
 
 namespace TourPlanner.ViewModels
 {
-    public class MapMessage
-    {
-        public string Type { get; set; }
-        public double Lat { get; set; }
-        public double Lon { get; set; }
-    }
-
     public class MapViewModel : BaseViewModel
     {
         private readonly ISelectedTourService? _selectedTourService;
-        private readonly IWebViewService _webViewService;
         private readonly IMapService _mapService;
         private readonly IOrsService _orsService;
+        private readonly ILoggerWrapper _logger;
         
         private Tour? _selectedTour;
         public Tour? SelectedTour
@@ -35,174 +28,118 @@ namespace TourPlanner.ViewModels
                 }
             }
         }
-        
-        
-        private WebView2? _webViewControl;
-        private bool _isWebViewReady = false; // Use a more descriptive name
 
-        public event EventHandler<MapClickEventArgs>? MapClicked;
+        public event EventHandler<GeoCoordinate>? MapClicked;
 
-        public MapViewModel(ISelectedTourService? selectedTourService, IWebViewService webViewService, IMapService mapService, IOrsService iorsService)
+        
+        public MapViewModel(ISelectedTourService selectedTourService, IMapService mapService, IOrsService iorsService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
-            _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
             _orsService = iorsService ?? throw new ArgumentNullException(nameof(iorsService));
+            _logger = LoggerFactory.GetLogger<WebViewService>();
             
             _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
             
-            if (_selectedTourService != null)
-            {
-                _selectedTourService.SelectedTourChanged += OnSelectedTourChanged;
-            }
+            _mapService.MapClicked += OnMapClicked; // Subscribe to the MapClicked event from the MapService
+            _selectedTourService.SelectedTourChanged += OnSelectedTourChanged; // Subscribe to changes in the selected tour
         }
         
         
-        public async Task InitializeWebViewAsync(WebView2 webView)
-        {
-            // Prevent re-initialization if the control has already been linked.
-            if (_webViewControl != null) return; 
-
-            _webViewControl = webView;
-    
-            // Ensure the CoreWebView2 backend is ready.
-            await _webViewControl.EnsureCoreWebView2Async(null);
-    
-            if (_webViewControl.CoreWebView2 == null)
-            {
-                System.Diagnostics.Debug.WriteLine("MapViewModel: CoreWebView2 is NULL. Aborting communication setup.");
-                return;
-            }
-    
-            // *** THIS IS THE CRITICAL PART WE NEED TO RESTORE ***
-            // Listen for messages from JavaScript (like map clicks).
-            _webViewControl.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-            // Listen for when the page has finished loading.
-            _webViewControl.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
-
-            System.Diagnostics.Debug.WriteLine("MapViewModel: Communication with WebView is now established.");
-    
-            // Since the XAML's Source property already loaded the page, NavigationCompleted
-            // might have already fired. We'll set the _isWebViewReady flag to true here to be safe,
-            // so that subsequent calls to DrawRoute etc. will work.
-            _isWebViewReady = true;
-
-            // If a tour was selected before the map was fully ready, display its route now.
-            if (_selectedTourService?.SelectedTour != null)
-            {
-                await DisplayTourRoute(_selectedTourService.SelectedTour); // Assuming CurrentTour is the property name
-            }
-        }
-        
-        private void CoreWebView2_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        /// <summary>
+        /// Initializes the MapViewModel by ensuring the Map is ready and displaying the selected tour's route if available
+        /// </summary>
+        public async Task InitializeAsync()
         {
             try
             {
-                var message = JsonSerializer.Deserialize<MapMessage>(e.WebMessageAsJson);
-                if (message?.Type == "MapClick")
+                // Ensure the Map Service (i.e. the WebView) is ready
+                await _mapService.InitializeAsync();
+                
+                // If a tour was already selected before the initialization, display its route
+                if (_selectedTourService?.SelectedTour != null)
                 {
-                    MapClicked?.Invoke(this, new MapClickEventArgs(message.Lat, message.Lon));
+                    await DisplayTourRouteAsync(_selectedTourService.SelectedTour);
+                }
+                
+                _logger.Info("MapViewModel initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to initialize MapViewModel: {ex.Message}", ex);
+                throw;
+            }
+        }
+        
+        
+        /// <summary>
+        /// Handles changes to the selected tour and updates the map accordingly
+        /// </summary>
+        /// <param name="selectedTour">The newly selected tour</param>
+        private async void OnSelectedTourChanged(Tour? selectedTour)
+        {
+            SelectedTour = selectedTour;
+            
+            if (selectedTour != null)
+            {
+                await DisplayTourRouteAsync(selectedTour);
+            }
+            else
+            {
+                await _mapService.ClearMapAsync();
+            }
+        }
+        
+        
+        /// <summary>
+        /// Handles the MapClicked event from the MapService and forwards it to any subscribers
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnMapClicked(object? sender, GeoCoordinate e)
+        {
+            MapClicked?.Invoke(this, e);
+            _logger.Debug($"Map clicked event forwarded: ({e.Latitude}, {e.Longitude})");
+        }
+        
+        
+        /// <summary>
+        /// Displays the route for the specified tour on the map
+        /// </summary>
+        /// <param name="tour">The tour whose route to display</param>
+        private async Task DisplayTourRouteAsync(Tour tour)
+        {
+            if (tour.StartCoordinates == null || tour.EndCoordinates == null)
+            {
+                _logger.Warn($"Tour '{tour.TourName}' does not have valid start or end coordinates.");
+                await _mapService.ClearMapAsync();
+                return;
+            }
+            
+            try
+            {
+                _logger.Debug($"Displaying route for tour '{tour.TourName}'");
+
+                var route = await _orsService.GetRouteAsync(tour.TransportationType, (GeoCoordinate)tour.StartCoordinates, (GeoCoordinate)tour.EndCoordinates);
+
+                if (route?.RouteGeometry != null)
+                {
+                    await _mapService.ClearMapAsync();
+                    await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
+                    await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
+                    await _mapService.DrawRouteAsync(route.RouteGeometry);
+                }
+                else
+                {
+                    _logger.Warn($"Failed to get route for tour '{tour.TourName}'");
+                    await _mapService.ClearMapAsync();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error receiving web message: {ex.Message}");
+                _logger.Error($"Failed to display tour route: {ex.Message}", ex);
+                await _mapService.ClearMapAsync();
             }
         }
-
-        private async void OnSelectedTourChanged(Tour? selectedTour)
-        {
-            if (!_isWebViewReady) return; // Don't do anything if the map page isn't even loaded
-            
-            if (selectedTour != null)
-            {
-                await DisplayTourRoute(selectedTour);
-            }
-            else
-            {
-                ClearMap();
-            }
-        }
-        
-        private async Task DisplayTourRoute(Tour tour)
-        {
-            if (!_isWebViewReady) return;
-
-            if (tour.StartLat == 0 || tour.StartLon == 0 || tour.EndLat == 0 || tour.EndLon == 0)
-            {
-                System.Diagnostics.Debug.WriteLine($"MapViewModel: Tour '{tour.TourName}' has no coordinates. Clearing map.");
-                ClearMap();
-                return;
-            }
-
-            var startPoint = (tour.StartLon, tour.StartLat);
-            var endPoint = (tour.EndLon, tour.EndLat);
-
-            System.Diagnostics.Debug.WriteLine($"MapViewModel: Displaying route for '{tour.TourName}'.");
-            var routeInfo = await _orsService.GetRouteAsync(tour.TransportationType, startPoint, endPoint);
-
-            if (routeInfo != null)
-            {
-                ClearMap();
-                AddMarker(tour.StartLat, tour.StartLon, "start");
-                AddMarker(tour.EndLat, tour.EndLon, "end");
-                DrawRoute(routeInfo.RouteGeometry);
-            }
-        }
-        
-        public async void DrawRoute(string geoJson)
-        {
-            if (!_isWebViewReady) return;
-            var escapedJson = HttpUtility.JavaScriptStringEncode(geoJson);
-            await _webViewControl!.CoreWebView2.ExecuteScriptAsync($"drawRoute('{escapedJson}')");
-        }
-        
-        public async void ClearMap()
-        {
-            if (!_isWebViewReady) return;
-            await _webViewControl!.CoreWebView2.ExecuteScriptAsync("clearMap()");
-        }
-        
-        
-        
-        private readonly Queue<string> _pendingScripts = new();
-        public async void AddMarker(double lat, double lon, string type)
-        {
-            var script = $"addMarker({lat}, {lon}, '{type}')";
-            if (!_isWebViewReady)
-            {
-                _pendingScripts.Enqueue(script);
-                return;
-            }
-            await _webViewControl!.CoreWebView2.ExecuteScriptAsync(script);
-        }
-
-        private async void FlushPending()
-        {
-            while (_pendingScripts.TryDequeue(out var js))
-                await _webViewControl!.CoreWebView2.ExecuteScriptAsync(js);
-        }
-
-        private void CoreWebView2_NavigationCompleted(
-            object? sender, CoreWebView2NavigationCompletedEventArgs e)
-        {
-            _isWebViewReady = e.IsSuccess;
-            if (_isWebViewReady) FlushPending();   // no await
-        }
-        
-    }
-}
-
-
-
-
-public class MapClickEventArgs : EventArgs
-{
-    public double Lat { get; }
-    public double Lon { get; }
-    public MapClickEventArgs(double lat, double lon)
-    {
-        Lat = lat;
-        Lon = lon;
     }
 }

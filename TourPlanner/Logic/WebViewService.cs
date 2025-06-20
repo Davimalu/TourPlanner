@@ -28,7 +28,7 @@ public class WebViewService : IWebViewService
     /// <param name="webView"></param>
     public void SetWebView(WebView2 webView)
     {
-        _webView = webView;
+        _webView = webView ?? throw new ArgumentNullException(nameof(webView), "WebView cannot be null.");
     }
     
     

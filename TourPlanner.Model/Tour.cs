@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
-using TourPlanner.Enums;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
 
@@ -114,9 +113,9 @@ namespace TourPlanner.Model
             }
         }
 
-        private GeoCoordinate _startCoordinates;
+        private GeoCoordinate? _startCoordinates;
         [JsonIgnore]
-        public GeoCoordinate StartCoordinates
+        public GeoCoordinate? StartCoordinates
         {
             get => _startCoordinates;
             set
@@ -126,9 +125,9 @@ namespace TourPlanner.Model
             }
         }
         
-        private GeoCoordinate _endCoordinates;
+        private GeoCoordinate? _endCoordinates;
         [JsonIgnore]
-        public GeoCoordinate EndCoordinates
+        public GeoCoordinate? EndCoordinates
         {
             get => _endCoordinates;
             set
@@ -150,20 +149,6 @@ namespace TourPlanner.Model
             }
         }
         
-
-        // TODO: Remove these properties once the rest of the code is updated to use the new coordinate properties
-        private double _startLat, _startLon, _endLat, _endLon;
-        
-        // FIX: Add coordinate properties that are sent to/from the server
-        [JsonPropertyName("startLat")]
-        public double StartLat { get => _startLat; set { _startLat = value; OnPropertyChanged(nameof(StartLat)); } }
-        [JsonPropertyName("startLon")]
-        public double StartLon { get => _startLon; set { _startLon = value; OnPropertyChanged(nameof(StartLon)); } }
-        [JsonPropertyName("endLat")]
-        public double EndLat { get => _endLat; set { _endLat = value; OnPropertyChanged(nameof(EndLat)); } }
-        [JsonPropertyName("endLon")]
-        public double EndLon { get => _endLon; set { _endLon = value; OnPropertyChanged(nameof(EndLon)); } }
-        
         
         // Constructor
         public Tour() { }
@@ -181,10 +166,8 @@ namespace TourPlanner.Model
             TransportationType = other.TransportationType;
             Distance = other.Distance;
             EstimatedTime = other.EstimatedTime;
-            StartCoordinates = new GeoCoordinate(other.StartCoordinates.Latitude, other.StartCoordinates.Longitude);
-            EndCoordinates = new GeoCoordinate(other.EndCoordinates.Latitude, other.EndCoordinates.Longitude);
-            StartLat = other.StartLat; StartLon = other.StartLon; // TODO: Remove these lines once the rest of the code is updated to use the new coordinate properties
-            EndLat = other.EndLat; EndLon = other.EndLon; // TODO: Remove these lines once the rest of the code is updated to use the new coordinate properties
+            StartCoordinates = other.StartCoordinates;
+            EndCoordinates = other.EndCoordinates;
             Logs = new ObservableCollection<TourLog>(other.Logs);
         }
         
