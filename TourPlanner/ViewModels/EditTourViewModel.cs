@@ -12,7 +12,7 @@ namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
-        private readonly MapViewModel _mapViewModel;
+        private readonly MapViewModel _mapViewModel; // TODO: Is it okay for one ViewModel to depend on another ViewModel?
         private readonly ITourService _tourService;
         private readonly IOrsService _osrService;
         private readonly ILoggerWrapper _logger;
@@ -57,7 +57,7 @@ namespace TourPlanner.ViewModels
         {
             try
             {
-                await _mapViewModel.InitializeAsync();
+                _mapViewModel.InitializeAsync();
                 _mapViewModel.MapClicked += OnMapClicked; // Subscribe to the MapClicked event
             }
             catch (Exception ex)

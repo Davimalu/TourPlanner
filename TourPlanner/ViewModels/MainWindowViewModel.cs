@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using TourPlanner.Models;
-
-namespace TourPlanner.ViewModels
+﻿namespace TourPlanner.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {

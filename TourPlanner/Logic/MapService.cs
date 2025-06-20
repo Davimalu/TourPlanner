@@ -18,7 +18,7 @@ public class MapService : IMapService
     public MapService(IWebViewService webViewService)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
-        _logger = LoggerFactory.GetLogger<WebViewService>();
+        _logger = LoggerFactory.GetLogger<MapService>();
     }
     
     

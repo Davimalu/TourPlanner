@@ -8,13 +8,15 @@ namespace TourPlanner.Views
     public partial class Map : UserControl
     {
         private readonly IWebViewService _webViewService;
+        private readonly IMapService _mapService;
         
         public Map()
         {
             InitializeComponent();
             
-            // Get the WebViewService from the ServiceProvider
+            // Get the WebViewService and MapService from the service provider
             _webViewService = App.ServiceProvider.GetRequiredService<IWebViewService>();
+            _mapService = App.ServiceProvider.GetRequiredService<IMapService>();
             
             Loaded += Map_Loaded;
         }
@@ -28,8 +30,8 @@ namespace TourPlanner.Views
                 // From an architectural perspective, this is a bit questionable, but since the WebViewService is so tightly coupled to the WebView2 control, we think it's okay to do it this way
                 _webViewService.SetWebView(WebView);
             
-                // Ensure the WebView2 control is initialized before proceeding
-                await _webViewService.InitializeAsync();
+                // Ensure the MapService (and thus also the WebView2 control) is initialized before proceeding
+                await _mapService.InitializeAsync();
                 
                 // Construct the path to the folder containing the map resources
                 var mapFolderPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets");

@@ -41,6 +41,7 @@ public class WebViewService : IWebViewService
     {
         if (_webView == null)
         {
+            _logger.Error("WebView is not set. Please call SetWebView() before initializing.");
             throw new InvalidOperationException("WebView is not set.");
         }
 
@@ -67,6 +68,7 @@ public class WebViewService : IWebViewService
 
         try
         {
+            _logger.Debug($"Executing JavaScript script: {script}");
             return await _webView.CoreWebView2.ExecuteScriptAsync(script);
         }
         catch (Exception ex)
@@ -90,13 +92,14 @@ public class WebViewService : IWebViewService
             _logger.Error("Function call failed: WebView is not initialized.");
             return string.Empty;
         }
-
+        
         // C# objects can't be passed directly to JavaScript, so we need to serialize them to JSON
         var jsonParams = parameters.Select(p => JsonSerializer.Serialize(p)).ToArray();
         var script = $"{functionName}({string.Join(",", jsonParams)})";
 
         try
         {
+            _logger.Debug($"Calling JavaScript function: {functionName} with parameters: {string.Join(", ", parameters)}");
             return await _webView.CoreWebView2.ExecuteScriptAsync(script);
         }
         catch (Exception ex)

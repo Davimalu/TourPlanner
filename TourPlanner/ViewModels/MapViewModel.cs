@@ -1,7 +1,6 @@
 ﻿using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
-using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Structs;
@@ -37,7 +36,7 @@ namespace TourPlanner.ViewModels
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
             _orsService = iorsService ?? throw new ArgumentNullException(nameof(iorsService));
-            _logger = LoggerFactory.GetLogger<WebViewService>();
+            _logger = LoggerFactory.GetLogger<MapViewModel>();
             
             _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
             
@@ -67,7 +66,6 @@ namespace TourPlanner.ViewModels
             catch (Exception ex)
             {
                 _logger.Error($"Failed to initialize MapViewModel: {ex.Message}", ex);
-                throw;
             }
         }
         
@@ -82,6 +80,7 @@ namespace TourPlanner.ViewModels
             
             if (selectedTour != null)
             {
+                _logger.Debug($"Selected tour changed: {selectedTour.TourName} (ID: {selectedTour.TourId}). Redrawing route on map...");
                 await DisplayTourRouteAsync(selectedTour);
             }
             else
