@@ -11,43 +11,16 @@ public class MapService : IMapService
 {
     private readonly IWebViewService _webViewService;
     private readonly ILoggerWrapper _logger;
-    
-    private bool _isReady = false;
     public event EventHandler<GeoCoordinate>? MapClicked;
     
     public MapService(IWebViewService webViewService)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
         _logger = LoggerFactory.GetLogger<MapService>();
-    }
-    
-    
-    /// <summary>
-    /// Initializes the map service by ensuring the WebView is ready and setting up necessary event handlers
-    /// </summary>
-    public async Task InitializeAsync()
-    {
-        if (_isReady)
-        {
-            _logger.Warn("Map service is already initialized.");
-            return;
-        }
         
-        try
-        {
-            await _webViewService.InitializeAsync();
-            _webViewService.MessageReceived += OnWebViewMessageReceived;
-            
-            _isReady = true;
-            _logger.Info("Map service initialized successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Failed to initialize map service: {ex.Message}", ex);
-            throw;
-        }
+        _webViewService.MessageReceived += OnWebViewMessageReceived;
     }
-    
+
     
     /// <summary>
     /// Adds a marker to the map at the specified coordinates with an optional description
@@ -56,9 +29,9 @@ public class MapService : IMapService
     /// <returns></returns>
     public async Task<bool> AddMarkerAsync(MapMarker marker)
     {
-        if (!_isReady)
+        if (!_webViewService.IsReady)
         {
-            _logger.Warn("Failed to add marker: Map service is not ready.");
+            _logger.Warn("Failed to add marker: WebView is not ready.");
             return false;
         }
 
@@ -83,9 +56,9 @@ public class MapService : IMapService
     /// <returns></returns>
     public async Task<bool> DrawRouteAsync(string geoJsonRoute)
     {
-        if (!_isReady)
+        if (!_webViewService.IsReady)
         {
-            _logger.Warn("Failed to draw route: Map service is not ready.");
+            _logger.Warn("Failed to draw route: WebView is not ready.");
             return false;
         }
 
@@ -109,9 +82,9 @@ public class MapService : IMapService
     /// <returns></returns>
     public async Task<bool> ClearMapAsync()
     {
-        if (!_isReady)
+        if (!_webViewService.IsReady)
         {
-            _logger.Warn("Failed to clear map: Map service is not ready.");
+            _logger.Warn("Failed to clear map: WebView is not ready.");
             return false;
         }
 

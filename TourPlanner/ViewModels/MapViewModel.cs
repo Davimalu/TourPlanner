@@ -52,9 +52,6 @@ namespace TourPlanner.ViewModels
         {
             try
             {
-                // Ensure the Map Service (i.e. the WebView) is ready
-                await _mapService.InitializeAsync();
-                
                 // If a tour was already selected before the initialization, display its route
                 if (_selectedTourService?.SelectedTour != null)
                 {

@@ -13,28 +13,13 @@ public class WebViewService : IWebViewService
     We could add an interface for WebView2, but that would just add unnecessary complexity for this specific use case. */
     private WebView2? _webView;
     public event EventHandler<string>? MessageReceived;
+    public bool IsReady { get; private set; } = false;
 
     private readonly ILoggerWrapper _logger;
 
     public WebViewService()
     {
         _logger = LoggerFactory.GetLogger<WebViewService>();
-    }
-
-    
-    /// <summary>
-    /// Sets the WebView2 component that should be used by this service
-    /// </summary>
-    /// <param name="webView"></param>
-    public void SetWebView(WebView2 webView)
-    {
-        if (_webView != null)
-        {
-            _logger.Warn("WebView is already set. Overwriting with the new WebView.");
-        }
-        
-        _webView = webView ?? throw new ArgumentNullException(nameof(webView), "WebView cannot be null.");
-        _logger.Info("WebView has been set successfully.");
     }
     
     
@@ -43,13 +28,15 @@ public class WebViewService : IWebViewService
     /// <para>Set up the event handler to receive messages from JavaScript</para>
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(WebView2 webView)
     {
-        if (_webView == null)
+        if (_webView != null)
         {
-            _logger.Error("WebView is not set. Please call SetWebView() before initializing.");
-            throw new InvalidOperationException("WebView is not set.");
+            _logger.Warn("WebView is already set. Overwriting with the new WebView.");
         }
+        
+        _webView = webView ?? throw new ArgumentNullException(nameof(webView), "WebView cannot be null.");
+        _logger.Info("WebView has been set successfully.");
 
         // Ensure that the WebView2 control is initialized
         await _webView.EnsureCoreWebView2Async();
@@ -57,6 +44,9 @@ public class WebViewService : IWebViewService
         // WebMessageReceived fires whenever JavaScript code running inside WebView calls the window.chrome.webview.postMessage("message") function
         // -> this allows us to receive messages from the JavaScript code running in the WebView
         _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
+        
+        // Set the IsReady flag to true to indicate that the WebView is ready for use
+        IsReady = true;
     }
 
 

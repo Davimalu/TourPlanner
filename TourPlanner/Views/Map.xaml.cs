@@ -8,15 +8,13 @@ namespace TourPlanner.Views
     public partial class Map : UserControl
     {
         private readonly IWebViewService _webViewService;
-        private readonly IMapService _mapService;
         
         public Map()
         {
             InitializeComponent();
             
-            // Get the WebViewService and MapService from the service provider
+            // Get the WebViewService from the service provider
             _webViewService = App.ServiceProvider.GetRequiredService<IWebViewService>();
-            _mapService = App.ServiceProvider.GetRequiredService<IMapService>();
             
             Loaded += Map_Loaded;
         }
@@ -26,12 +24,9 @@ namespace TourPlanner.Views
         {
             try
             {
-                // Set the WebView2 control in the service so that it can be used by the ViewModel
+                // Set the WebView2 control in the service so that it can be used by the ViewModel and ensure the WebView2 control is initialized before proceeding
                 // From an architectural perspective, this is a bit questionable, but since the WebViewService is so tightly coupled to the WebView2 control, we think it's okay to do it this way
-                _webViewService.SetWebView(WebView);
-            
-                // Ensure the MapService (and thus also the WebView2 control) is initialized before proceeding
-                await _mapService.InitializeAsync();
+                await _webViewService.InitializeAsync(WebView);
                 
                 // Construct the path to the folder containing the map resources
                 var mapFolderPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets");
