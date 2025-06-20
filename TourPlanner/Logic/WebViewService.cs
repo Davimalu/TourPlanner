@@ -28,7 +28,13 @@ public class WebViewService : IWebViewService
     /// <param name="webView"></param>
     public void SetWebView(WebView2 webView)
     {
+        if (_webView != null)
+        {
+            _logger.Warn("WebView is already set. Overwriting with the new WebView.");
+        }
+        
         _webView = webView ?? throw new ArgumentNullException(nameof(webView), "WebView cannot be null.");
+        _logger.Info("WebView has been set successfully.");
     }
     
     
@@ -99,7 +105,7 @@ public class WebViewService : IWebViewService
 
         try
         {
-            _logger.Debug($"Calling JavaScript function: {functionName} with parameters: {string.Join(", ", parameters)}");
+            _logger.Debug($"Calling JavaScript function: {functionName}");
             return await _webView.CoreWebView2.ExecuteScriptAsync(script);
         }
         catch (Exception ex)

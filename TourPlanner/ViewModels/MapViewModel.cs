@@ -31,11 +31,11 @@ namespace TourPlanner.ViewModels
         public event EventHandler<GeoCoordinate>? MapClicked;
 
         
-        public MapViewModel(ISelectedTourService selectedTourService, IMapService mapService, IOrsService iorsService)
+        public MapViewModel(ISelectedTourService selectedTourService, IMapService mapService, IOrsService orsService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-            _orsService = iorsService ?? throw new ArgumentNullException(nameof(iorsService));
+            _orsService = orsService ?? throw new ArgumentNullException(nameof(orsService));
             _logger = LoggerFactory.GetLogger<MapViewModel>();
             
             _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service

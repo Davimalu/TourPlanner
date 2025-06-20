@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:views="clr-namespace:TourPlanner.Views"
+        xmlns:local="clr-namespace:TourPlanner.Views"
         mc:Ignorable="d"
         Title="Edit Tour" Height="850" Width="800">
 
@@ -110,7 +111,7 @@
         
         <!-- Map -->
         <Border Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="2" BorderBrush="Gray" BorderThickness="1" Margin="5">
-            <views:Map DataContext="{Binding MapViewModel}"/>
+            <local:Map x:Name="Map"/>
         </Border>
         
         <!-- Save and Cancel Buttons -->

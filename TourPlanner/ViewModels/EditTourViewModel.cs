@@ -57,7 +57,6 @@ namespace TourPlanner.ViewModels
         {
             try
             {
-                _mapViewModel.InitializeAsync();
                 _mapViewModel.MapClicked += OnMapClicked; // Subscribe to the MapClicked event
             }
             catch (Exception ex)

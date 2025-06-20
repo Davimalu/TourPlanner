@@ -27,6 +27,12 @@ public class MapService : IMapService
     /// </summary>
     public async Task InitializeAsync()
     {
+        if (_isReady)
+        {
+            _logger.Warn("Map service is already initialized.");
+            return;
+        }
+        
         try
         {
             await _webViewService.InitializeAsync();
