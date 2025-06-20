@@ -15,7 +15,7 @@ public class MapService : IMapService
     private bool _isReady = false;
     public event EventHandler<GeoCoordinate>? MapClicked;
     
-    public MapService(IWebViewService webViewService, ILoggerWrapper logger)
+    public MapService(IWebViewService webViewService)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
         _logger = LoggerFactory.GetLogger<WebViewService>();
