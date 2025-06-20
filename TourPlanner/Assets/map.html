@@ -68,6 +68,24 @@
                 console.log(`Marker added at: Lat ${lat}, Lon ${lon}`);
             }
             
+            
+            function removeMarkerByTitle(title) {
+                // Find the marker by title and remove it
+                const markerIndex = markers.findIndex(marker => {
+                    const popupContent = marker.getPopup() ? marker.getPopup().getContent() : '';
+                    return popupContent.includes(title);
+                });
+                
+                if (markerIndex !== -1) {
+                    map.removeLayer(markers[markerIndex]);
+                    markers.splice(markerIndex, 1);
+                    console.log(`Marker with title "${title}" removed.`);
+                } else {
+                    console.warn(`No marker found with title "${title}".`);
+                }
+            }
+            
+            
             function flyToLocation(lat, lon, zoom) {
                 map.flyTo([lat, lon], zoom)
                 

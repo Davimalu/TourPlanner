@@ -130,7 +130,10 @@ namespace TourPlanner.ViewModels
             EditableTour.StartCoordinates = coordinates.Coordinates;
             EditableTour.StartLocation = coordinates.Label;
             
-            // Add marker on the map for the start location
+            // Remove existing start marker from the map
+            await _mapService.RemoveMarkerByTitleAsync("Start");
+            
+            // Add new marker on the map for the start location
             await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "Start", coordinates.Label));
             await _mapService.SetViewToCoordinatesAsync(coordinates.Coordinates);
         });
@@ -151,7 +154,10 @@ namespace TourPlanner.ViewModels
             EditableTour.EndCoordinates = coordinates.Coordinates;
             EditableTour.EndLocation = coordinates.Label;
             
-            // Add marker on the map for the end location
+            // Remove existing end marker from the map
+            await _mapService.RemoveMarkerByTitleAsync("End");
+            
+            // Add new marker on the map for the end location
             await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "End", coordinates.Label));
             await _mapService.SetViewToCoordinatesAsync(coordinates.Coordinates);
         });

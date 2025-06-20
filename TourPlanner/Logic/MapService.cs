@@ -50,6 +50,33 @@ public class MapService : IMapService
 
 
     /// <summary>
+    /// Removes a marker from the map by its title
+    /// </summary>
+    /// <param name="markerTitle">The title of the marker to remove</param>
+    /// <returns></returns>
+    public async Task<bool> RemoveMarkerByTitleAsync(string markerTitle)
+    {
+        if (!_webViewService.IsReady)
+        {
+            _logger.Warn("Failed to add marker: WebView is not ready.");
+            return false;
+        }
+        
+        try
+        {
+            var result = await _webViewService.CallFunctionAsync("removeMarkerByTitle", markerTitle);
+            _logger.Debug($"Removed marker with title '{markerTitle}'");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to remove marker: {ex.Message}", ex);
+            return false;
+        }
+    }
+
+
+    /// <summary>
     /// Sets the map view to the specified coordinates and zoom level
     /// </summary>
     /// <param name="coordinates">Coordinates to center the map on</param>
