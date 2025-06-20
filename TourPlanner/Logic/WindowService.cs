@@ -4,7 +4,6 @@ using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.ViewModels;
 using TourPlanner.Views;
-using IORSService = TourPlanner.DAL.Interfaces.IORSService;
 
 namespace TourPlanner.Logic
 {
@@ -12,9 +11,9 @@ namespace TourPlanner.Logic
     {
         private readonly ITourLogService _tourLogService;
         private readonly ITourService _tourService;
-        private readonly IORSService _iosrService;
+        private readonly IOrsService _iosrService;
         
-        public WindowService(ITourLogService tourLogService, ITourService tourService, IORSService iosrService)
+        public WindowService(ITourLogService tourLogService, ITourService tourService, IOrsService iosrService)
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));

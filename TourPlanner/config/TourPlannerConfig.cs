@@ -13,7 +13,10 @@ public class TourPlannerConfig : ITourPlannerConfig
             .AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: true)
             .Build();
     }
-    
+
+    public string OpenRouteServiceBaseUrl => _configuration["OpenRouteService:BaseUrl"] 
+                                            ?? throw new InvalidOperationException("OpenRouteService Base URL is not configured.");
+
     public string OpenRouteServiceApiKey => _configuration["OpenRouteService:ApiKey"] 
                                             ?? throw new InvalidOperationException("OpenRouteService API key is not configured.");
     

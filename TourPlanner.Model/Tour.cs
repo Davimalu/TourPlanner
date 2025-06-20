@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using TourPlanner.Enums;
+using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
 
 namespace TourPlanner.Model

@@ -1,6 +1,6 @@
 namespace TourPlanner.Models;
 
-public class RouteInfo
+public class Route
 {
     public string RouteGeometry { get; set; }
     public double Distance { get; set; }

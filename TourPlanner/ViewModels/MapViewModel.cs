@@ -2,9 +2,9 @@
 using Microsoft.Web.WebView2.Wpf;
 using System.Text.Json;
 using System.Web;
+using TourPlanner.DAL.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
-using IORSService = TourPlanner.DAL.Interfaces.IORSService;
 
 namespace TourPlanner.ViewModels
 {
@@ -20,7 +20,7 @@ namespace TourPlanner.ViewModels
         private readonly ISelectedTourService? _selectedTourService;
         private readonly IWebViewService _webViewService;
         private readonly IMapService _mapService;
-        private readonly IORSService _iorsService;
+        private readonly IOrsService _orsService;
         
         private Tour? _selectedTour;
         public Tour? SelectedTour
@@ -42,12 +42,12 @@ namespace TourPlanner.ViewModels
 
         public event EventHandler<MapClickEventArgs>? MapClicked;
 
-        public MapViewModel(ISelectedTourService? selectedTourService, IWebViewService webViewService, IMapService mapService, IORSService iorsService)
+        public MapViewModel(ISelectedTourService? selectedTourService, IWebViewService webViewService, IMapService mapService, IOrsService iorsService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-            _iorsService = iorsService ?? throw new ArgumentNullException(nameof(iorsService));
+            _orsService = iorsService ?? throw new ArgumentNullException(nameof(iorsService));
             
             _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
             
@@ -139,7 +139,7 @@ namespace TourPlanner.ViewModels
             var endPoint = (tour.EndLon, tour.EndLat);
 
             System.Diagnostics.Debug.WriteLine($"MapViewModel: Displaying route for '{tour.TourName}'.");
-            var routeInfo = await _iorsService.GetRouteAsync(tour.TransportationType, startPoint, endPoint);
+            var routeInfo = await _orsService.GetRouteAsync(tour.TransportationType, startPoint, endPoint);
 
             if (routeInfo != null)
             {

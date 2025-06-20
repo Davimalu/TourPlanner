@@ -9,7 +9,6 @@ using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.ViewModels;
 using TourPlanner.Views;
-using IORSService = TourPlanner.DAL.ServiceAgents.IORSService;
 
 namespace TourPlanner;
 
@@ -33,7 +32,7 @@ public partial class App : Application
         services.AddSingleton<ISelectedTourService, SelectedTourService>();
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
         services.AddSingleton<IWindowService, WindowService>();
-        services.AddSingleton<DAL.Interfaces.IORSService, IORSService>();
+        services.AddSingleton<DAL.Interfaces.IOrsService, OrsService>();
         services.AddSingleton<IMapService, MapService>();
         services.AddSingleton<IWebViewService, WebViewService>();
         

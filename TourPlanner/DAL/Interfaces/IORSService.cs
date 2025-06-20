@@ -1,15 +1,11 @@
-using TourPlanner.Enums;
+using TourPlanner.Model.Enums;
+using TourPlanner.Model.Structs;
 using TourPlanner.Models;
 
 namespace TourPlanner.DAL.Interfaces;
 
-public interface IORSService
-{
-    string GetProfileForTransportType(Transport transportType);
-
-    /// returns structured route information including GeoJSON, distance, and duration
-    Task<RouteInfo?> GetRouteAsync(
-        Transport mode, (double lon, double lat) start, (double lon, double lat) end);
-
-    Task<(double lon, double lat)?> GetCoordinatesFromAddressAsync(string address);
+public interface IOrsService {
+    string GetOrsProfileForTransportType(Transport transportType);
+    Task<Route?> GetRouteAsync(Transport transportMode, GeoCoordinate start, GeoCoordinate end);
+    Task<GeoCoordinate?> GetCoordinatesFromAddressAsync(string address);
 }

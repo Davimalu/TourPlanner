@@ -7,14 +7,14 @@ using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
-using IORSService = TourPlanner.DAL.Interfaces.IORSService;
+using TourPlanner.Model.Enums;
 
 namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
         private readonly ITourService _tourService;
-        private readonly IORSService _iosrService;
+        private readonly IOrsService _iosrService;
         private readonly ILoggerWrapper _logger;
         
         public ICommand FindStartLocationCommand { get; }
@@ -39,7 +39,7 @@ namespace TourPlanner.ViewModels
         private (double lon, double lat)? _startPoint;
         private (double lon, double lat)? _endPoint;
 
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IORSService iosrService)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService iosrService)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _iosrService = iosrService ?? throw new ArgumentNullException(nameof(iosrService));
@@ -69,7 +69,7 @@ namespace TourPlanner.ViewModels
             
             
             // Initialize enums (WPF can't bind to enums directly, so we use lists)
-            Transports = new List<Transport> { Transport.Car, Transport.Bicycle, Transport.Foot, Transport.Motorcycle };
+            Transports = new List<Transport> { Transport.Car, Transport.Bicycle, Transport.Walking, Transport.Motorcycle };
         }
         
         private async Task GeocodeAddress(bool isStart)
