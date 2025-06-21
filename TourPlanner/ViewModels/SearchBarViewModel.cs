@@ -1,26 +1,42 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Logic.Interfaces;
 
 namespace TourPlanner.ViewModels
 {
     public class SearchBarViewModel : BaseViewModel
     {
+        private readonly ISearchService _searchService;
+        private readonly ILoggerWrapper _logger;
+        
         private string _searchText = string.Empty;
         public string SearchText
         {
-            get { return _searchText; }
+            get => _searchText;
             set
             {
                 _searchText = value;
                 RaisePropertyChanged(nameof(SearchText));
+                
+                _searchService.CurrentQuery = _searchText;
             }
         }
-
-        public event EventHandler<string>? SearchButtonClicked;
-
-        public ICommand ExecuteSearch => new RelayCommand(_ =>
+        
+        
+        public SearchBarViewModel(ISearchService searchService)
         {
-            SearchButtonClicked?.Invoke(this, _searchText);
+            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+            _logger = LoggerFactory.GetLogger<SearchBarViewModel>();
+        }
+
+        
+        public ICommand ExecuteClearSearchQuery => new RelayCommand(_ =>
+        {
+            SearchText = string.Empty;
+            _searchService.CurrentQuery = string.Empty;
+            _logger.Info("Search query cleared.");
         }, _ => !string.IsNullOrEmpty(_searchText));
     }
 }

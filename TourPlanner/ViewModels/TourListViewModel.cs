@@ -14,6 +14,7 @@ namespace TourPlanner.ViewModels
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService;
         private readonly ITourService _tourService;
+        private readonly ISearchService _searchService;
         private readonly ILoggerWrapper _logger;
 
 
@@ -54,12 +55,24 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService)
+        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService, ISearchService searchService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
+            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            
+            // Subscribe to changes in the search query to filter tours
+            _searchService.QueryChanged += (sender, query) =>
+            {
+                if (Tours != null)
+                {
+                    // TODO: Code from Copilot; change
+                    var filteredTours = Tours.Where(t => t.TourName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+                    Tours = new ObservableCollection<Tour>(filteredTours);
+                }
+            };
 
             // Get a list of all tours from the REST API when the ViewModel is created
             LoadToursAsync();
