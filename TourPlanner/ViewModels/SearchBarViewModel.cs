@@ -8,7 +8,7 @@ namespace TourPlanner.ViewModels
 {
     public class SearchBarViewModel : BaseViewModel
     {
-        private readonly ISearchService _searchService;
+        private readonly ISearchQueryService _searchQueryService;
         private readonly ILoggerWrapper _logger;
         
         private string _searchText = string.Empty;
@@ -20,14 +20,14 @@ namespace TourPlanner.ViewModels
                 _searchText = value;
                 RaisePropertyChanged(nameof(SearchText));
                 
-                _searchService.CurrentQuery = _searchText;
+                _searchQueryService.CurrentQuery = _searchText;
             }
         }
         
         
-        public SearchBarViewModel(ISearchService searchService)
+        public SearchBarViewModel(ISearchQueryService searchQueryService)
         {
-            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+            _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _logger = LoggerFactory.GetLogger<SearchBarViewModel>();
         }
 
@@ -35,7 +35,7 @@ namespace TourPlanner.ViewModels
         public ICommand ExecuteClearSearchQuery => new RelayCommand(_ =>
         {
             SearchText = string.Empty;
-            _searchService.CurrentQuery = string.Empty;
+            _searchQueryService.CurrentQuery = string.Empty;
             _logger.Info("Search query cleared.");
         }, _ => !string.IsNullOrEmpty(_searchText));
     }

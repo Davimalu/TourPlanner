@@ -1,7 +1,8 @@
+using TourPlanner.Model;
+
 namespace TourPlanner.Logic.Interfaces;
 
 public interface ISearchService
 {
-    string CurrentQuery { get; set; }
-    event EventHandler<string>? QueryChanged;
+    Task<List<Tour>> SearchToursAsync(string query, List<Tour> tours);
 }
