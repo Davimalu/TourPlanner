@@ -8,17 +8,17 @@ using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Models;
-using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
         private readonly ISelectedTourService _selectedTourService;
-        private readonly IWindowService _windowService = WindowService.Instance;
-        private readonly ITourLogService _tourLogService = new TourLogService();
+        private readonly IWindowService _windowService;
+        private readonly ITourLogService _tourLogService;
         private readonly ILoggerWrapper _logger;
 
+        
         private string? _newLogName;
         public string? NewLogName
         {
@@ -29,8 +29,20 @@ namespace TourPlanner.ViewModels
                 RaisePropertyChanged(nameof(NewLogName));
             }
         }
-
-
+        
+        
+        private Tour? _selectedTour;
+        public Tour? SelectedTour
+        {
+            get { return _selectedTour; }
+            set
+            {
+                _selectedTour = value;
+                RaisePropertyChanged(nameof(SelectedTour));
+            }
+        }
+        
+        
         private TourLog? _selectedLog;
         public TourLog? SelectedLog
         {
@@ -43,22 +55,13 @@ namespace TourPlanner.ViewModels
         }
 
 
-        private Tour? _selectedTour;
-        public Tour? SelectedTour
+        public TourLogsViewModel(ISelectedTourService selectedTourService, IWindowService windowService, ITourLogService tourLogService)
         {
-            get { return _selectedTour; }
-            set
-            {
-                _selectedTour = value;
-                RaisePropertyChanged(nameof(SelectedTour));
-            }
-        }
-
-
-        public TourLogsViewModel(ISelectedTourService selectedTourService)
-        {
-            _selectedTourService = selectedTourService;
-            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the selected tour from the service
+            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
+            _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
+            _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
+            
+            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
 
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
         }

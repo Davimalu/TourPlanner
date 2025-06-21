@@ -2,25 +2,19 @@
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
 
 namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
-        private readonly ITourLogService _tourLogService = new TourLogService();
+        private readonly ITourLogService _tourLogService;
         private readonly ILoggerWrapper _logger;
-
-        // The original TourLog before it was edited
-        private readonly TourLog _originalTourLog;
-
-
-        // The copy that will be edited
+        
+        // Copy of the original TourLog to edit (to avoid changing the original UNTIL the user saves)
         private TourLog _editableTourLog = null!;
         public TourLog EditableTourLog
         {
@@ -49,15 +43,15 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog)
+        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog, ITourLogService tourLogService)
         {
+            _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             _selectedTour = selectedTour;
-            _originalTourLog = selectedTourLog; // Store the original TourLog
-            EditableTourLog = new TourLog(_originalTourLog); // Create a copy of the TourLog to edit
+            EditableTourLog = new TourLog(selectedTourLog); // Create a copy of the TourLog to edit (so that if the user cancels, the original TourLog remains unchanged)
 
-            // Initialize enums
+            // Initialize enums (WPF can't bind to enums directly, so we use lists)
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
             Ratings = new List<Rating> { Rating.Bad, Rating.Okay, Rating.Good, Rating.Great, Rating.Amazing };
         }

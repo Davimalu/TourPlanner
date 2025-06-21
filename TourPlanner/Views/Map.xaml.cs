@@ -1,48 +1,58 @@
-﻿// FILE: TourPlanner\Views\Map.xaml.cs
-
-using Microsoft.Web.WebView2.Core;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using TourPlanner.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using TourPlanner.Logic.Interfaces;
 
 namespace TourPlanner.Views
 {
     public partial class Map : UserControl
     {
+        private readonly IWebViewService _webViewService;
+        private bool _isInitialized = false;
+        
         public Map()
         {
             InitializeComponent();
-            // This event tells us when the WebView2 control's backend is ready.
-            webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
-        }
 
-        private async void WebView_CoreWebView2InitializationCompleted(object? sender, CoreWebView2InitializationCompletedEventArgs e)
+            // Get the WebViewService from the service provider
+            _webViewService = App.ServiceProvider.GetRequiredService<IWebViewService>();
+            
+            Loaded += Map_Loaded;
+        }
+        
+        // This code is completely specific to WPF and WebView2. Thus, we think it's okay to put it in the Code Behind.
+        private async void Map_Loaded(object? sender, RoutedEventArgs e)
         {
-            if (!e.IsSuccess)
+            // It seems that the WPF UI Tab Control loads the content of all tabs on startup and then again each time the tab is selected
+            // Thus we have to make sure that the initialization code is only executed once (running it multiple times doesn't break things, but it's inefficient and unnecessary).
+            if (_isInitialized)
             {
-                MessageBox.Show($"WebView2 initialization failed. Error: {e.InitializationException?.Message}",
-                    "WebView2 Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var mapFolder = System.IO.Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory, "MapResources");
-            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
-                hostName: "appassets",
-                folderPath: mapFolder,
-                accessKind: Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow
-            );
-            if (this.DataContext is MapViewModel vm)
+            _isInitialized = true;
+            
+            try
             {
-                await vm.InitializeWebViewAsync(webView);
+                // Set the WebView2 control in the service so that it can be used by the ViewModel and ensure the WebView2 control is initialized before proceeding
+                // From an architectural perspective, this is a bit questionable, but since the WebViewService is so tightly coupled to the WebView2 control, we think it's okay to do it this way
+                await _webViewService.InitializeAsync(WebView);
+                
+                // Construct the path to the folder containing the map resources
+                var mapFolderPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets");
+                
+                // Redirect all requests to the "appassets" domain to the local folder (instead of the "real" internet)
+                WebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    hostName: "appassets",
+                    folderPath: mapFolderPath,
+                    accessKind: Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow
+                );
+                
+                // Navigate to the local HTML file that contains the map
+                WebView.CoreWebView2.Navigate("https://appassets/map.html");
             }
-        }
-
-        // This handles the case where the DataContext is set *after* the WebView is already initialized.
-        private async void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (webView != null && webView.CoreWebView2 != null && e.NewValue is MapViewModel vm)
+            catch (Exception ex)
             {
-                await vm.InitializeWebViewAsync(webView);
+                MessageBox.Show($"Error initializing WebView: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

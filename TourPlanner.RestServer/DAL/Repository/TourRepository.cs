@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TourPlanner.RestServer.DAL.Repository.Interfaces;
-using TourPlanner.RestServer.Models;
+using TourPlanner.Model;
 
 namespace TourPlanner.RestServer.DAL.Repository;
 
@@ -73,11 +73,8 @@ public class TourRepository : ITourRepository
         tour.TransportationType = updatedTour.TransportationType;
         tour.Distance = updatedTour.Distance;
         tour.EstimatedTime = updatedTour.EstimatedTime;
-        
-        tour.StartLat = updatedTour.StartLat;
-        tour.StartLon = updatedTour.StartLon;
-        tour.EndLat = updatedTour.EndLat;
-        tour.EndLon = updatedTour.EndLon;
+        tour.StartCoordinates = updatedTour.StartCoordinates;
+        tour.EndCoordinates = updatedTour.EndCoordinates;
 
         // ------------------------------
         // Handle updating the TourLogs (simply doing tour.Logs = updatedTour.Logs; throws an exception)

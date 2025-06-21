@@ -1,6 +1,5 @@
 ﻿using log4net;
 using System.IO;
-using System.Reflection;
 using TourPlanner.Infrastructure.Interfaces;
 
 namespace TourPlanner.Infrastructure
@@ -26,10 +25,7 @@ namespace TourPlanner.Infrastructure
             // Check if the config file exists
             if (!File.Exists(configPath))
             {
-                throw new FileNotFoundException(
-                    $"Log4Net configuration file not found at: {configPath}",
-                    configPath
-                );
+                throw new FileNotFoundException($"Log4Net configuration file not found at: {configPath}", configPath);
             }
 
             // Configure Log4Net using the specified config file

@@ -1,4 +1,5 @@
 ﻿using NSubstitute;
+using TourPlanner.DAL.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Models;
@@ -10,12 +11,16 @@ namespace TourPlanner.Test.ViewModel
     {
         private TourListViewModel _tourListViewModel;
         private ISelectedTourService _selectedTourService;
+        private ITourService _tourService;
+        private IWindowService _windowService;
 
         [SetUp]
         public void Setup()
         {
             _selectedTourService = Substitute.For<ISelectedTourService>();
-            _tourListViewModel = new TourListViewModel(_selectedTourService);
+            _tourService = Substitute.For<ITourService>();
+            _windowService = Substitute.For<IWindowService>();
+            _tourListViewModel = new TourListViewModel(_selectedTourService, _tourService, _windowService);
         }
 
         [Test]

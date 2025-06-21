@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TourPlanner.RestServer.DAL.Repository.Interfaces;
-using TourPlanner.RestServer.Models;
+using TourPlanner.Model;
 
 namespace TourPlanner.RestServer.DAL.Repository;
 

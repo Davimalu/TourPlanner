@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TourPlanner.Model;
-using TourPlanner.Models;
+﻿using TourPlanner.Model;
 
 namespace TourPlanner.Logic.Interfaces
 {
-    internal interface IWindowService
+    public interface IWindowService
     {
         public void SpawnEditTourWindow(Tour selectedTour);
         public void SpawnEditTourLogWindow (Tour selectedTour, TourLog selectedTourLog);

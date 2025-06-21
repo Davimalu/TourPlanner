@@ -1,17 +1,14 @@
-﻿using System;
-using System.ComponentModel;
-using TourPlanner.Enums;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TourPlanner.Models
+namespace TourPlanner.Model
 {
     public class TourLog : INotifyPropertyChanged
     {
-        // TourLog needs to implement INotifyPropertyChanged to notify the UI when a property changes
-        // This isn't ideal but according to StackOverflow it's acceptable
-        // https://stackoverflow.com/questions/6922130/in-mvvm-model-should-the-model-implement-inotifypropertychanged-interface
-
-
         private int _logId;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int LogId
         {
             get => _logId;
@@ -97,15 +94,15 @@ namespace TourPlanner.Models
         public TourLog() { }
 
         // Copy constructor
-        public TourLog(TourLog tourLog)
+        public TourLog(TourLog other)
         {
-            LogId = tourLog.LogId;
-            TimeStamp = tourLog.TimeStamp;
-            Comment = tourLog.Comment;
-            Difficulty = tourLog.Difficulty;
-            DistanceTraveled = tourLog.DistanceTraveled;
-            TimeTaken = tourLog.TimeTaken;
-            Rating = tourLog.Rating;
+            LogId = other.LogId;
+            TimeStamp = other.TimeStamp;
+            Comment = other.Comment;
+            Difficulty = other.Difficulty;
+            DistanceTraveled = other.DistanceTraveled;
+            TimeTaken = other.TimeTaken;
+            Rating = other.Rating;
         }
 
 

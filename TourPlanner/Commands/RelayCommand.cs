@@ -4,8 +4,8 @@ namespace TourPlanner.Commands
 {
     public class RelayCommand : ICommand
     {
-        private readonly Action<object?> _execute;
-        private readonly Func<object?, bool> _canExecute;
+        private readonly Action<object?> _execute; // Reference to the method to execute when the command is invoked
+        private readonly Func<object?, bool> _canExecute; // Reference to the method that determines if the command can execute
 
         // Constructor 
         public RelayCommand(Action<object?> execute, Func<object?, bool> canExecute)
@@ -21,19 +21,27 @@ namespace TourPlanner.Commands
             _canExecute = _ => true;
         }
 
-        // The ICommand interface requires this event:
+        
+        /// <summary>
+        /// event that is raised when the ability to execute the command changes
+        /// </summary>
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;
         }
-
-        // The ICommand interface requires these two methods:
+        
+        /// <summary>
+        /// whether the command is currently allowed to execute
+        /// </summary>
         public bool CanExecute(object? parameter)
         {
             return _canExecute(parameter);
         }
 
+        /// <summary>
+        /// The code to execute when the command is invoked
+        /// </summary>
         public void Execute(object? parameter)
         {
             // Calls the stored execute action to perform the actual command logic

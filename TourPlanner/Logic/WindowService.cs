@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TourPlanner.DAL.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
 using TourPlanner.ViewModels;
 using TourPlanner.Views;
 
@@ -13,26 +8,29 @@ namespace TourPlanner.Logic
 {
     internal class WindowService : IWindowService
     {
-        #region Singleton
-        private static WindowService? _instance;
-        public static WindowService Instance
+        private readonly ITourLogService _tourLogService;
+        private readonly ITourService _tourService;
+        private readonly IOrsService _osrService;
+        private readonly IMapService _mapService;
+        
+        private readonly MapViewModel _mapViewModel;
+        
+        public WindowService(ITourLogService tourLogService, ITourService tourService, IOrsService iosrService, IMapService mapService, MapViewModel mapViewModel)
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new WindowService();
-                }
-                return _instance;
-            }
+            _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
+            _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
+            _osrService = iosrService ?? throw new ArgumentNullException(nameof(iosrService));
+            _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+            _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
         }
-        #endregion
-
+        
+        
         public void SpawnEditTourWindow(Tour selectedTour)
         {
             var editWindow = new EditTourWindow()
             {
-                DataContext = new EditTourViewModel(selectedTour)
+                DataContext = new EditTourViewModel(selectedTour, _tourService, _osrService, _mapService),
+                Map = { DataContext = _mapViewModel}
             };
 
             editWindow.ShowDialog();
@@ -43,7 +41,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog)
+                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog, _tourLogService)
             };
 
             editWindow.ShowDialog();

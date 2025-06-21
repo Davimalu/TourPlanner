@@ -1,29 +1,23 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
-using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
-using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
         private readonly ISelectedTourService _selectedTourService;
-        private readonly IWindowService _windowService = WindowService.Instance;
-        private readonly ITourService _tourService = new TourService();
+        private readonly IWindowService _windowService;
+        private readonly ITourService _tourService;
         private readonly ILoggerWrapper _logger;
 
 
         private ObservableCollection<Tour>? _tours;
-
         public ObservableCollection<Tour>? Tours
         {
             get { return _tours; }
@@ -36,7 +30,6 @@ namespace TourPlanner.ViewModels
 
 
         private string? _newTourName;
-
         public string? NewTourName
         {
             get { return _newTourName; }
@@ -49,7 +42,6 @@ namespace TourPlanner.ViewModels
 
 
         private Tour? _selectedTour;
-
         public Tour? SelectedTour
         {
             get { return _selectedTour; }
@@ -62,16 +54,18 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService)
+        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService)
         {
-            _selectedTourService = selectedTourService;
+            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
+            _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
+            _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             // Get a list of all tours from the REST API when the ViewModel is created
             LoadToursAsync();
         }
 
-
+        
         public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
         {
             _windowService.SpawnEditTourWindow(new Tour() { TourName = NewTourName!, TourId = -1 }); // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
@@ -89,7 +83,7 @@ namespace TourPlanner.ViewModels
             if (success)
             {
                 _logger.Info($"Deleted tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
-                Tours?.Remove(SelectedTour); // Remove the tour from the local collection
+                Tours?.Remove(SelectedTour); // Remove the tour from the local collection too
             }
             else
             {

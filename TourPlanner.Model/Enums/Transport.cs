@@ -1,15 +1,15 @@
-﻿namespace TourPlanner.Enums
+﻿namespace TourPlanner.Model.Enums
 {
     public enum Transport
     {
         Car,
+        Truck,
         Bicycle,
-        Foot,
-        Motorcycle,
-        Train,
-        Bus,
-        Tram,
-        Ship,
-        Airplane
+        Roadbike,
+        Mountainbike,
+        ElectricBicycle,
+        Walking,
+        Hiking,
+        Wheelchair
     }
 }

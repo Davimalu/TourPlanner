@@ -6,6 +6,7 @@ namespace TourPlanner.ViewModels
 {
     class MenuBarViewModel : BaseViewModel
     {
+        // TODO: Check if this is needed
         public ICommand ExecuteShowContextMenu { get; } = new RelayCommand(param =>
         {
             if (param is Button btn && btn.ContextMenu != null)

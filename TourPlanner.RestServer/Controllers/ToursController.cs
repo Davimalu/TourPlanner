@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TourPlanner.RestServer.DAL;
 using TourPlanner.RestServer.DAL.Repository.Interfaces;
-using TourPlanner.RestServer.Models;
+using TourPlanner.Model;
 
 namespace TourPlanner.RestServer.Controllers
 {
