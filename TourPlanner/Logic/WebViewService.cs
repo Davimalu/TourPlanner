@@ -17,7 +17,7 @@ public class WebViewService : IWebViewService
      * Once the Edit Tour Windows spawns, it also initializes a WebView2 User Control for its map that also calls the WebViewService.InitializeAsync method to set the WebView2 control
      * The problem is that this second call overwrites the first one (the main window's WebView2), which means we loose communication with the main window's WebView2
      * To solve this problem, we keep a reference to the main window's WebView2 in _mainWindowWebView - calling RevertToMainWindowWebViewAsync() will set the _activeWebView to the main window's WebView2 again
-     * I'm not entirely happy with this solution, especially since it requires manually calling RevertToMainWindowWebViewAsync() manually, but it seems to be the best way to handle this situation without introducing a lot of complexity
+     * I'm not entirely happy with this solution, especially since it requires manually calling RevertToMainWindowWebViewAsync() manually, but it seems to be the best way to address this problem without introducing a lot of complexity
      */
     private WebView2? _activeWebView;
     private WebView2? _mainWindowWebView;
