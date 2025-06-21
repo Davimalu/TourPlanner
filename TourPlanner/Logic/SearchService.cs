@@ -29,26 +29,30 @@ public class SearchService : ISearchService
             return tours;
         }
         
-        _logger.Debug($"Starting full text search with query: {query}");
+        // Run the search operation on a separate thread to avoid blocking the UI
+        return await Task.Run(() =>
+        {
+            _logger.Debug($"Starting full text search with query: {query}");
 
-        var lowerQuery = query.ToLowerInvariant();
+            var lowerQuery = query.ToLowerInvariant();
 
-        // We use the current culture to ensure that number formats are consistent with the user's locale
-        return tours.Where(tour => 
-            tour.TourName.ToLowerInvariant().Contains(lowerQuery) ||
-            tour.TourDescription.ToLowerInvariant().Contains(lowerQuery) ||
-            tour.StartLocation.ToLowerInvariant().Contains(lowerQuery) ||
-            tour.EndLocation.ToLowerInvariant().Contains(lowerQuery) ||
-            tour.TransportationType.ToString().ToLowerInvariant().Contains(lowerQuery) ||
-            tour.Distance.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-            tour.EstimatedTime.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-            tour.Logs.Any(log => 
-                log.TimeStamp.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                log.Comment.ToLowerInvariant().Contains(lowerQuery) ||
-                log.Difficulty.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                log.DistanceTraveled.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                log.TimeTaken.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                log.Rating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery)))
-            .ToList();
+            // We use the current culture to ensure that number formats are consistent with the user's locale
+            return tours.Where(tour =>
+                    tour.TourName.ToLowerInvariant().Contains(lowerQuery) ||
+                    tour.TourDescription.ToLowerInvariant().Contains(lowerQuery) ||
+                    tour.StartLocation.ToLowerInvariant().Contains(lowerQuery) ||
+                    tour.EndLocation.ToLowerInvariant().Contains(lowerQuery) ||
+                    tour.TransportationType.ToString().ToLowerInvariant().Contains(lowerQuery) ||
+                    tour.Distance.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                    tour.EstimatedTime.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                    tour.Logs.Any(log =>
+                        log.TimeStamp.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                        log.Comment.ToLowerInvariant().Contains(lowerQuery) ||
+                        log.Difficulty.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                        log.DistanceTraveled.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                        log.TimeTaken.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                        log.Rating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery)))
+                .ToList();
+        }).ConfigureAwait(false);
     }
 }
