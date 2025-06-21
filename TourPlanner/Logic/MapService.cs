@@ -155,6 +155,17 @@ public class MapService : IMapService
             return false;
         }
     }
+
+
+    /// <summary>
+    /// Switches the control back to the main map in the MainWindow's WebView
+    /// </summary>
+    /// <returns>>true if the switch was successful, false otherwise</returns>
+    public async Task<bool> SwitchControlToMainMapAsync()
+    {
+        _logger.Debug("Switching control back to the main map in the MainWindow's WebView...");
+        return await _webViewService.RevertToMainWindowWebViewAsync();
+    }
     
     
     /// <summary>

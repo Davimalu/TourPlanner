@@ -207,6 +207,9 @@ namespace TourPlanner.ViewModels
 
         private void CloseWindow()
         {
+            // Make the MapService control the map in the main window again
+            _mapService.SwitchControlToMainMapAsync();
+            
             foreach (Window window in Application.Current.Windows)
             {
                 if (window.DataContext == this)
