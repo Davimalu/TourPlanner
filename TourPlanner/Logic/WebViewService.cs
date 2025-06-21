@@ -12,7 +12,16 @@ public class WebViewService : IWebViewService
     /* Generally, a service shouldn't depend on a specific UI component like WebView2. However, this service is SO SPECIFIC to WebView2 that it can't really be used in any other way anyway, so we think it's okay to have it here
     We could add an interface for WebView2, but that would just add unnecessary complexity for this specific use case. */
     
-    private WebView2? _webView;
+    
+    /* Once the main window spawns, it initializes a map using a WebView2 User Control - this user control calls the WebViewService.InitializeAsync method to set the WebView2 control
+     * Once the Edit Tour Windows spawns, it also initializes a WebView2 User Control for its map that also calls the WebViewService.InitializeAsync method to set the WebView2 control
+     * The problem is that this second call overwrites the first one (the main window's WebView2), which means we loose communication with the main window's WebView2
+     * To solve this problem, we keep a reference to the main window's WebView2 in _mainWindowWebView - calling RevertToMainWindowWebViewAsync() will set the _activeWebView to the main window's WebView2 again
+     * I'm not entirely happy with this solution, especially since it requires manually calling RevertToMainWindowWebViewAsync() manually, but it seems to be the best way to handle this situation without introducing a lot of complexity
+     */
+    private WebView2? _activeWebView;
+    private WebView2? _mainWindowWebView;
+    
     public event EventHandler<string>? MessageReceived;
     public bool IsReady { get; private set; } = false;
 
@@ -25,29 +34,66 @@ public class WebViewService : IWebViewService
     
     
     /// <summary>
-    /// <para>Ensure CoreWebView2 (the backend for WebView2) is ready - the WPF Control for WebView2 is created instantly, but the underlying browser process (CoreWebView2) starts up asynchronously (and takes longer)</para>
-    /// <para>Set up the event handler to receive messages from JavaScript</para>
+    /// Ensure CoreWebView2 (the backend for WebView2) is ready - the WPF Control for WebView2 is created instantly, but the underlying browser process (CoreWebView2) starts up asynchronously (and takes longer>
+    /// <list type="bullet">
+    /// <item><description>Sets the active WebView2 control (the one controlled by this service) to the provided WebView2 instance</description></item>
+    /// <item><description>Sets up an event handler to receive messages from JavaScript code running inside the WebView</description></item>
+    /// </list>
+    /// <para>The first call to this method should be made from the main window's WebView2 control, which will be used as the main WebView2 control</para>
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public async Task InitializeAsync(WebView2 webView)
     {
-        if (_webView != null)
+        if (_activeWebView == null)
         {
-            _logger.Warn("WebView is already set. Overwriting with the new WebView.");
+            _logger.Debug("First time setting WebView. Setting the provided WebView as the main WebView.");
+            
+            _mainWindowWebView = webView;
+            _activeWebView = webView;
+        }
+        else
+        {
+            _logger.Debug("Subsequent time setting WebView. Setting the active WebView to the provided WebView.");
+            _activeWebView = webView;
         }
         
-        _webView = webView ?? throw new ArgumentNullException(nameof(webView), "WebView cannot be null.");
+        _activeWebView = webView ?? throw new ArgumentNullException(nameof(webView), "WebView cannot be null.");
         _logger.Info("WebView has been set successfully.");
 
         // Ensure that the WebView2 control is initialized
-        await _webView.EnsureCoreWebView2Async();
+        await _activeWebView.EnsureCoreWebView2Async();
         
         // WebMessageReceived fires whenever JavaScript code running inside WebView calls the window.chrome.webview.postMessage("message") function
         // -> this allows us to receive messages from the JavaScript code running in the WebView
-        _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
+        _activeWebView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
         
         // Set the IsReady flag to true to indicate that the WebView is ready for use
         IsReady = true;
+    }
+
+
+    /// <summary>
+    /// Reverts the active WebView to the main window's WebView
+    /// </summary>
+    /// <returns>true if the operation was successful, false otherwise</returns>
+    public Task<bool> RevertToMainWindowWebViewAsync()
+    {
+        if (_mainWindowWebView == null)
+        {
+            _logger.Error("Error reverting to MainWindow's web view: No main window WebView is set.");
+            return Task.FromResult(false);
+        }
+        
+        // Remove the event handler from the current active WebView
+        if (_activeWebView != null)
+        {
+            _activeWebView.CoreWebView2.WebMessageReceived -= OnWebMessageReceived;
+            _logger.Debug("Removed WebMessageReceived event handler from the current active WebView.");
+        }
+        
+        _activeWebView = _mainWindowWebView;
+        _logger.Info("Reverted to main window's WebView successfully.");
+        return Task.FromResult(true);
     }
 
 
@@ -57,7 +103,7 @@ public class WebViewService : IWebViewService
     /// <param name="script"></param>
     public async Task<string> ExecuteScriptAsync(string script)
     {
-        if (_webView?.CoreWebView2 == null)
+        if (_activeWebView?.CoreWebView2 == null)
         {
             _logger.Error("Script execution failed: WebView is not initialized.");
             return string.Empty;
@@ -66,7 +112,7 @@ public class WebViewService : IWebViewService
         try
         {
             _logger.Debug($"Executing JavaScript script: {script}");
-            return await _webView.CoreWebView2.ExecuteScriptAsync(script);
+            return await _activeWebView.CoreWebView2.ExecuteScriptAsync(script);
         }
         catch (Exception ex)
         {
@@ -84,7 +130,7 @@ public class WebViewService : IWebViewService
     /// <returns></returns>
     public async Task<string> CallFunctionAsync(string functionName, params object[] parameters)
     {
-        if (_webView?.CoreWebView2 == null)
+        if (_activeWebView?.CoreWebView2 == null)
         {
             _logger.Error("Function call failed: WebView is not initialized.");
             return string.Empty;
@@ -97,7 +143,7 @@ public class WebViewService : IWebViewService
         try
         {
             _logger.Debug($"Calling JavaScript function: {functionName}");
-            return await _webView.CoreWebView2.ExecuteScriptAsync(script);
+            return await _activeWebView.CoreWebView2.ExecuteScriptAsync(script);
         }
         catch (Exception ex)
         {
