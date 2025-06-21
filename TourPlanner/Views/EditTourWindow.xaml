@@ -22,7 +22,7 @@
             <RowDefinition Height="Auto"/> <!-- Label Distance -->
             <RowDefinition Height="Auto"/> <!-- Field Distance -->
             <RowDefinition Height="Auto"/> <!-- Label Duration -->
-            <RowDefinition Height="Auto"/> <!-- Map Label with Calculate Route -->
+            <RowDefinition Height="Auto"/> <!-- Calculate Route -->
             <RowDefinition Height="*"/>    <!-- Map User Control -->
             <RowDefinition Height="Auto"/> <!-- Buttons -->
         </Grid.RowDefinitions>
@@ -97,13 +97,12 @@
         <ui:TextBox Grid.Row="10" Grid.Column="1" Name="EstimatedTimeField" Text="{Binding EditableTour.EstimatedTime, Mode=OneWay}" Margin="5" Padding="0,0,30,0" IsReadOnly="True"/>
         <ui:TextBlock Grid.Row="10" Grid.Column="1" Text="min" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
         
-        <!-- Map Label with Calculate Route Button -->
+        <!-- Calculate Route Button -->
         <Grid Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="Click on the map to set start and end points:" />
             <Button Grid.Column="1" Content="Calculate Route" Margin="5" 
                     Command="{Binding ExecuteCalculateAndDrawRoute}"/>
         </Grid>

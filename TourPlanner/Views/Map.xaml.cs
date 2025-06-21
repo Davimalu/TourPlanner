@@ -23,7 +23,7 @@ namespace TourPlanner.Views
         // This code is completely specific to WPF and WebView2. Thus, we think it's okay to put it in the Code Behind.
         private async void Map_Loaded(object? sender, RoutedEventArgs e)
         {
-            // It seems that the WPF UI Tab Control loads the content of all tabs on startup and then again each time the tab is selected.
+            // It seems that the WPF UI Tab Control loads the content of all tabs on startup and then again each time the tab is selected
             // Thus we have to make sure that the initialization code is only executed once (running it multiple times doesn't break things, but it's inefficient and unnecessary).
             if (_isInitialized)
             {

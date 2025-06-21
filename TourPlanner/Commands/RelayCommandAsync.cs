@@ -27,10 +27,14 @@ namespace TourPlanner.Commands
         /// <summary>
         /// event that is raised when the ability to execute the command changes
         /// </summary>
-        public event EventHandler? CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
+        public event EventHandler? CanExecuteChanged;
+        
+        /// <summary>
+        /// Raises the CanExecuteChanged event to notify that the command's ability to execute has changed.
+        /// </summary>
+        public void RaiseCanExecuteChanged()
+        {        
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -48,9 +52,12 @@ namespace TourPlanner.Commands
         public async void Execute(object? parameter)
         {
             if (!CanExecute(parameter))
+            {
                 return;
-
+            }
             _isExecuting = true;
+            RaiseCanExecuteChanged(); // Notify that the command can no longer execute
+            
             try
             {
                 // Calls the stored execute action to perform the actual command logic
@@ -63,6 +70,7 @@ namespace TourPlanner.Commands
             finally
             {
                 _isExecuting = false;
+                RaiseCanExecuteChanged(); // Notify that the command can now execute again
             }
         }
     }
