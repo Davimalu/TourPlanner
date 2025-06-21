@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
@@ -14,13 +15,25 @@ namespace TourPlanner.ViewModels
         private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService;
         private readonly ITourService _tourService;
+        private readonly ISearchQueryService _searchQueryService;
+        private readonly ISearchService _searchService;
         private readonly ILoggerWrapper _logger;
 
+        [Description("when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
+        private bool _filterActive = false;
 
+        private ObservableCollection<Tour>? _filteredTours;
         private ObservableCollection<Tour>? _tours;
+        [Description("contains all tours that are currently loaded from the REST API | when _filterActive is true, this collection is filtered and the Tours property returns _filteredTours instead")]
         public ObservableCollection<Tour>? Tours
         {
-            get { return _tours; }
+            get { 
+                if (_filterActive && _filteredTours != null)
+                {
+                    return _filteredTours;
+                }
+                return _tours;
+            }
             set
             {
                 _tours = value;
@@ -54,12 +67,20 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService)
+        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
+            _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
+            _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            
+            // Subscribe to changes in the search query to filter tours
+            _searchQueryService.QueryChanged += async (sender, query) =>
+            {
+                await SearchToursAsync(query);
+            };
 
             // Get a list of all tours from the REST API when the ViewModel is created
             LoadToursAsync();
@@ -102,6 +123,46 @@ namespace TourPlanner.ViewModels
             // Refresh the list of tours
             LoadToursAsync();
         }, _ => SelectedTour != null);
+        
+        
+        /// <summary>
+        /// Searches for tours (including their logs) based on the provided query.
+        /// </summary>
+        /// <param name="query">The search query to filter Tours and TourLogs by </param>
+        private async Task SearchToursAsync(string query)
+        {
+            if (_tours == null || _tours.Count == 0)
+            {
+                _logger.Warn("No tours available to search.");
+                return;
+            }
+            
+            if (string.IsNullOrEmpty(query))
+            {
+                _logger.Info("Search query is empty, showing all tours.");
+                _filterActive = false;
+                
+                // Notify the UI that the Tours collection has changed
+                RaisePropertyChanged(nameof(Tours));
+                
+                return;
+            }
+            _filterActive = true;
+
+            try
+            {
+                List<Tour> filteredTours = await _searchService.SearchToursAsync(query, _tours.ToList());
+                _filteredTours = new ObservableCollection<Tour>(filteredTours);
+                _logger.Info($"Found {filteredTours.Count} tours matching the query: {query}");
+                
+                // Notify the UI that the Tours collection has changed
+                RaisePropertyChanged(nameof(Tours));
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error searching tours: {ex.Message}");
+            }
+        }
 
 
         /// <summary>

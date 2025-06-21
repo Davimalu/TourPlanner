@@ -35,6 +35,8 @@ public partial class App : Application
         services.AddSingleton<IOrsService, OrsService>();
         services.AddSingleton<IMapService, MapService>();
         services.AddSingleton<IWebViewService, WebViewService>();
+        services.AddSingleton<ISearchQueryService, SearchQueryService>();
+        services.AddSingleton<ISearchService, SearchService>();
         
         services.AddTransient<HttpClient>();
         
