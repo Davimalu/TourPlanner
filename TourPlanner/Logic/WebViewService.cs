@@ -11,6 +11,7 @@ public class WebViewService : IWebViewService
 {
     /* Generally, a service shouldn't depend on a specific UI component like WebView2. However, this service is SO SPECIFIC to WebView2 that it can't really be used in any other way anyway, so we think it's okay to have it here
     We could add an interface for WebView2, but that would just add unnecessary complexity for this specific use case. */
+    
     private WebView2? _webView;
     public event EventHandler<string>? MessageReceived;
     public bool IsReady { get; private set; } = false;

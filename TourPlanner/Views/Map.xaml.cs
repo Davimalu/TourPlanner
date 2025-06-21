@@ -13,7 +13,7 @@ namespace TourPlanner.Views
         public Map()
         {
             InitializeComponent();
-            
+
             // Get the WebViewService from the service provider
             _webViewService = App.ServiceProvider.GetRequiredService<IWebViewService>();
             
