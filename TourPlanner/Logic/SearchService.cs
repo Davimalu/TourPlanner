@@ -24,7 +24,7 @@ public class SearchService : ISearchService
         }
     }
 
-    public EventHandler<string> QueryChanged { get; set;  }
+    public event EventHandler<string>? QueryChanged;
     
     
     public SearchService()
