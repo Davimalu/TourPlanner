@@ -40,7 +40,7 @@ public class AttributeService : IAttributeService
         // Iterate through all tours to find the maximum log count of any tour
         foreach (var t in allTours)
         {
-            int currentLogCount = t.Logs?.Count ?? 0;
+            int currentLogCount = t.Logs.Count;
             if (currentLogCount > maxLogCount)
             {
                 maxLogCount = currentLogCount;
@@ -61,7 +61,7 @@ public class AttributeService : IAttributeService
         }
 
         float popularity = (float)logCount / maxLogCount * 100f; // Scale to percentage
-        _logger.Debug($"Calculated popularity for tour '{tour.TourName}' with ID {tour.TourId}: {popularity}% based on {logCount} logs out of {maxLogCount} maximum logs.");
+        _logger.Debug($"Calculated popularity for tour '{tour.TourName}' with ID {tour.TourId}: {popularity}% based on it having {logCount} logs compared to the most popular tour with {maxLogCount} logs.");
 
         return popularity;
     }
