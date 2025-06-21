@@ -5,6 +5,7 @@ using TourPlanner.DAL.Interfaces;
 using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 
 namespace TourPlanner.ViewModels
@@ -12,6 +13,7 @@ namespace TourPlanner.ViewModels
     public class EditTourLogViewModel : BaseViewModel
     {
         private readonly ITourLogService _tourLogService;
+        private readonly IAttributeService _attributeService;
         private readonly ILoggerWrapper _logger;
         
         // Copy of the original TourLog to edit (to avoid changing the original UNTIL the user saves)
@@ -43,9 +45,10 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog, ITourLogService tourLogService)
+        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService)
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
+            _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             _selectedTour = selectedTour;
@@ -61,7 +64,7 @@ namespace TourPlanner.ViewModels
         {
             // Check if the TourLog already exists in the SelectedTour (i.e. are we updating an existing TourLog or creating a new one?)
             TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == EditableTourLog.LogId);
-
+            
             // TourLog already exists -> update it
             if (existingTourLog != null)
             {

@@ -96,9 +96,9 @@
                                     <ui:TextBlock Text="Misc." />
                                 </StackPanel>
                             </TabItem.Header>
-                            <StackPanel>
-                                <ui:TextBlock>Placeholder for Misc.</ui:TextBlock>
-                            </StackPanel>
+                            <Grid Margin="10">
+                                <local:TourAttributes x:Name="TourAttributes"/>
+                            </Grid>
                         </TabItem>
                     </TabControl>
 
