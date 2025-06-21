@@ -8,6 +8,7 @@ namespace TourPlanner.Views
     public partial class Map : UserControl
     {
         private readonly IWebViewService _webViewService;
+        private bool _isInitialized = false;
         
         public Map()
         {
@@ -22,6 +23,14 @@ namespace TourPlanner.Views
         // This code is completely specific to WPF and WebView2. Thus, we think it's okay to put it in the Code Behind.
         private async void Map_Loaded(object? sender, RoutedEventArgs e)
         {
+            // It seems that the WPF UI Tab Control loads the content of all tabs on startup and then again each time the tab is selected.
+            // Thus we have to make sure that the initialization code is only executed once (running it multiple times doesn't break things, but it's inefficient and unnecessary).
+            if (_isInitialized)
+            {
+                return;
+            }
+            _isInitialized = true;
+            
             try
             {
                 // Set the WebView2 control in the service so that it can be used by the ViewModel and ensure the WebView2 control is initialized before proceeding

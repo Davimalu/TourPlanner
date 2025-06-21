@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TourPlanner.Views
 {
@@ -10,6 +11,9 @@ namespace TourPlanner.Views
         public EditTourWindow()
         {
             InitializeComponent();
+            
+            // Set the DataContext for the Map
+            Map.DataContext = App.ServiceProvider.GetRequiredService<ViewModels.MapViewModel>();
         }
     }
 }

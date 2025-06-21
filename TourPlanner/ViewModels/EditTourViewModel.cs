@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
@@ -8,6 +9,7 @@ using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
+using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
