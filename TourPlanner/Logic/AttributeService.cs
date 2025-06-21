@@ -23,11 +23,17 @@ public class AttributeService : IAttributeService
     /// </summary>
     /// <param name="tour">The tour for which to calculate popularity</param>
     /// <returns>Popularity score as a float</returns>
-    public float CalculatePopularity(Tour tour)
+    public async Task<float> CalculatePopularityAsync(Tour tour)
     {
-        return 5f;
-        /*
-
+        // Get all tours from the tour service
+        var allTours = await _tourService.GetToursAsync();
+        
+        if (allTours == null || !allTours.Any())
+        {
+            _logger.Warn("Failed to calculate popularity: No tours found.");
+            return 0f;
+        }
+        
         int logCount = 0;
         int maxLogCount = 0;
 
@@ -57,7 +63,7 @@ public class AttributeService : IAttributeService
         float popularity = (float)logCount / maxLogCount * 100f; // Scale to percentage
         _logger.Debug($"Calculated popularity for tour '{tour.TourName}' with ID {tour.TourId}: {popularity}% based on {logCount} logs out of {maxLogCount} maximum logs.");
 
-        return popularity;*/
+        return popularity;
     }
     
     
