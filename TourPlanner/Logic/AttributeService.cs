@@ -44,7 +44,7 @@ public class AttributeService : IAttributeService
     // ---------------------------------------------
     // Parameters for AI Summary generation
     // ---------------------------------------------
-    private const string SystemPrompt = "You are an expert tour guide and analyst. Your task is to provide a concise summary of the tour details and its associated logs based on the provided details. Talk about the tour's highlights, challenges, and any notable features. Use the following JSON data to generate your summary:\n\n";
+    private const string SystemPrompt = "You are an expert tour guide and analyst. Your task is to provide a concise summary of the tour details and its associated logs based on the provided details. Talk about the tour's highlights, challenges, and any notable features. Please provide your answer in plain-text, don't use Markdown formatting - you can use ASCII art to make the answer pretty if you want. Your answer should be in English, even if the Tour Information is provided in another language. Use the following JSON data to generate your summary:\n\n";
     
     
     /// <summary>
@@ -180,6 +180,6 @@ public class AttributeService : IAttributeService
     public async Task<string> GetAiSummaryAsync(Tour tour)
     {
         string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(tour);
-        return await _aiService.AnswerQueryAsync(SystemPrompt + jsonString, AiModel.GPT4_1);
+        return await _aiService.AnswerQueryAsync(SystemPrompt, jsonString, AiModel.GPT4_1);
     }
 }

@@ -4,5 +4,5 @@ namespace TourPlanner.DAL.Interfaces;
 
 public interface IAiService
 {
-    Task<string> AnswerQueryAsync(string query, AiModel model);
+    Task<string> AnswerQueryAsync(string systemPrompt, string query, AiModel model);
 }

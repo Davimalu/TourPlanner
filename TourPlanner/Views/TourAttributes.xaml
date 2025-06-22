@@ -43,8 +43,8 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="BrainCircuit24" /> <!-- MyLocation24 -->
-                            <ui:TextBlock Text="AI Summary:" FontWeight="Bold" />
+                            <ui:SymbolIcon VerticalAlignment="Top" Margin="0,0,6,0" Symbol="BrainCircuit24" /> <!-- MyLocation24 -->
+                            <ui:TextBlock VerticalAlignment="Top" Text="AI Summary:" FontWeight="Bold" />
                         </StackPanel>
 
                         <!-- Data Binding -->
