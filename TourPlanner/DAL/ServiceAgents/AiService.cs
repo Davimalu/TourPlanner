@@ -33,6 +33,8 @@ public class AiService :IAiService
             return String.Empty;
         }
         
+        _logger.Debug($"Answering query '{query}' using model {model}...");
+        
         try
         {
             ChatClient client = new ChatClient(model: GetModelStringFromEnum(model), apiKey: _config.OpenAiApiKey);
@@ -43,6 +45,12 @@ public class AiService :IAiService
         catch (Exception ex)
         {
             _logger.Error($"Failed to answer query '{query}' using model {model}.", ex);
+
+            if (ex.Message.Contains("invalid_api_key"))
+            {
+                return "Invalid API key. Please check your OpenAI API key configuration.";
+            }
+            
             return String.Empty;
         }
     }

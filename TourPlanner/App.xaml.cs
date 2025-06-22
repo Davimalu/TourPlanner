@@ -38,6 +38,7 @@ public partial class App : Application
         services.AddSingleton<ISearchQueryService, SearchQueryService>();
         services.AddSingleton<ISearchService, SearchService>();
         services.AddSingleton<IAttributeService, AttributeService>();
+        services.AddSingleton<IAiService, AiService>();
         
         services.AddTransient<HttpClient>();
         

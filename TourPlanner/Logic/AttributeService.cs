@@ -1,8 +1,10 @@
+using System.Text.Json;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Enums;
 
 namespace TourPlanner.Logic;
 
@@ -10,12 +12,39 @@ public class AttributeService : IAttributeService
 {
     private readonly ILoggerWrapper _logger;
     private readonly ITourService _tourService;
+    private readonly IAiService _aiService;
     
-    public AttributeService(ITourService tourService)
+    public AttributeService(ITourService tourService, IAiService aiService)
     {
         _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
+        _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
         _logger = LoggerFactory.GetLogger<AttributeService>();
     }
+    
+    // ---------------------------------------------
+    // Parameters for child-friendliness calculation
+    // ---------------------------------------------
+    
+    // The maximum difficulty rating on the scale.
+    private const float MaxDifficultyRating = 5.0f;
+
+    // We consider a tour increasingly unfriendly as it approaches this distance.
+    // At or beyond this distance, the distance score becomes 0.
+    private const float IdealMaxChildDistanceKm = 5.0f;
+
+    // We consider a tour increasingly unfriendly as it approaches this duration.
+    // At or beyond this duration, the duration score becomes 0.
+    private const float IdealMaxChildDurationMin = 120.0f;
+    
+    // Weights for combining the normalized scores. Must sum to 1.0.
+    private const float DifficultyWeight = 0.50f;
+    private const float DurationWeight = 0.30f;
+    private const float DistanceWeight = 0.20f;
+    
+    // ---------------------------------------------
+    // Parameters for AI Summary generation
+    // ---------------------------------------------
+    private const string SystemPrompt = "You are an expert tour guide and analyst. Your task is to provide a concise summary of the tour details and its associated logs based on the provided details. Talk about the tour's highlights, challenges, and any notable features. Use the following JSON data to generate your summary:\n\n";
     
     
     /// <summary>
@@ -66,25 +95,6 @@ public class AttributeService : IAttributeService
         return popularity;
     }
     
-    
-    // Parameters for child-friendliness calculation
-    
-    // The maximum difficulty rating on the scale.
-    private const float MaxDifficultyRating = 5.0f;
-
-    // We consider a tour increasingly unfriendly as it approaches this distance.
-    // At or beyond this distance, the distance score becomes 0.
-    private const float IdealMaxChildDistanceKm = 5.0f;
-
-    // We consider a tour increasingly unfriendly as it approaches this duration.
-    // At or beyond this duration, the duration score becomes 0.
-    private const float IdealMaxChildDurationMin = 120.0f;
-    
-    // Weights for combining the normalized scores. Must sum to 1.0.
-    private const float DifficultyWeight = 0.50f;
-    private const float DurationWeight = 0.30f;
-    private const float DistanceWeight = 0.20f;
-
     
     /// <summary>
     /// Calculates the child-friendliness of the tour based on the difficulty ratings, total times and distances of the tour logs
@@ -159,5 +169,17 @@ public class AttributeService : IAttributeService
         // Score decreases linearly until the ideal max duration
         double score = 1.0 - (duration / IdealMaxChildDurationMin);
         return Math.Max(0, score); // Ensure score doesn't go below 0
+    }
+
+
+    /// <summary>
+    /// Generates an AI summary for the given tour using the AI service
+    /// </summary>
+    /// <param name="tour">The tour for which to generate the summary</param>
+    /// <returns>A summary of the tour as a string</returns>
+    public async Task<string> GetAiSummaryAsync(Tour tour)
+    {
+        string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(tour);
+        return await _aiService.AnswerQueryAsync(SystemPrompt + jsonString, AiModel.GPT4_1);
     }
 }
