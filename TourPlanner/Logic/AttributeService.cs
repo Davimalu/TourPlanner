@@ -101,7 +101,7 @@ public class AttributeService : IAttributeService
     /// </summary>
     /// <param name="tour">The tour for which to calculate child-friendliness</param>
     /// <returns>Child-friendliness score as a float</returns>
-    public float CalulateChildFriendliness(Tour tour)
+    public float CalculateChildFriendliness(Tour tour)
     {
         if (!tour.Logs.Any())
         {

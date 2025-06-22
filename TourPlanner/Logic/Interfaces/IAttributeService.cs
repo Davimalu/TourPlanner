@@ -4,7 +4,7 @@ namespace TourPlanner.Logic.Interfaces;
 
 public interface IAttributeService
 {
-    public Task<float> CalculatePopularityAsync(Tour tour);
-    public float CalulateChildFriendliness(Tour tour);
-    public Task<string> GetAiSummaryAsync(Tour tour);
+    Task<float> CalculatePopularityAsync(Tour tour);
+    float CalculateChildFriendliness(Tour tour);
+    Task<string> GetAiSummaryAsync(Tour tour);
 }

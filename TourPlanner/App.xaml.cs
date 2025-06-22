@@ -51,7 +51,7 @@ public partial class App : Application
         services.AddSingleton<MenuBarViewModel>();
         services.AddSingleton<SearchBarViewModel>();
         services.AddSingleton<TourListViewModel>();
-        services.AddSingleton <TourAttributesViewModel>();
+        services.AddSingleton<TourAttributesViewModel>();
         services.AddSingleton<TourDetailsViewModel>();
         services.AddSingleton<TourLogsViewModel>();
         services.AddSingleton<MapViewModel>();

@@ -57,7 +57,7 @@ public class TourAttributesViewModel : BaseViewModel
         
         // Calculate the tour attributes asynchronously
         SelectedTour.Popularity = await _attributeService.CalculatePopularityAsync(SelectedTour);
-        SelectedTour.ChildFriendlyRating = _attributeService.CalulateChildFriendliness(SelectedTour);
+        SelectedTour.ChildFriendlyRating = _attributeService.CalculateChildFriendliness(SelectedTour);
         SelectedTour.AiSummary = await _attributeService.GetAiSummaryAsync(SelectedTour);
 
         // Raise property changed to update the UI

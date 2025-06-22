@@ -104,7 +104,7 @@ namespace TourPlanner.ViewModels
             
             // Calculate the attributes of the Tour (change whenever a log is added or updated) and update the Tour in the database
             SelectedTour.Popularity = await _attributeService.CalculatePopularityAsync(SelectedTour);
-            SelectedTour.ChildFriendlyRating = _attributeService.CalulateChildFriendliness(SelectedTour);
+            SelectedTour.ChildFriendlyRating = _attributeService.CalculateChildFriendliness(SelectedTour);
             await _tourService.UpdateTourAsync(SelectedTour);
 
             // Close the window
