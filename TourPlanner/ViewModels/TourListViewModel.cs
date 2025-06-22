@@ -17,21 +17,27 @@ namespace TourPlanner.ViewModels
         private readonly ITourService _tourService;
         private readonly ISearchQueryService _searchQueryService;
         private readonly ISearchService _searchService;
+        private readonly IEventService _eventService;
         private readonly ILoggerWrapper _logger;
 
-        [Description("when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
+        [Description(
+            "when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
         private bool _filterActive = false;
 
         private ObservableCollection<Tour>? _filteredTours;
         private ObservableCollection<Tour>? _tours;
-        [Description("contains all tours that are currently loaded from the REST API | when _filterActive is true, this collection is filtered and the Tours property returns _filteredTours instead")]
+
+        [Description(
+            "contains all tours that are currently loaded from the REST API | when _filterActive is true, this collection is filtered and the Tours property returns _filteredTours instead")]
         public ObservableCollection<Tour>? Tours
         {
-            get { 
+            get
+            {
                 if (_filterActive && _filteredTours != null)
                 {
                     return _filteredTours;
                 }
+
                 return _tours;
             }
             set
@@ -43,6 +49,7 @@ namespace TourPlanner.ViewModels
 
 
         private string? _newTourName;
+
         public string? NewTourName
         {
             get { return _newTourName; }
@@ -55,6 +62,7 @@ namespace TourPlanner.ViewModels
 
 
         private Tour? _selectedTour;
+
         public Tour? SelectedTour
         {
             get { return _selectedTour; }
@@ -67,29 +75,41 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService, IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService)
+        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService,
+            IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
+            IEventService eventService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
-            
+
             // Subscribe to changes in the search query to filter tours
             _searchQueryService.QueryChanged += async (sender, query) =>
             {
                 await SearchToursAsync(query);
             };
 
+            // Subscribe to changes in the tours
+            _eventService.ToursChanged += async (sender, tours) =>
+            {
+                await LoadToursAsync();
+            };
+
             // Get a list of all tours from the REST API when the ViewModel is created
             LoadToursAsync();
         }
 
-        
+
         public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
         {
-            _windowService.SpawnEditTourWindow(new Tour() { TourName = NewTourName!, TourId = -1 }); // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
+            _windowService.SpawnEditTourWindow(new Tour()
+            {
+                TourName = NewTourName!, TourId = -1
+            }); // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
             NewTourName = string.Empty;
 
             // Refresh the list of tours
@@ -111,7 +131,7 @@ namespace TourPlanner.ViewModels
                 _logger.Error($"Failed to delete tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
                 return;
             }
-            
+
             SelectedTour = null;
         }, _ => SelectedTour != null);
 
@@ -123,8 +143,8 @@ namespace TourPlanner.ViewModels
             // Refresh the list of tours
             LoadToursAsync();
         }, _ => SelectedTour != null);
-        
-        
+
+
         /// <summary>
         /// Searches for tours (including their logs) based on the provided query.
         /// </summary>
@@ -136,17 +156,18 @@ namespace TourPlanner.ViewModels
                 _logger.Warn("No tours available to search.");
                 return;
             }
-            
+
             if (string.IsNullOrEmpty(query))
             {
                 _logger.Info("Search query is empty, showing all tours.");
                 _filterActive = false;
-                
+
                 // Notify the UI that the Tours collection has changed
                 RaisePropertyChanged(nameof(Tours));
-                
+
                 return;
             }
+
             _filterActive = true;
 
             try
@@ -154,7 +175,7 @@ namespace TourPlanner.ViewModels
                 List<Tour> filteredTours = await _searchService.SearchToursAsync(query, _tours.ToList());
                 _filteredTours = new ObservableCollection<Tour>(filteredTours);
                 _logger.Info($"Found {filteredTours.Count} tours matching the query: {query}");
-                
+
                 // Notify the UI that the Tours collection has changed
                 RaisePropertyChanged(nameof(Tours));
             }
@@ -168,7 +189,7 @@ namespace TourPlanner.ViewModels
         /// <summary>
         /// Helper method to load all tours from the REST API because the constructor cannot be async
         /// </summary>
-        private async void LoadToursAsync()
+        private async Task LoadToursAsync()
         {
             try
             {

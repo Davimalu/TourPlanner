@@ -1,12 +1,10 @@
-﻿using System.Net;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
-using TourPlanner.Model.Exceptions;
 
 namespace TourPlanner.ViewModels
 {
@@ -15,6 +13,7 @@ namespace TourPlanner.ViewModels
         private readonly ILocalTourService _localTourService;
         private readonly ITourService _tourService;
         private readonly IIoService _ioService;
+        private readonly IEventService _eventService;
         private readonly ILoggerWrapper _logger;
         
         // Commands
@@ -33,11 +32,12 @@ namespace TourPlanner.ViewModels
         
         
         // Constructor
-        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService)
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IEventService eventService)
         {
             _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
+            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
             
             _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
         }
@@ -108,34 +108,23 @@ namespace TourPlanner.ViewModels
             // Save the imported tours to the database
             foreach (var tour in tours)
             {
-                // Check if the tour already exists
-                try
+                _logger.Info($"Importing Tour {tour.TourId}: {tour.TourName} | {tour.TourDescription}...");
+                
+                // Create the tour in the database
+                var createdTour = await _tourService.CreateTourAsync(tour);
+                if (createdTour == null)
                 {
-                    await _tourService.GetTourByIdAsync(tour.TourId);
+                    _logger.Error($"Failed to import tour {tour.TourId}: {tour.TourName}");
+                    MessageBox.Show($"Failed to import tour {tour.TourId}: {tour.TourName}", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                catch (ApiServiceException ex)
+                else
                 {
-                    if (ex.StatusCode == HttpStatusCode.NotFound)
-                    {
-                        // Tour does not exist, proceed with import
-                        _logger.Debug($"Tour with ID {tour.TourId} does not exist. Proceeding with import.");
-                        
-                        // Create the tour in the service
-                        var createdTour = await _tourService.CreateTourAsync(tour);
-                        if (createdTour == null)
-                        {
-                            _logger.Error($"Failed to import tour: {tour.TourName}");
-                            MessageBox.Show($"Failed to import tour: {tour.TourName}", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                    else
-                    {
-                        _logger.Error($"Error checking tour existence: {ex.Message}");
-                        MessageBox.Show($"Error checking tour existence: {ex.Message}", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    _logger.Info($"Successfully imported tour {tour.TourId}: {createdTour.TourName}");
                 }
-                // Tour already exists, do nothing
             }
+            
+            // Inform the UI there may be new tours
+            _eventService.RaiseToursChanged();
         }
         
         private void ExitApplication(object? parameter)
