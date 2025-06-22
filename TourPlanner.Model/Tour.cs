@@ -144,6 +144,41 @@ namespace TourPlanner.Model
             }
         }
         
+        // Computed attributes
+        private float _popularity;
+        public float Popularity
+        {
+            get => _popularity;
+            set
+            {
+                _popularity = value;
+                OnPropertyChanged(nameof(Popularity));
+            }
+        }
+        
+        private float _childFriendlyRating;
+        public float ChildFriendlyRating
+        {
+            get => _childFriendlyRating;
+            set
+            {
+                _childFriendlyRating = value;
+                OnPropertyChanged(nameof(ChildFriendlyRating));
+            }
+        }
+        
+        private string _aiSummary = string.Empty;
+        public string AiSummary
+        {
+            get => _aiSummary;
+            set
+            {
+                _aiSummary = value;
+                OnPropertyChanged(nameof(AiSummary));
+            }
+        }
+        
+        // Tour logs
         private ObservableCollection<TourLog> _logs = new ObservableCollection<TourLog>();
         [JsonPropertyName("logs")]
         public ObservableCollection<TourLog> Logs

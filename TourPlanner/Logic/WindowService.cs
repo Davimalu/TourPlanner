@@ -12,16 +12,18 @@ namespace TourPlanner.Logic
         private readonly ITourService _tourService;
         private readonly IOrsService _osrService;
         private readonly IMapService _mapService;
+        private readonly IAttributeService _attributeService;
         
         private readonly MapViewModel _mapViewModel;
         
-        public WindowService(ITourLogService tourLogService, ITourService tourService, IOrsService iosrService, IMapService mapService, MapViewModel mapViewModel)
+        public WindowService(ITourLogService tourLogService, ITourService tourService, IOrsService iosrService, IMapService mapService, MapViewModel mapViewModel, IAttributeService attributeService)
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _osrService = iosrService ?? throw new ArgumentNullException(nameof(iosrService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
             _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
+            _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
         }
         
         
@@ -41,7 +43,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog, _tourLogService)
+                DataContext = new EditTourLogViewModel(selectedTour, _tourService, selectedTourLog, _tourLogService, _attributeService),
             };
 
             editWindow.ShowDialog();

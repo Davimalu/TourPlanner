@@ -37,6 +37,8 @@ public partial class App : Application
         services.AddSingleton<IWebViewService, WebViewService>();
         services.AddSingleton<ISearchQueryService, SearchQueryService>();
         services.AddSingleton<ISearchService, SearchService>();
+        services.AddSingleton<IAttributeService, AttributeService>();
+        services.AddSingleton<IAiService, AiService>();
         
         services.AddTransient<HttpClient>();
         
@@ -49,6 +51,7 @@ public partial class App : Application
         services.AddSingleton<MenuBarViewModel>();
         services.AddSingleton<SearchBarViewModel>();
         services.AddSingleton<TourListViewModel>();
+        services.AddSingleton<TourAttributesViewModel>();
         services.AddSingleton<TourDetailsViewModel>();
         services.AddSingleton<TourLogsViewModel>();
         services.AddSingleton<MapViewModel>();
@@ -65,7 +68,8 @@ public partial class App : Application
             TourList = { DataContext = ServiceProvider.GetRequiredService<TourListViewModel>() },
             TourDetails = { DataContext = ServiceProvider.GetRequiredService<TourDetailsViewModel>() },
             TourLogs = { DataContext = ServiceProvider.GetRequiredService<TourLogsViewModel>() },
-            Map = { DataContext = ServiceProvider.GetRequiredService<MapViewModel>() }
+            Map = { DataContext = ServiceProvider.GetRequiredService<MapViewModel>() },
+            TourAttributes = { DataContext = ServiceProvider.GetRequiredService<TourAttributesViewModel>() }
         };
 
         // Show the MainWindow

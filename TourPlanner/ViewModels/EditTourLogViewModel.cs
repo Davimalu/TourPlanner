@@ -5,6 +5,7 @@ using TourPlanner.DAL.Interfaces;
 using TourPlanner.Enums;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 
 namespace TourPlanner.ViewModels
@@ -12,13 +13,15 @@ namespace TourPlanner.ViewModels
     public class EditTourLogViewModel : BaseViewModel
     {
         private readonly ITourLogService _tourLogService;
+        private readonly ITourService _tourService;
+        private readonly IAttributeService _attributeService;
         private readonly ILoggerWrapper _logger;
         
         // Copy of the original TourLog to edit (to avoid changing the original UNTIL the user saves)
         private TourLog _editableTourLog = null!;
         public TourLog EditableTourLog
         {
-            get { return _editableTourLog; }
+            get => _editableTourLog;
             set
             {
                 _editableTourLog = value;
@@ -27,10 +30,10 @@ namespace TourPlanner.ViewModels
         }
 
 
-        private Tour _selectedTour = null!;
+        private Tour _selectedTour;
         public Tour SelectedTour
         {
-            get { return _selectedTour; }
+            get => _selectedTour;
             set
             {
                 _selectedTour = value;
@@ -43,9 +46,11 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog, ITourLogService tourLogService)
+        public EditTourLogViewModel(Tour selectedTour, ITourService tourService, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService)
         {
+            _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
+            _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             _selectedTour = selectedTour;
@@ -61,7 +66,7 @@ namespace TourPlanner.ViewModels
         {
             // Check if the TourLog already exists in the SelectedTour (i.e. are we updating an existing TourLog or creating a new one?)
             TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == EditableTourLog.LogId);
-
+            
             // TourLog already exists -> update it
             if (existingTourLog != null)
             {
@@ -96,6 +101,11 @@ namespace TourPlanner.ViewModels
                     _logger.Error($"Failed to create TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
                 }
             }
+            
+            // Calculate the attributes of the Tour (change whenever a log is added or updated) and update the Tour in the database
+            SelectedTour.Popularity = await _attributeService.CalculatePopularityAsync(SelectedTour);
+            SelectedTour.ChildFriendlyRating = _attributeService.CalculateChildFriendliness(SelectedTour);
+            await _tourService.UpdateTourAsync(SelectedTour);
 
             // Close the window
             CloseWindow();

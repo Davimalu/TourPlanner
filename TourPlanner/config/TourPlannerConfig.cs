@@ -22,4 +22,10 @@ public class TourPlannerConfig : ITourPlannerConfig
     
     public string ApiBaseUrl => _configuration["ApiSettings:BaseUrl"]
                                     ?? throw new InvalidOperationException("API Base URL is not configured.");
+
+    public string OpenRouterBaseUrl => _configuration["OpenRouter:BaseUrl"] 
+                                            ?? throw new InvalidOperationException("OpenRouter Base URL is not configured.");
+    
+    public string OpenRouterApiKey => _configuration["OpenRouter:ApiKey"] 
+                                            ?? throw new InvalidOperationException("OpenRouter API key is not configured.");
 }
