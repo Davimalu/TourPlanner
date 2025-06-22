@@ -77,6 +77,7 @@ public class TourRepository : ITourRepository
         tour.EndCoordinates = updatedTour.EndCoordinates;
         tour.Popularity = updatedTour.Popularity;
         tour.ChildFriendlyRating = updatedTour.ChildFriendlyRating;
+        tour.AiSummary = updatedTour.AiSummary;
 
         // ------------------------------
         // Handle updating the TourLogs (simply doing tour.Logs = updatedTour.Logs; throws an exception)
