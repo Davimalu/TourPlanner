@@ -51,7 +51,7 @@ public class LocalTourService : ILocalTourService
     /// Loads a collection of Tour objects from a local file in JSON format
     /// </summary>
     /// <param name="path">File path from which the tours will be loaded</param>
-    /// <returns>>Collection of Tour objects if loaded successfully, null if the file does not exist or is empty</returns>
+    /// <returns>Collection of Tour objects if loaded successfully, null if the file does not exist or is empty</returns>
     public async Task<IEnumerable<Tour>?> LoadToursFromFileAsync(string path)
     {
         try

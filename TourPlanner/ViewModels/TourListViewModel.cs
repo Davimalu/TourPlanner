@@ -148,6 +148,7 @@ namespace TourPlanner.ViewModels
             }
 
             SelectedTour = null;
+            _eventService.RaiseToursChanged();
         }
 
 
