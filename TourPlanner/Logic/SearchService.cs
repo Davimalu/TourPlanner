@@ -47,6 +47,7 @@ public class SearchService : ISearchService
                     tour.EstimatedTime.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                     tour.Popularity.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                     tour.ChildFriendlyRating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                    tour.AiSummary.ToLowerInvariant().Contains(lowerQuery) ||
                     tour.Logs.Any(log =>
                         log.TimeStamp.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                         log.Comment.ToLowerInvariant().Contains(lowerQuery) ||
