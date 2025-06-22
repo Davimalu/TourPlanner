@@ -30,7 +30,7 @@
                         <!-- Labels -->
                         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                             <ui:SymbolIcon Margin="0,0,6,0" Symbol="TextDescription24" />
-                            <ui:TextBlock Text="Description:" FontWeight="Bold"/>
+                            <ui:TextBlock VerticalAlignment="Center" Text="Description:" FontWeight="Bold"/>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
