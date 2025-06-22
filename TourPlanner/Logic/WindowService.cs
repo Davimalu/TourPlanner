@@ -43,7 +43,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog, _tourLogService, _attributeService),
+                DataContext = new EditTourLogViewModel(selectedTour, _tourService, selectedTourLog, _tourLogService, _attributeService),
             };
 
             editWindow.ShowDialog();

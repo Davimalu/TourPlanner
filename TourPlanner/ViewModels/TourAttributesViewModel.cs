@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
@@ -10,6 +11,7 @@ namespace TourPlanner.ViewModels;
 public class TourAttributesViewModel : BaseViewModel
 {
     private readonly ISelectedTourService _selectedTourService;
+    private readonly ITourService _tourService;
     private readonly IAttributeService _attributeService;
     private readonly ILoggerWrapper _logger;
     
@@ -32,9 +34,10 @@ public class TourAttributesViewModel : BaseViewModel
         }
     }
 
-    public TourAttributesViewModel(ISelectedTourService selectedTourService, IAttributeService attributeService)
+    public TourAttributesViewModel(ISelectedTourService selectedTourService, ITourService tourService, IAttributeService attributeService)
     {
         _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
+        _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
         _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
         _logger = LoggerFactory.GetLogger<TourAttributesViewModel>();
             
@@ -58,5 +61,8 @@ public class TourAttributesViewModel : BaseViewModel
 
         // Raise property changed to update the UI
         RaisePropertyChanged(nameof(SelectedTour));
+        
+        // Update the tour in the database
+        await _tourService.UpdateTourAsync(SelectedTour);
     }
 }

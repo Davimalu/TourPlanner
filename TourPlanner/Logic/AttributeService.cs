@@ -19,7 +19,7 @@ public class AttributeService : IAttributeService
     
     
     /// <summary>
-    /// Calculates the popularity of the tour based on the number of logs
+    /// Calculates the popularity of the tour based on the number of logs (relative to the most popular tour)
     /// </summary>
     /// <param name="tour">The tour for which to calculate popularity</param>
     /// <returns>Popularity score as a float</returns>
@@ -120,7 +120,7 @@ public class AttributeService : IAttributeService
         // Calculate the average score across all logs
         double averageFriendlinessScore = totalWeightedFriendlinessScore / tour.Logs.Count;
         
-        // Scale the score to a percentage (0.0 to 1.0)
+        // Ensure the score is between 0 and 1
         float childFriendlyRating = (float)Math.Max(0, Math.Min(1.0, averageFriendlinessScore));
         _logger.Debug($"Calculated child-friendliness for tour '{tour.TourName}' with ID {tour.TourId}: {childFriendlyRating * 100}% based on {tour.Logs.Count} logs.");
         
