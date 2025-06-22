@@ -41,7 +41,7 @@ public class PdfService : IPdfService
         var title = new Paragraph($"{tour.TourName}")
             .SetFont(boldFont)
             .SetFontSize(24)
-            .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+            .SetTextAlignment(TextAlignment.CENTER)
             .SetMarginBottom(20);
         document.Add(title);
         
