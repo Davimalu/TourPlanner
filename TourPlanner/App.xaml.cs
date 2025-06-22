@@ -32,19 +32,20 @@ public partial class App : Application
         services.AddSingleton<ISelectedTourService, SelectedTourService>();
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
         services.AddSingleton<IWindowService, WindowService>();
-        services.AddSingleton<IOrsService, OrsService>();
         services.AddSingleton<IMapService, MapService>();
         services.AddSingleton<IWebViewService, WebViewService>();
         services.AddSingleton<ISearchQueryService, SearchQueryService>();
         services.AddSingleton<ISearchService, SearchService>();
         services.AddSingleton<IAttributeService, AttributeService>();
-        services.AddSingleton<IAiService, AiService>();
         
         services.AddTransient<HttpClient>();
         
         // DAL Services
         services.AddSingleton<ITourService, TourService>();
         services.AddSingleton<ITourLogService, TourLogService>();
+        services.AddSingleton<ILocalTourService, LocalTourService>();
+        services.AddSingleton<IOrsService, OrsService>();
+        services.AddSingleton<IAiService, AiService>();
         
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();
