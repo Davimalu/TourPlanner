@@ -19,6 +19,12 @@ namespace TourPlanner.ViewModels
         private readonly ISearchService _searchService;
         private readonly IEventService _eventService;
         private readonly ILoggerWrapper _logger;
+        
+        // Commands
+        private RelayCommandAsync? _executeDeleteTour;
+        
+        public ICommand ExecuteDeleteTour => _executeDeleteTour ??= 
+            new RelayCommandAsync(async _ => await DeleteSelectedTour(), _ => SelectedTour != null);
 
         [Description(
             "when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
@@ -70,7 +76,11 @@ namespace TourPlanner.ViewModels
             {
                 _selectedTour = value;
                 RaisePropertyChanged(nameof(SelectedTour));
+                
                 _selectedTourService.SelectedTour = _selectedTour; // Update the selected tour in the service
+                
+                // Inform the Delete Action that the SelectedTour has changed
+                _executeDeleteTour?.RaiseCanExecuteChanged();
             }
         }
 
@@ -93,14 +103,14 @@ namespace TourPlanner.ViewModels
                 await SearchToursAsync(query);
             };
 
-            // Subscribe to changes in the tours
+            // Subscribe to changes in the tours to refresh the list of tours
             _eventService.ToursChanged += async (sender, tours) =>
             {
                 await LoadToursAsync();
             };
 
-            // Get a list of all tours from the REST API when the ViewModel is created
-            LoadToursAsync();
+            // On Startup, load all tours from the REST API
+            _ = LoadToursAsync();
         }
 
 
@@ -116,10 +126,16 @@ namespace TourPlanner.ViewModels
             LoadToursAsync();
         }, _ => !string.IsNullOrEmpty(NewTourName));
 
-
-        public ICommand ExecuteDeleteTour => new RelayCommandAsync(async _ =>
+        
+        public async Task DeleteSelectedTour()
         {
-            var success = await _tourService.DeleteTourAsync(SelectedTour!.TourId); // Delete the tour via the REST API
+            if (SelectedTour == null)
+            {
+                _logger.Warn("No tour selected for deletion.");
+                return;
+            }
+
+            var success = await _tourService.DeleteTourAsync(SelectedTour.TourId); // Delete the tour via the REST API
 
             if (success)
             {
@@ -129,11 +145,10 @@ namespace TourPlanner.ViewModels
             else
             {
                 _logger.Error($"Failed to delete tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
-                return;
             }
 
             SelectedTour = null;
-        }, _ => SelectedTour != null);
+        }
 
 
         public ICommand ExecuteEditTour => new RelayCommand(_ =>
