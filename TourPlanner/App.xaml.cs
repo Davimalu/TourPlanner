@@ -46,6 +46,7 @@ public partial class App : Application
         services.AddSingleton<ILocalTourService, LocalTourService>();
         services.AddSingleton<IOrsService, OrsService>();
         services.AddSingleton<IAiService, AiService>();
+        services.AddSingleton<IIoService, IoService>();
         
         // ViewModels
         services.AddSingleton<MainWindowViewModel>();
