@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
-using TourPlanner.Models;
 using TourPlanner.ViewModels;
 
 namespace TourPlanner.Test.ViewModel

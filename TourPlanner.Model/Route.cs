@@ -1,4 +1,4 @@
-namespace TourPlanner.Models;
+namespace TourPlanner.Model;
 
 public class Route
 {

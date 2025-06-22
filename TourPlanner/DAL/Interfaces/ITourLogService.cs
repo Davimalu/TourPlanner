@@ -1,5 +1,4 @@
 ﻿using TourPlanner.Model;
-using TourPlanner.Models;
 
 namespace TourPlanner.DAL.Interfaces
 {

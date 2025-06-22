@@ -1,11 +1,14 @@
 using System.IO;
 using iText.IO.Font.Constants;
+using iText.IO.Image;
 using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 
@@ -13,7 +16,18 @@ namespace TourPlanner.Logic;
 
 public class PdfService : IPdfService
 {
-    public Task<bool> ExportTourAsPdfAsync(Tour tour, string filePath)
+    private readonly ILoggerWrapper _logger;
+    private readonly IMapService _mapService;
+    
+    public PdfService(IMapService mapService)
+    {
+        _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+
+        _logger = LoggerFactory.GetLogger<PdfService>();
+    }
+    
+    
+    public async Task<bool> ExportTourAsPdfAsync(Tour tour, string filePath)
     {
         PdfWriter writer = new PdfWriter(filePath);
         PdfDocument pdfDocument = new PdfDocument(writer);
@@ -32,7 +46,24 @@ public class PdfService : IPdfService
         document.Add(title);
         
         // Route Image
-        // TODO
+        try
+        {
+            string imagePath = await GetRouteImagePathAsync(tour);
+            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+            {
+                ImageData imageData = ImageDataFactory.Create(imagePath);
+                Image routeImage = new Image(imageData);
+                routeImage.SetWidth(400);
+                routeImage.SetHorizontalAlignment(HorizontalAlignment.CENTER);
+                routeImage.SetMarginBottom(20);
+                document.Add(routeImage);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the error but continue with PDF generation
+            _logger.Error($"Failed to add route image for tour '{tour.TourName}': {ex.Message}");
+        }
         
         // Tour Details
         Table detailsTable = new Table(2);
@@ -131,7 +162,7 @@ public class PdfService : IPdfService
             
         document.Close();
         
-        return Task.FromResult(File.Exists(filePath));
+        return File.Exists(filePath);
     }
     
     
@@ -149,5 +180,11 @@ public class PdfService : IPdfService
 
         table.AddCell(labelCell);
         table.AddCell(valueCell);
+    }
+    
+    
+    private async Task<string> GetRouteImagePathAsync(Tour tour)
+    {
+        return await _mapService.CaptureMapImageAsync(tour);
     }
 }

@@ -110,6 +110,8 @@ namespace TourPlanner.ViewModels
             await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)EditableTour.EndCoordinates, "End", EditableTour.EndLocation));
             await _mapService.DrawRouteAsync(routeInfo.RouteGeometry);
             
+            EditableTour.GeoJsonString = routeInfo.RouteGeometry;
+            
             RouteCalculated = true; // Mark that the route has been calculated
             _executeSave?.RaiseCanExecuteChanged(); // Notify the save command that the route has been calculated and thus it can be saved
         }

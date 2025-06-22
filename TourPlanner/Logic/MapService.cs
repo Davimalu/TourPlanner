@@ -13,6 +13,8 @@ public class MapService : IMapService
     private readonly ILoggerWrapper _logger;
     public event EventHandler<GeoCoordinate>? MapClicked;
     
+    private const string DefaultMapImagePath = "C:\\tmp\\MapImage.png";
+    
     public MapService(IWebViewService webViewService)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
@@ -165,6 +167,41 @@ public class MapService : IMapService
     {
         _logger.Debug("Switching control back to the main map in the MainWindow's WebView...");
         return await _webViewService.RevertToMainWindowWebViewAsync();
+    }
+    
+    
+    public async Task<string> CaptureMapImageAsync(Tour tour)
+    {
+        if (!_webViewService.IsReady)
+        {
+            _logger.Warn("Failed to capture map image: WebView is not ready.");
+            return string.Empty;
+        }
+
+        // Ensure the map displays the tour's route before capturing the image
+        await ClearMapAsync();
+        await AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
+        await AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
+        await DrawRouteAsync(tour.GeoJsonString);
+
+        try
+        {
+            var success = await _webViewService.TakeScreenshotAsync(DefaultMapImagePath);
+            
+            if (!success)
+            {
+                _logger.Error("Failed to capture map image: Screenshot operation was not successful.");
+                return string.Empty;
+            }
+            
+            _logger.Debug($"Captured map image for tour '{tour.TourName}'");
+            return DefaultMapImagePath;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to capture map image: {ex.Message}", ex);
+            return string.Empty;
+        }
     }
     
     

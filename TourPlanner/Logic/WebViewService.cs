@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
@@ -151,7 +152,50 @@ public class WebViewService : IWebViewService
             return string.Empty;
         }
     }
+    
+    
+    /// <summary>
+    /// Takes a screenshot of the WebView and saves it to the specified file path
+    /// </summary>
+    /// <param name="filePath">The file path where the screenshot will be saved, e.g., "C:\\screenshot.png"</param>
+    /// <returns>>true if the screenshot was taken successfully, false otherwise</returns>
+    public async Task<bool> TakeScreenshotAsync(string filePath)
+    {
+        if (_activeWebView?.CoreWebView2 == null)
+        {
+            _logger.Error("Screenshot capture failed: WebView is not initialized.");
+            return false;
+        }
 
+        // Ensure that the WebView2 control is initialized
+        await _activeWebView.EnsureCoreWebView2Async(null);
+        
+        try
+        {
+            _logger.Debug("Capturing screenshot of the WebView...");
+            
+            // Make sure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+            
+            // Capture screenshot
+            await using (FileStream stream = new FileStream(filePath, FileMode.Create))
+            {
+                await _activeWebView.CoreWebView2.CapturePreviewAsync(
+                    CoreWebView2CapturePreviewImageFormat.Png,
+                    stream);
+            }
+            
+            _logger.Info($"Screenshot captured successfully and saved to {filePath}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Screenshot capture failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    
     /// <summary>
     /// Handles messages received from the WebView's JavaScript code
     /// </summary>
