@@ -53,7 +53,7 @@ public class PdfService : IPdfService
             {
                 ImageData imageData = ImageDataFactory.Create(imagePath);
                 Image routeImage = new Image(imageData);
-                routeImage.SetWidth(400);
+                routeImage.SetWidth(UnitValue.CreatePercentValue(100));
                 routeImage.SetHorizontalAlignment(HorizontalAlignment.CENTER);
                 routeImage.SetMarginBottom(20);
                 document.Add(routeImage);

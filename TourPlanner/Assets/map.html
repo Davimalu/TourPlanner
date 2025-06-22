@@ -93,7 +93,7 @@
             }
             
         
-            // 5. Function to draw the route (called from C#)
+            // Function to draw the route
             function drawRoute(geoJsonString) {
                 if (routeLayer) {
                     map.removeLayer(routeLayer);
@@ -114,7 +114,7 @@
                 }
             }
         
-            // 6. Function to clear markers and route
+            // Function to clear markers and route
             function clearMap() {
                 markers.forEach(marker => {
                     map.removeLayer(marker);
