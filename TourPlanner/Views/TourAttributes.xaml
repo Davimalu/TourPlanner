@@ -48,8 +48,8 @@
                         </StackPanel>
 
                         <!-- Data Binding -->
-                        <ui:TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTour.Popularity, TargetNullValue='', StringFormat={}{0} %}" TextWrapping="Wrap"/>
-                        <ui:TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTour.ChildFriendlyRating, TargetNullValue='', StringFormat={}{0} %}" TextWrapping="Wrap"/>
+                        <ProgressBar Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding SelectedTour.Popularity, UpdateSourceTrigger=PropertyChanged}"/>
+                        <ProgressBar Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding SelectedTour.ChildFriendlyRating, UpdateSourceTrigger=PropertyChanged}"/>
                         <ui:TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTour.AiSummary, TargetNullValue=''}" TextWrapping="Wrap"/>
                     </Grid>
                     
