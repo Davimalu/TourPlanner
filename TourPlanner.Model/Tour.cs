@@ -146,7 +146,6 @@ namespace TourPlanner.Model
         
         // Computed attributes
         private float _popularity;
-        [JsonIgnore]
         public float Popularity
         {
             get => _popularity;
@@ -158,7 +157,6 @@ namespace TourPlanner.Model
         }
         
         private float _childFriendlyRating;
-        [JsonIgnore]
         public float ChildFriendlyRating
         {
             get => _childFriendlyRating;
@@ -170,7 +168,6 @@ namespace TourPlanner.Model
         }
         
         private string _aiSummary = string.Empty;
-        [JsonIgnore]
         public string AiSummary
         {
             get => _aiSummary;
