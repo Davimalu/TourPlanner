@@ -18,13 +18,19 @@ namespace TourPlanner.ViewModels
         private readonly ISearchQueryService _searchQueryService;
         private readonly ISearchService _searchService;
         private readonly IEventService _eventService;
+        private readonly IIoService _ioService;
+        private readonly IPdfService _pdfService;
         private readonly ILoggerWrapper _logger;
         
         // Commands
         private RelayCommandAsync? _executeDeleteTour;
+        private RelayCommandAsync? _executeExportTour;
         
         public ICommand ExecuteDeleteTour => _executeDeleteTour ??= 
             new RelayCommandAsync(async _ => await DeleteSelectedTour(), _ => SelectedTour != null);
+        
+        public ICommand ExecuteExportTour => _executeExportTour ??=
+            new RelayCommandAsync(async _ => await ExportSelectedTourAsPdfAsync(), _ => SelectedTour != null);
 
         [Description(
             "when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
@@ -87,7 +93,7 @@ namespace TourPlanner.ViewModels
 
         public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService,
             IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
-            IEventService eventService)
+            IEventService eventService, IIoService ioService, IPdfService pdfService)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
@@ -95,6 +101,8 @@ namespace TourPlanner.ViewModels
             _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
+            _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
+            _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             // Subscribe to changes in the search query to filter tours
@@ -199,6 +207,37 @@ namespace TourPlanner.ViewModels
             {
                 _logger.Error($"Error searching tours: {ex.Message}");
             }
+        }
+        
+        
+        /// <summary>
+        /// Exports the selected tour as a PDF file
+        /// </summary>
+        /// <returns>True if the export was successful, false otherwise</returns>
+        private Task<bool> ExportSelectedTourAsPdfAsync()
+        {
+            if (SelectedTour == null)
+            {
+                _logger.Warn("No tour selected for export.");
+                return Task.FromResult(false);
+            }
+            
+            // Get the file path from the user
+            string filePath = _ioService.OpenFileSaveDialog(
+                "PDF files (*.pdf)|*.pdf|All files (*.*)|*.*",
+                "Export Tour as PDF",
+                $"{SelectedTour.TourName}.pdf");
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                _logger.Warn("Export canceled by user.");
+                return Task.FromResult(false);
+            }
+            
+            _logger.Info($"Exporting tour {SelectedTour.TourName} (ID: {SelectedTour.TourId}) to PDF at {filePath}...");
+            
+            // Export the tour to PDF
+            return _pdfService.ExportTourAsPdfAsync(SelectedTour, filePath);
         }
 
 

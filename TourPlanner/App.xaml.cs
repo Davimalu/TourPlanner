@@ -38,6 +38,7 @@ public partial class App : Application
         services.AddSingleton<ISearchService, SearchService>();
         services.AddSingleton<IAttributeService, AttributeService>();
         services.AddSingleton<IEventService, EventService>();
+        services.AddSingleton<IPdfService, PdfService>();
         
         services.AddTransient<HttpClient>();
         

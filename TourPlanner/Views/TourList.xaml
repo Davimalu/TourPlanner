@@ -19,8 +19,11 @@
                 <ContextMenu>
                     <ui:MenuItem Header="Edit"
                               Command="{Binding ExecuteEditTour}"/>
+                    <ui:MenuItem Header="Export"
+                                 Command="{Binding ExecuteExportTour}"/>
+                    <Separator/>
                     <ui:MenuItem Header="Delete"
-                              Command="{Binding ExecuteDeleteTour}"/>
+                                 Command="{Binding ExecuteDeleteTour}"/>
                 </ContextMenu>
             </ui:ListView.ContextMenu>
             <ui:ListView.ItemTemplate >
