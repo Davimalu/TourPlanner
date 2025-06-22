@@ -55,6 +55,13 @@ namespace TourPlanner.DAL.ServiceAgents
             }
             catch (HttpRequestException ex)
             {
+                // For a 404 Not Found, we return null instead of throwing an exception
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    _logger.Warn($"Tour with ID {id} not found.");
+                    return null;
+                }
+                
                 _logger.Error($"Failed to get tour with ID {id}. Status: {ex.StatusCode}", ex);
                 throw new ApiServiceException($"Failed to get tour with ID {id} from API.", ex.StatusCode ?? HttpStatusCode.InternalServerError, ex.Message);
             }

@@ -1,27 +1,136 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
 using System.Windows.Input;
 using TourPlanner.Commands;
+using TourPlanner.DAL.Interfaces;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
+using TourPlanner.Logic.Interfaces;
 
 namespace TourPlanner.ViewModels
 {
     class MenuBarViewModel : BaseViewModel
     {
-        // TODO: Check if this is needed
-        public ICommand ExecuteShowContextMenu { get; } = new RelayCommand(param =>
+        private readonly ILocalTourService _localTourService;
+        private readonly ITourService _tourService;
+        private readonly IIoService _ioService;
+        private readonly IEventService _eventService;
+        private readonly ILoggerWrapper _logger;
+        
+        // Commands
+        private RelayCommandAsync? _executeExportTours;
+        private RelayCommandAsync? _executeImportTours;
+        private RelayCommand? _executeExitApplication;
+        
+        public ICommand ExecuteExportTours => _executeExportTours ??= 
+            new RelayCommandAsync(ExportTours, _ => true);
+        
+        public ICommand ExecuteImportTours => _executeImportTours ??= 
+            new RelayCommandAsync(ImportTours, _ => true);
+
+        public RelayCommand? ExecuteExitApplication => _executeExitApplication ??= 
+            new RelayCommand(ExitApplication);
+        
+        
+        // Constructor
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IEventService eventService)
         {
-            if (param is Button btn && btn.ContextMenu != null)
+            _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
+            _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
+            _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
+            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
+            
+            _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
+        }
+        
+        
+        // TODO: Create MessageBoxService to handle messages in a more consistent way
+        
+        // Implementations        
+        private async Task ExportTours(object? parameter)
+        {
+            // Get the save path from the user
+            string savePath = _ioService.OpenFileSaveDialog("Tour Files (*.tours)|*.tours", "Export Tours", "%userprofile%");
+            
+            if (string.IsNullOrEmpty(savePath))
             {
-                // Set DataContext to the ViewModel (otherwise the binding won't work)
-                btn.ContextMenu.DataContext = btn.DataContext;
-
-                // Open the context menu
-                btn.ContextMenu.IsOpen = true;
+                // User cancelled the save dialog
+                return;
             }
-        });
 
-        public ICommand ExecuteExitApplication { get; } = new RelayCommand(_ =>
+            // Get all tours from the service
+            var tours = await _tourService.GetToursAsync();
+            if (tours == null || tours.Count == 0)
+            {
+                MessageBox.Show("No tours available to export.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            
+            // Export tours to the specified file
+            _logger.Debug($"Exporting {tours.Count} tours to {savePath}");
+            var success = await _localTourService.SaveToursToFileAsync(tours.ToList(), savePath);
+            
+            // Check if the export was successful
+            if (success)
+            {
+                _logger.Info($"Tours exported successfully to {savePath}");
+                MessageBox.Show("Tours exported successfully.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                _logger.Error($"Failed to export tours to {savePath}");
+                MessageBox.Show("Failed to export tours. Please try again.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        private async Task ImportTours(object? parameter)
         {
-            Environment.Exit(0);
-        });
+            // Get the file path from the user
+            string loadPath = _ioService.OpenFileOpenDialog("Tour Files (*.tours)|*.tours", "Import Tours", "%userprofile%");
+            
+            if (string.IsNullOrEmpty(loadPath))
+            {
+                // User cancelled the open dialog
+                return;
+            }
+            
+            // Load tours from the specified file
+            var tours = await _localTourService.LoadToursFromFileAsync(loadPath);
+            
+            // Check if tours were loaded successfully
+            if (tours == null || !tours.Any())
+            {
+                MessageBox.Show("No tours found in the selected file.", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            _logger.Debug($"Importing {tours.Count()} tours from {loadPath}");
+            
+            // Save the imported tours to the database
+            foreach (var tour in tours)
+            {
+                _logger.Info($"Importing Tour {tour.TourId}: {tour.TourName} | {tour.TourDescription}...");
+                
+                // Create the tour in the database
+                var createdTour = await _tourService.CreateTourAsync(tour);
+                if (createdTour == null)
+                {
+                    _logger.Error($"Failed to import tour {tour.TourId}: {tour.TourName}");
+                    MessageBox.Show($"Failed to import tour {tour.TourId}: {tour.TourName}", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    _logger.Info($"Successfully imported tour {tour.TourId}: {createdTour.TourName}");
+                }
+            }
+            
+            // Inform the UI there may be new tours
+            _eventService.RaiseToursChanged();
+        }
+        
+        private void ExitApplication(object? parameter)
+        {
+            // Close the application
+            Application.Current.Shutdown();
+        }
     }
 }
