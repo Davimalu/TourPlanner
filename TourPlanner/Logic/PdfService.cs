@@ -18,10 +18,12 @@ public class PdfService : IPdfService
 {
     private readonly ILoggerWrapper _logger;
     private readonly IMapService _mapService;
+    private readonly IEventAggregator _eventAggregator;
     
-    public PdfService(IMapService mapService)
+    public PdfService(IMapService mapService, IEventAggregator eventAggregator)
     {
         _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+        _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
 
         _logger = LoggerFactory.GetLogger<PdfService>();
     }

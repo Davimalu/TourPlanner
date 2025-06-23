@@ -3,6 +3,7 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 using TourPlanner.Model.Structs;
 
 namespace TourPlanner.Logic;
@@ -10,14 +11,16 @@ namespace TourPlanner.Logic;
 public class MapService : IMapService
 {
     private readonly IWebViewService _webViewService;
+    private readonly IEventAggregator _eventAggregator;
     private readonly ILoggerWrapper _logger;
     public event EventHandler<GeoCoordinate>? MapClicked;
     
     private const string DefaultMapImagePath = "C:\\tmp\\MapImage.png";
     
-    public MapService(IWebViewService webViewService)
+    public MapService(IWebViewService webViewService, IEventAggregator eventAggregator)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
+        _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
         _logger = LoggerFactory.GetLogger<MapService>();
         
         _webViewService.MessageReceived += OnWebViewMessageReceived;
@@ -177,6 +180,9 @@ public class MapService : IMapService
             _logger.Warn("Failed to capture map image: WebView is not ready.");
             return string.Empty;
         }
+        
+        // Inform others that a screenshot of the map is about to be taken
+        _eventAggregator.Publish(new MapScreenshotRequestedEvent());
 
         // Ensure the map displays the tour's route before capturing the image
         await ClearMapAsync();
