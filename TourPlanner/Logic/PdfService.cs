@@ -166,8 +166,17 @@ public class PdfService : IPdfService
 
         return File.Exists(filePath);
     }
-
-
+    
+    /// -------------------------
+    /// Tour Summary PDF Export
+    /// -------------------------
+    
+    /// <summary>
+    /// Exports a summary of multiple tours as a PDF document
+    /// </summary>
+    /// <param name="tours">The list of tours to include in the summary</param>
+    /// <param name="filePath">The file path where the PDF will be saved</param>
+    /// <returns>True if the PDF was successfully created, false otherwise</returns>
     public async Task<bool> ExportToursAsPdfAsync(List<Tour> tours, string filePath)
     {
         try
@@ -217,23 +226,13 @@ public class PdfService : IPdfService
     }
 
 
-    private void AddDetailRow(Table table, string label, string value, PdfFont font, PdfFont boldFont)
-    {
-        var labelCell = new Cell()
-            .Add(new Paragraph(label).SetFont(boldFont).SetFontSize(12))
-            .SetPadding(5)
-            .SetWidth(UnitValue.CreatePercentValue(30));
-
-        var valueCell = new Cell()
-            .Add(new Paragraph(value).SetFont(font).SetFontSize(12))
-            .SetPadding(5)
-            .SetWidth(UnitValue.CreatePercentValue(70));
-
-        table.AddCell(labelCell);
-        table.AddCell(valueCell);
-    }
-
-
+    /// <summary>
+    /// Adds the overall statistics section to the PDF document
+    /// </summary>
+    /// <param name="document">The PDF document to add the statistics to</param>
+    /// <param name="tours">The list of tours to calculate statistics from</param>
+    /// <param name="font">The font to use for normal text</param>
+    /// <param name="boldFont">The font to use for bold text</param>
     private void AddOverallStatistics(Document document, List<Tour> tours, PdfFont font, PdfFont boldFont)
     {
         var statsHeader = new Paragraph("Overall Statistics")
@@ -243,28 +242,29 @@ public class PdfService : IPdfService
         document.Add(statsHeader);
 
         // Calculate overall statistics
-        var totalTours = tours.Count;
-        var toursWithLogs = tours.Where(t => t.Logs.Any()).ToList();
+        int totalTours = tours.Count;
         var totalLogs = tours.Sum(t => t.Logs.Count);
-        var avgToursPerTransport = tours.GroupBy(t => t.TransportationType)
+        var toursWithLogs = tours.Where(t => t.Logs.Any()).ToList();
+        var tourCountByTransportType = tours
+            .GroupBy(t => t.TransportationType)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        // Overall stats table
+        // Overall statistics table
         var overallStatsTable = new Table(2);
         overallStatsTable.SetWidth(UnitValue.CreatePercentValue(100));
         overallStatsTable.SetMarginBottom(20);
 
         AddDetailRow(overallStatsTable, "Total Tours:", totalTours.ToString(), font, boldFont);
-        AddDetailRow(overallStatsTable, "Tours with Logs:",
-            $"{toursWithLogs.Count} ({(double)toursWithLogs.Count / totalTours * 100:F1}%)", font, boldFont);
+        AddDetailRow(overallStatsTable, "Tours with Logs:", $"{toursWithLogs.Count} ({(double)toursWithLogs.Count / totalTours * 100:F1}%)", font, boldFont);
         AddDetailRow(overallStatsTable, "Total Log Entries:", totalLogs.ToString(), font, boldFont);
-        AddDetailRow(overallStatsTable, "Average Logs per Tour:",
-            totalTours > 0 ? $"{(double)totalLogs / totalTours:F1}" : "0", font, boldFont);
+        AddDetailRow(overallStatsTable, "Average Logs per Tour:", totalTours > 0 ? $"{(double)totalLogs / totalTours:F1}" : "0", font, boldFont);
 
         // Transport type breakdown
-        foreach (var transportGroup in avgToursPerTransport)
-            AddDetailRow(overallStatsTable, $"{transportGroup.Key} Tours:",
-                $"{transportGroup.Value} ({(double)transportGroup.Value / totalTours * 100:F1}%)", font, boldFont);
+        foreach (var (transportType, count) in tourCountByTransportType)
+        {
+            double percentage = totalTours > 0 ? (double)count / totalTours * 100 : 0;
+            AddDetailRow(overallStatsTable, $"{transportType} Tours:", $"{count} ({percentage:F1}%)", font, boldFont);
+        }
 
         document.Add(overallStatsTable);
     }
@@ -424,6 +424,23 @@ public class PdfService : IPdfService
             
             document.Add(tourContainer);
         }
+    }
+
+    
+    private void AddDetailRow(Table table, string label, string value, PdfFont font, PdfFont boldFont)
+    {
+        var labelCell = new Cell()
+            .Add(new Paragraph(label).SetFont(boldFont).SetFontSize(12))
+            .SetPadding(5)
+            .SetWidth(UnitValue.CreatePercentValue(30));
+
+        var valueCell = new Cell()
+            .Add(new Paragraph(value).SetFont(font).SetFontSize(12))
+            .SetPadding(5)
+            .SetWidth(UnitValue.CreatePercentValue(70));
+
+        table.AddCell(labelCell);
+        table.AddCell(valueCell);
     }
 
 
