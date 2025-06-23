@@ -18,19 +18,28 @@ namespace TourPlanner.Logic;
 
 public class PdfService : IPdfService
 {
-    private readonly IEventAggregator _eventAggregator;
     private readonly ILoggerWrapper _logger;
     private readonly IMapService _mapService;
 
-    public PdfService(IMapService mapService, IEventAggregator eventAggregator)
+    public PdfService(IMapService mapService)
     {
         _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-        _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
 
         _logger = LoggerFactory.GetLogger<PdfService>();
     }
+    
+    // ---------------------------
+    // Detailed Tour PDF Export
+    // ---------------------------
 
-
+    // TODO: Refactor statistics calculation logic into a separate service for better separation of concerns; maybe then also display the statistics in the UI
+    
+    /// <summary>
+    /// Exports the details of a single tour as a PDF document
+    /// </summary>
+    /// <param name="tour">The tour to export</param>
+    /// <param name="filePath">The file path where the PDF will be saved</param>
+    /// <returns>True if the PDF was successfully created, false otherwise</returns>
     public async Task<bool> ExportTourAsPdfAsync(Tour tour, string filePath)
     {
         var writer = new PdfWriter(filePath);
@@ -50,43 +59,99 @@ public class PdfService : IPdfService
         document.Add(title);
 
         // Route Image
-        try
-        {
-            var imagePath = await GetRouteImagePathAsync(tour);
-            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
-            {
-                var imageData = ImageDataFactory.Create(imagePath);
-                var routeImage = new Image(imageData);
-                routeImage.SetWidth(UnitValue.CreatePercentValue(100));
-                routeImage.SetHorizontalAlignment(HorizontalAlignment.CENTER);
-                routeImage.SetMarginBottom(20);
-                document.Add(routeImage);
-            }
-        }
-        catch (Exception ex)
-        {
-            // Log the error but continue with PDF generation
-            _logger.Error($"Failed to add route image for tour '{tour.TourName}': {ex.Message}");
-        }
+        await AddRouteImage(tour, document);
 
         // Tour Details
-        var detailsTable = new Table(2);
-        detailsTable.SetWidth(UnitValue.CreatePercentValue(100));
-
-        AddDetailRow(detailsTable, "Description:", tour.TourDescription, font, boldFont);
-        AddDetailRow(detailsTable, "Start Location:", tour.StartLocation, font, boldFont);
-        AddDetailRow(detailsTable, "End Location:", tour.EndLocation, font, boldFont);
-        AddDetailRow(detailsTable, "Means of transport:", tour.TransportationType.ToString(), font, boldFont);
-        AddDetailRow(detailsTable, "Distance:", $"{tour.Distance:F2} km", font, boldFont);
-        AddDetailRow(detailsTable, "Estimated Time:", $"{tour.EstimatedTime:F1} minutes", font, boldFont);
-
-        AddDetailRow(detailsTable, "Popularity:", $"{tour.Popularity:F2} %", font, boldFont);
-        AddDetailRow(detailsTable, "Child-Friendliness Rating:", $"{tour.ChildFriendlyRating:F2} %", font, boldFont);
-
-        detailsTable.SetMarginBottom(10);
-        document.Add(detailsTable);
+        AddTourDetails(tour, font, boldFont, document);
 
         // Tour Logs
+        AddLogContainers(tour, boldFont, font, document);
+
+        // Summary statistics for logs
+        AddLogSummary(tour, boldFont, document, font);
+
+        // AI Summary
+        AddAiSummary(tour, boldFont, document, font);
+
+        document.Close();
+
+        return File.Exists(filePath);
+    }
+
+    
+    /// <summary>
+    /// Adds the summary statistics for logs to the PDF document for the given tour
+    /// </summary>
+    /// <param name="tour">Tour for which the summary should be added</param>
+    /// <param name="boldFont">The font to use for bold text</param>
+    /// <param name="document"> The PDF document to which the summary should be added</param>
+    /// <param name="font">The font to use for normal text</param>
+    private void AddLogSummary(Tour tour, PdfFont boldFont, Document document, PdfFont font)
+    {
+        if (tour.Logs.Count > 1)
+        {
+            var statsHeader = new Paragraph("Log Statistics")
+                .SetFont(boldFont)
+                .SetFontSize(16)
+                .SetMarginTop(20)
+                .SetMarginBottom(10);
+            document.Add(statsHeader);
+
+            var statsTable = new Table(2, false);
+            statsTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+            var avgRating = tour.Logs.Where(l => l.Rating > 0).Average(l => l.Rating);
+            var avgDifficulty = tour.Logs.Average(l => l.Difficulty);
+            var totalDistance = tour.Logs.Sum(l => l.DistanceTraveled);
+            var totalTime = tour.Logs.Sum(l => l.TimeTaken);
+
+            AddKeyValuePairAsRow(statsTable, "Total Logs:", tour.Logs.Count.ToString(), font, boldFont);
+            AddKeyValuePairAsRow(statsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
+            AddKeyValuePairAsRow(statsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
+            AddKeyValuePairAsRow(statsTable, "Total Distance Logged:", $"{totalDistance:F2} km", font, boldFont);
+            AddKeyValuePairAsRow(statsTable, "Total Time Logged:", $"{totalTime:F1} hours", font, boldFont);
+
+            document.Add(statsTable);
+        }
+    }
+
+
+    /// <summary>
+    /// Adds the AI summary section to the PDF document for the given tour
+    /// </summary>
+    /// <param name="tour">Tour for which the AI summary should be added</param>
+    /// <param name="boldFont">The font to use for bold text</param>
+    /// <param name="document"> The PDF document to which the summary should be added</param>
+    /// <param name="font">The font to use for normal text</param>
+    private static void AddAiSummary(Tour tour, PdfFont boldFont, Document document, PdfFont font)
+    {
+        if (!string.IsNullOrWhiteSpace(tour.AiSummary))
+        {
+            var summaryHeader = new Paragraph("AI Summary")
+                .SetFont(boldFont)
+                .SetFontSize(16)
+                .SetMarginTop(20)
+                .SetMarginBottom(10);
+            document.Add(summaryHeader);
+
+            var summaryText = new Paragraph(tour.AiSummary)
+                .SetFont(font)
+                .SetFontSize(10)
+                .SetMarginBottom(20);
+            document.Add(summaryText);
+        }
+    }
+
+
+    /// <summary>
+    /// Adds the logs section to the PDF document for the given tour
+    /// </summary>
+    /// <param name="tour">Tour for which the logs should be added</param>
+    /// <param name="boldFont">The font to use for bold text</param>
+    /// <param name="font">The font to use for normal text</param>
+    /// <param name="document"> The PDF document to which the logs should be added</param>
+    private void AddLogContainers(Tour tour, PdfFont boldFont, PdfFont font, Document document)
+    {
         foreach (var log in tour.Logs.OrderByDescending(l => l.TimeStamp))
         {
             // Log container
@@ -106,70 +171,89 @@ public class PdfService : IPdfService
             var logTable = new Table(2, false);
             logTable.SetWidth(UnitValue.CreatePercentValue(100));
 
-            AddDetailRow(logTable, "Rating:", $"{log.Rating:F1}/5", font, boldFont);
-            AddDetailRow(logTable, "Difficulty:", $"{log.Difficulty}/5", font, boldFont);
-            AddDetailRow(logTable, "Distance Traveled:", $"{log.DistanceTraveled:F2} km", font, boldFont);
-            AddDetailRow(logTable, "Time Taken:", $"{log.TimeTaken:F1} hours", font, boldFont);
+            AddKeyValuePairAsRow(logTable, "Rating:", $"{log.Rating:F1}/5", font, boldFont);
+            AddKeyValuePairAsRow(logTable, "Difficulty:", $"{log.Difficulty}/5", font, boldFont);
+            AddKeyValuePairAsRow(logTable, "Distance Traveled:", $"{log.DistanceTraveled:F2} km", font, boldFont);
+            AddKeyValuePairAsRow(logTable, "Time Taken:", $"{log.TimeTaken:F1} hours", font, boldFont);
 
             if (!string.IsNullOrWhiteSpace(log.Comment))
-                AddDetailRow(logTable, "Comment:", log.Comment, font, boldFont);
+                AddKeyValuePairAsRow(logTable, "Comment:", log.Comment, font, boldFont);
 
             logContainer.Add(logTable);
             document.Add(logContainer);
         }
+    }
 
-        // Summary statistics for logs
-        if (tour.Logs.Count > 1)
+
+    /// <summary>
+    /// Adds the tour details table to the PDF document
+    /// </summary>
+    /// <param name="tour">Tour for which the details should be added</param>
+    /// <param name="font">The font to use for normal text</param>
+    /// <param name="boldFont">The font to use for bold text</param>
+    /// <param name="document">The PDF document to which the table should be added</param>
+    private void AddTourDetails(Tour tour, PdfFont font, PdfFont boldFont, Document document)
+    {
+        var detailsTable = new Table(2);
+        detailsTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+        AddKeyValuePairAsRow(detailsTable, "Description:", tour.TourDescription, font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "Start Location:", tour.StartLocation, font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "End Location:", tour.EndLocation, font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "Means of transport:", tour.TransportationType.ToString(), font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "Distance:", $"{tour.Distance:F2} km", font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "Estimated Time:", $"{tour.EstimatedTime:F1} minutes", font, boldFont);
+
+        AddKeyValuePairAsRow(detailsTable, "Popularity:", $"{tour.Popularity:F2} %", font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "Child-Friendliness Rating:", $"{tour.ChildFriendlyRating:F2} %", font, boldFont);
+
+        detailsTable.SetMarginBottom(10);
+        document.Add(detailsTable);
+    }
+
+
+    /// <summary>
+    /// Adds the route image to the PDF document for the given tour
+    /// </summary>
+    /// <param name="tour">Tour for which the route image should be added</param>
+    /// <param name="document">The PDF document to which the image should be added</param>
+    private async Task AddRouteImage(Tour tour, Document document)
+    {
+        try
         {
-            var statsHeader = new Paragraph("Log Statistics")
-                .SetFont(boldFont)
-                .SetFontSize(16)
-                .SetMarginTop(20)
-                .SetMarginBottom(10);
-            document.Add(statsHeader);
-
-            var statsTable = new Table(2, false);
-            statsTable.SetWidth(UnitValue.CreatePercentValue(100));
-
-            var avgRating = tour.Logs.Where(l => l.Rating > 0).Average(l => l.Rating);
-            var avgDifficulty = tour.Logs.Average(l => l.Difficulty);
-            var totalDistance = tour.Logs.Sum(l => l.DistanceTraveled);
-            var totalTime = tour.Logs.Sum(l => l.TimeTaken);
-
-            AddDetailRow(statsTable, "Total Logs:", tour.Logs.Count.ToString(), font, boldFont);
-            AddDetailRow(statsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
-            AddDetailRow(statsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
-            AddDetailRow(statsTable, "Total Distance Logged:", $"{totalDistance:F2} km", font, boldFont);
-            AddDetailRow(statsTable, "Total Time Logged:", $"{totalTime:F1} hours", font, boldFont);
-
-            document.Add(statsTable);
+            var imagePath = await GetRouteImagePathAsync(tour);
+            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+            {
+                var imageData = ImageDataFactory.Create(imagePath);
+                var routeImage = new Image(imageData);
+                routeImage.SetWidth(UnitValue.CreatePercentValue(100));
+                routeImage.SetHorizontalAlignment(HorizontalAlignment.CENTER);
+                routeImage.SetMarginBottom(20);
+                document.Add(routeImage);
+            }
         }
-
-        // AI Summary (if available)
-        if (!string.IsNullOrWhiteSpace(tour.AiSummary))
+        catch (Exception ex)
         {
-            var summaryHeader = new Paragraph("AI Summary")
-                .SetFont(boldFont)
-                .SetFontSize(16)
-                .SetMarginTop(20)
-                .SetMarginBottom(10);
-            document.Add(summaryHeader);
-
-            var summaryText = new Paragraph(tour.AiSummary)
-                .SetFont(font)
-                .SetFontSize(10)
-                .SetMarginBottom(20);
-            document.Add(summaryText);
+            // Log the error but continue with PDF generation
+            _logger.Error($"Failed to add route image for tour '{tour.TourName}': {ex.Message}");
         }
+    }
 
-        document.Close();
 
-        return File.Exists(filePath);
+    /// <summary>
+    /// Generates the image of the route for the given tour and returns the file path to the image
+    /// </summary>
+    /// <param name="tour">The tour for which the route image should be generated</param>
+    /// <returns>the file path to the generated route image</returns>
+    private async Task<string> GetRouteImagePathAsync(Tour tour)
+    {
+        return await _mapService.CaptureMapImageAsync(tour);
     }
     
-    /// -------------------------
-    /// Tour Summary PDF Export
-    /// -------------------------
+    
+    // -------------------------
+    // Tour Summary PDF Export
+    // -------------------------
     
     /// <summary>
     /// Exports a summary of multiple tours as a PDF document
@@ -207,12 +291,13 @@ public class PdfService : IPdfService
 
             // Overall statistics
             AddOverallStatistics(document, tours, font, boldFont);
+            document.Add(new AreaBreak());
 
             // Tours summary table
             AddToursSummaryTable(document, tours, font, boldFont);
+            document.Add(new AreaBreak());
 
             // Detailed tour breakdown
-            document.Add(new AreaBreak());
             AddDetailedTourBreakdown(document, tours, font, boldFont);
 
             document.Close();
@@ -254,16 +339,16 @@ public class PdfService : IPdfService
         overallStatsTable.SetWidth(UnitValue.CreatePercentValue(100));
         overallStatsTable.SetMarginBottom(20);
 
-        AddDetailRow(overallStatsTable, "Total Tours:", totalTours.ToString(), font, boldFont);
-        AddDetailRow(overallStatsTable, "Tours with Logs:", $"{toursWithLogs.Count} ({(double)toursWithLogs.Count / totalTours * 100:F1}%)", font, boldFont);
-        AddDetailRow(overallStatsTable, "Total Log Entries:", totalLogs.ToString(), font, boldFont);
-        AddDetailRow(overallStatsTable, "Average Logs per Tour:", totalTours > 0 ? $"{(double)totalLogs / totalTours:F1}" : "0", font, boldFont);
+        AddKeyValuePairAsRow(overallStatsTable, "Total Tours:", totalTours.ToString(), font, boldFont);
+        AddKeyValuePairAsRow(overallStatsTable, "Tours with Logs:", $"{toursWithLogs.Count} ({(double)toursWithLogs.Count / totalTours * 100:F1}%)", font, boldFont);
+        AddKeyValuePairAsRow(overallStatsTable, "Total Log Entries:", totalLogs.ToString(), font, boldFont);
+        AddKeyValuePairAsRow(overallStatsTable, "Average Logs per Tour:", totalTours > 0 ? $"{(double)totalLogs / totalTours:F1}" : "0", font, boldFont);
 
         // Transport type breakdown
         foreach (var (transportType, count) in tourCountByTransportType)
         {
             double percentage = totalTours > 0 ? (double)count / totalTours * 100 : 0;
-            AddDetailRow(overallStatsTable, $"{transportType} Tours:", $"{count} ({percentage:F1}%)", font, boldFont);
+            AddKeyValuePairAsRow(overallStatsTable, $"{transportType} Tours:", $"{count} ({percentage:F1}%)", font, boldFont);
         }
 
         document.Add(overallStatsTable);
@@ -372,11 +457,11 @@ public class PdfService : IPdfService
             tourInfoTable.SetWidth(UnitValue.CreatePercentValue(100));
             tourInfoTable.SetMarginBottom(10);
 
-            AddDetailRow(tourInfoTable, "Route:", $"{tour.StartLocation} -> {tour.EndLocation}", font, boldFont);
-            AddDetailRow(tourInfoTable, "Means of Transport:", tour.TransportationType.ToString(), font, boldFont);
-            AddDetailRow(tourInfoTable, "Planned Distance:", $"{tour.Distance:F2} km", font, boldFont);
-            AddDetailRow(tourInfoTable, "Estimated Time:", $"{tour.EstimatedTime:F1} minutes", font, boldFont);
-            AddDetailRow(tourInfoTable, "Child-Friendliness:", $"{tour.ChildFriendlyRating:F1}%", font, boldFont);
+            AddKeyValuePairAsRow(tourInfoTable, "Route:", $"{tour.StartLocation} -> {tour.EndLocation}", font, boldFont);
+            AddKeyValuePairAsRow(tourInfoTable, "Means of Transport:", tour.TransportationType.ToString(), font, boldFont);
+            AddKeyValuePairAsRow(tourInfoTable, "Planned Distance:", $"{tour.Distance:F2} km", font, boldFont);
+            AddKeyValuePairAsRow(tourInfoTable, "Estimated Time:", $"{tour.EstimatedTime:F1} minutes", font, boldFont);
+            AddKeyValuePairAsRow(tourInfoTable, "Child-Friendliness:", $"{tour.ChildFriendlyRating:F1}%", font, boldFont);
 
             tourContainer.Add(tourInfoTable);
 
@@ -400,20 +485,20 @@ public class PdfService : IPdfService
                 var totalTime = logs.Sum(l => l.TimeTaken);
                 var totalDistance = logs.Sum(l => l.DistanceTraveled);
 
-                AddDetailRow(logStatsTable, "Total Logs:", logs.Count.ToString(), font, boldFont);
-                AddDetailRow(logStatsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
-                AddDetailRow(logStatsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
-                AddDetailRow(logStatsTable, "Average Time Taken:", $"{avgTime:F1} hours", font, boldFont);
-                AddDetailRow(logStatsTable, "Average Distance Traveled:", $"{avgDistance:F1} km", font, boldFont);
-                AddDetailRow(logStatsTable, "Total Time Logged:", $"{totalTime:F1} hours", font, boldFont);
-                AddDetailRow(logStatsTable, "Total Distance Logged:", $"{totalDistance:F1} km", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Total Logs:", logs.Count.ToString(), font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Average Time Taken:", $"{avgTime:F1} hours", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Average Distance Traveled:", $"{avgDistance:F1} km", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Total Time Logged:", $"{totalTime:F1} hours", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Total Distance Logged:", $"{totalDistance:F1} km", font, boldFont);
 
                 // Efficiency metrics
                 var timeEfficiency = tour.EstimatedTime > 0 ? avgTime * 60 / tour.EstimatedTime * 100 : 0; // Convert hours to minutes
                 var distanceEfficiency = tour.Distance > 0 ? avgDistance / tour.Distance * 100 : 0;
 
-                AddDetailRow(logStatsTable, "Time Efficiency:", timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);
-                AddDetailRow(logStatsTable, "Distance Efficiency:", distanceEfficiency > 0 ? $"{distanceEfficiency:F1}% of planned" : "N/A", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Time Efficiency:", timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Distance Efficiency:", distanceEfficiency > 0 ? $"{distanceEfficiency:F1}% of planned" : "N/A", font, boldFont);
 
                 tourContainer.Add(logStatsTable);
             }
@@ -431,10 +516,18 @@ public class PdfService : IPdfService
     }
 
     
-    private void AddDetailRow(Table table, string label, string value, PdfFont font, PdfFont boldFont)
+    /// <summary>
+    /// Adds a key-value pair as a row to the provided table
+    /// </summary>
+    /// <param name="table">The table to add the row to</param>
+    /// <param name="key">The key for the row, typically a label</param>
+    /// <param name="value">The value for the row, typically a description or data point</param>
+    /// <param name="font">The font to use for the value</param>
+    /// <param name="boldFont">The font to use for the label</param>
+    private void AddKeyValuePairAsRow(Table table, string key, string value, PdfFont font, PdfFont boldFont)
     {
         var labelCell = new Cell()
-            .Add(new Paragraph(label).SetFont(boldFont).SetFontSize(12))
+            .Add(new Paragraph(key).SetFont(boldFont).SetFontSize(12))
             .SetPadding(5)
             .SetWidth(UnitValue.CreatePercentValue(30));
 
@@ -445,11 +538,5 @@ public class PdfService : IPdfService
 
         table.AddCell(labelCell);
         table.AddCell(valueCell);
-    }
-
-
-    private async Task<string> GetRouteImagePathAsync(Tour tour)
-    {
-        return await _mapService.CaptureMapImageAsync(tour);
     }
 }
