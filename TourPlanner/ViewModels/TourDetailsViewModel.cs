@@ -1,13 +1,13 @@
 ﻿using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
     class TourDetailsViewModel : BaseViewModel
     {
-        private readonly ISelectedTourService _selectedTourService;
-
         private Tour? _selectedTour;
+
         public Tour? SelectedTour
         {
             get { return _selectedTour; }
@@ -19,11 +19,19 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourDetailsViewModel(ISelectedTourService selectedTourService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public TourDetailsViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
-            
-            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
+            EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
+        }
+
+
+        /// <summary>
+        /// Handles the SelectedTourChangedEvent to update the classes own SelectedTour property.
+        /// </summary>
+        /// <param name="e">The event containing the newly selected tour</param>
+        private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
+        {
+            SelectedTour = e.SelectedTour;
         }
     }
 }

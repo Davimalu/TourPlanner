@@ -13,7 +13,6 @@ namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
-        private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService;
         private readonly ITourService _tourService;
         private readonly ISearchQueryService _searchQueryService;
@@ -82,8 +81,9 @@ namespace TourPlanner.ViewModels
             {
                 _selectedTour = value;
                 RaisePropertyChanged(nameof(SelectedTour));
-
-                _selectedTourService.SelectedTour = _selectedTour; // Update the selected tour in the service
+                
+                // Inform others that the user selected a new tour
+                EventAggregator.Publish(new SelectedTourChangedEvent(_selectedTour));
 
                 // Inform the Delete Action that the SelectedTour has changed
                 _executeDeleteTour?.RaiseCanExecuteChanged();
@@ -91,11 +91,9 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService,
-            IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
+        public TourListViewModel(ITourService tourService, IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
             IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
@@ -273,7 +271,6 @@ namespace TourPlanner.ViewModels
         public void Dispose()
         {
             // Unsubscribe from events to prevent memory leaks
-            _selectedTourService.SelectedTourChanged -= (selectedTour) => SelectedTour = selectedTour;
             _searchQueryService.QueryChanged -= async (sender, query) => await SearchToursAsync(query);
             EventAggregator.Unsubscribe<ToursChangedEvent>(OnToursChangedAsync);
         }

@@ -1,18 +1,16 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.DAL.ServiceAgents;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
-using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
-        private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService;
         private readonly ITourLogService _tourLogService;
         private readonly ILoggerWrapper _logger;
@@ -54,15 +52,14 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourLogsViewModel(ISelectedTourService selectedTourService, IWindowService windowService, ITourLogService tourLogService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public TourLogsViewModel(IWindowService windowService, ITourLogService tourLogService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             
-            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
-
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            
+            EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
         }
 
 
@@ -96,5 +93,15 @@ namespace TourPlanner.ViewModels
         {
             _windowService.SpawnEditTourLogWindow(SelectedTour!, SelectedLog!);
         }, _ => SelectedTour != null && SelectedLog != null);
+
+
+        /// <summary>
+        /// Handles the event when the selected tour changes and updates the ViewModels own SelectedTour property
+        /// </summary>
+        /// <param name="e">The event containing the newly selected tour</param>
+        private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
+        {
+            SelectedTour = e.SelectedTour;
+        }
     }
 }
