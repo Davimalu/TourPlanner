@@ -3,7 +3,7 @@ using TourPlanner.Model.Enums.MessageBoxAbstraction;
 
 namespace TourPlanner.Logic.Interfaces
 {
-    public interface IUiService
+    public interface IWpfService
     {
         public void SpawnEditTourWindow(Tour selectedTour);
         public void SpawnEditTourLogWindow (Tour selectedTour, TourLog selectedTourLog);

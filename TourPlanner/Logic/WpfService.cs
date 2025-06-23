@@ -10,7 +10,7 @@ namespace TourPlanner.Logic
     /// <summary>
     /// Provides an abstraction layer for other classes that need to spawn windows or show message boxes
     /// </summary>
-    public class UiService : IUiService
+    public class WpfService : IWpfService
     {
         private readonly ITourLogService _tourLogService;
         private readonly ITourService _tourService;
@@ -21,7 +21,7 @@ namespace TourPlanner.Logic
         
         private readonly MapViewModel _mapViewModel;
         
-        public UiService(ITourLogService tourLogService, ITourService tourService, IOrsService orsService, IMapService mapService, MapViewModel mapViewModel, IAttributeService attributeService, IEventAggregator eventAggregator)
+        public WpfService(ITourLogService tourLogService, ITourService tourService, IOrsService orsService, IMapService mapService, MapViewModel mapViewModel, IAttributeService attributeService, IEventAggregator eventAggregator)
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));

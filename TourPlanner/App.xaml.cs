@@ -30,7 +30,7 @@ public partial class App : Application
     {
         // Services
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
-        services.AddSingleton<IUiService, UiService>();
+        services.AddSingleton<IWpfService, WpfService>();
         services.AddSingleton<IMapService, MapService>();
         services.AddSingleton<IWebViewService, WebViewService>();
         services.AddSingleton<ISearchService, SearchService>();

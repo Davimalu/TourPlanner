@@ -11,7 +11,7 @@ namespace TourPlanner.ViewModels
 {
     public class TourLogsViewModel : BaseViewModel
     {
-        private readonly IUiService _uiService;
+        private readonly IWpfService _wpfService;
         private readonly ITourLogService _tourLogService;
         private readonly ILoggerWrapper _logger;
 
@@ -52,9 +52,9 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourLogsViewModel(IUiService uiService, ITourLogService tourLogService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public TourLogsViewModel(IWpfService wpfService, ITourLogService tourLogService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _uiService = uiService ?? throw new ArgumentNullException(nameof(uiService));
+            _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
@@ -65,7 +65,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteAddNewTourLog => new RelayCommand(_ =>
         {
-            _uiService.SpawnEditTourLogWindow(SelectedTour!, new TourLog() { Comment = NewLogName! });
+            _wpfService.SpawnEditTourLogWindow(SelectedTour!, new TourLog() { Comment = NewLogName! });
             NewLogName = string.Empty;
         }, _ => SelectedTour != null && !string.IsNullOrEmpty(NewLogName));
 
@@ -91,7 +91,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteEditTourLog => new RelayCommand(_ =>
         {
-            _uiService.SpawnEditTourLogWindow(SelectedTour!, SelectedLog!);
+            _wpfService.SpawnEditTourLogWindow(SelectedTour!, SelectedLog!);
         }, _ => SelectedTour != null && SelectedLog != null);
 
 

@@ -13,7 +13,7 @@ namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
-        private readonly IUiService _uiService;
+        private readonly IWpfService _wpfService;
         private readonly ITourService _tourService;
         private readonly ISearchService _searchService;
         private readonly IIoService _ioService;
@@ -90,11 +90,11 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ITourService tourService, IUiService uiService, ISearchService searchService,
+        public TourListViewModel(ITourService tourService, IWpfService wpfService, ISearchService searchService,
             IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
-            _uiService = uiService ?? throw new ArgumentNullException(nameof(uiService));
+            _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
@@ -113,7 +113,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
         {
-            _uiService.SpawnEditTourWindow(new Tour()
+            _wpfService.SpawnEditTourWindow(new Tour()
             {
                 TourName = NewTourName!, TourId = -1
             }); // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
@@ -153,7 +153,7 @@ namespace TourPlanner.ViewModels
 
         public ICommand ExecuteEditTour => new RelayCommand(_ =>
         {
-            _uiService.SpawnEditTourWindow(SelectedTour!);
+            _wpfService.SpawnEditTourWindow(SelectedTour!);
 
             // Refresh the list of tours
             LoadToursAsync();

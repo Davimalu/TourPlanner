@@ -16,7 +16,7 @@ namespace TourPlanner.ViewModels
         private readonly ITourService _tourService;
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
-        private readonly IUiService _uiService;
+        private readonly IWpfService _wpfService;
         private readonly ILoggerWrapper _logger;
         
         // Commands
@@ -31,17 +31,17 @@ namespace TourPlanner.ViewModels
             new RelayCommandAsync(ImportTours, _ => true);
 
         public RelayCommand? ExecuteExitApplication => _executeExitApplication ??=
-            new RelayCommand(_ => _uiService.ExitApplication());
+            new RelayCommand(_ => _wpfService.ExitApplication());
         
         
         // Constructor
-        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IUiService uiService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IWpfService wpfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
-            _uiService = uiService ?? throw new ArgumentNullException(nameof(uiService));
+            _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             
             _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
         }
@@ -65,7 +65,7 @@ namespace TourPlanner.ViewModels
             var tours = await _tourService.GetToursAsync();
             if (tours == null || tours.Count == 0)
             {
-                _uiService.ShowMessageBox("Export Tours", "No tours available to export.", MessageBoxButton.OK, MessageBoxImage.Information);
+                _wpfService.ShowMessageBox("Export Tours", "No tours available to export.", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             
@@ -78,7 +78,7 @@ namespace TourPlanner.ViewModels
             {
                 _logger.Debug($"Exporting {tours.Count} tours as PDF to {savePath}");
                 success = await _pdfService.ExportToursAsPdfAsync(tours, savePath);
-            } else if (fileExtension != ".tours")
+            } else if (fileExtension == ".tours")
             {
                 // Export tours to the specified file
                 _logger.Debug($"Exporting {tours.Count} tours to {savePath}");
@@ -86,7 +86,7 @@ namespace TourPlanner.ViewModels
             }
             else
             {
-                _uiService.ShowMessageBox("Export Tours", "Invalid file format. Please use .tours or .pdf.", MessageBoxButton.OK, MessageBoxImage.Error);
+                _wpfService.ShowMessageBox("Export Tours", "Invalid file format. Please use .tours or .pdf.", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             
@@ -94,13 +94,13 @@ namespace TourPlanner.ViewModels
             if (success)
             {
                 _logger.Info($"Tours exported successfully to {savePath}");
-                _uiService.ShowMessageBox("Export Tours", "Tours exported successfully.", MessageBoxButton.OK, MessageBoxImage.Information);
+                _wpfService.ShowMessageBox("Export Tours", "Tours exported successfully.", MessageBoxButton.OK, MessageBoxImage.Information);
                 
             }
             else
             {
                 _logger.Error($"Failed to export tours to {savePath}");
-                _uiService.ShowMessageBox("Export Tours", "Failed to export tours. Please try again.", MessageBoxButton.OK, MessageBoxImage.Error);
+                _wpfService.ShowMessageBox("Export Tours", "Failed to export tours. Please try again.", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         
@@ -121,7 +121,7 @@ namespace TourPlanner.ViewModels
             // Check if tours were loaded successfully
             if (tours == null || !tours.Any())
             {
-                _uiService.ShowMessageBox("Import Tours", "No tours found in the selected file.", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _wpfService.ShowMessageBox("Import Tours", "No tours found in the selected file.", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             
@@ -137,7 +137,7 @@ namespace TourPlanner.ViewModels
                 if (createdTour == null)
                 {
                     _logger.Error($"Failed to import tour {tour.TourId}: {tour.TourName}");
-                    _uiService.ShowMessageBox("Import Tours", $"Failed to import tour {tour.TourId}: {tour.TourName}. Please check the logs for more details.", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _wpfService.ShowMessageBox("Import Tours", $"Failed to import tour {tour.TourId}: {tour.TourName}. Please check the logs for more details.", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
                 {

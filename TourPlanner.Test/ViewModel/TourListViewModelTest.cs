@@ -10,14 +10,14 @@ namespace TourPlanner.Test.ViewModel
     {
         private TourListViewModel _tourListViewModel;
         private ITourService _tourService;
-        private IUiService _uiService;
+        private IWpfService _wpfService;
 
         [SetUp]
         public void Setup()
         {
             _tourService = Substitute.For<ITourService>();
-            _uiService = Substitute.For<IUiService>();
-            _tourListViewModel = new TourListViewModel(_tourService, _uiService);
+            _wpfService = Substitute.For<IWpfService>();
+            _tourListViewModel = new TourListViewModel(_tourService, _wpfService);
         }
 
         [Test]
