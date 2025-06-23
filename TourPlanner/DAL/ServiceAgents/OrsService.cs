@@ -9,7 +9,6 @@ using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
-using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents;
 

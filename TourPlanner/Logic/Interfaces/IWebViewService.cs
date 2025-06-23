@@ -9,5 +9,6 @@ public interface IWebViewService
     Task<bool> RevertToMainWindowWebViewAsync();
     Task<string> ExecuteScriptAsync(string script);
     Task<string> CallFunctionAsync(string functionName, params object[] parameters);
+    Task<bool> TakeScreenshotAsync(string filePath);
     event EventHandler<string>? MessageReceived;
 }

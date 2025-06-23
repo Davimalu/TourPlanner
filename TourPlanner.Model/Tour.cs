@@ -144,6 +144,18 @@ namespace TourPlanner.Model
             }
         }
         
+        private string _geoJsonString = string.Empty;
+        [JsonPropertyName("geoJsonString")]
+        public string GeoJsonString
+        {
+            get => _geoJsonString;
+            set
+            {
+                _geoJsonString = value;
+                OnPropertyChanged(nameof(GeoJsonString));
+            }
+        }
+        
         // Computed attributes
         private float _popularity;
         public float Popularity

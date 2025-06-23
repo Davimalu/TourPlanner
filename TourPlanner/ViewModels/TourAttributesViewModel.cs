@@ -5,12 +5,12 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels;
 
 public class TourAttributesViewModel : BaseViewModel
 {
-    private readonly ISelectedTourService _selectedTourService;
     private readonly ITourService _tourService;
     private readonly IAttributeService _attributeService;
     private readonly ILoggerWrapper _logger;
@@ -28,20 +28,29 @@ public class TourAttributesViewModel : BaseViewModel
         {
             _selectedTour = value;
             RaisePropertyChanged(nameof(SelectedTour));
-
-            // Inform the UI that the command execution state may have changed
-            _executeCalculateAttributes?.RaiseCanExecuteChanged();
         }
     }
 
-    public TourAttributesViewModel(ISelectedTourService selectedTourService, ITourService tourService, IAttributeService attributeService)
+    public TourAttributesViewModel(ITourService tourService, IAttributeService attributeService, IEventAggregator eventAggregator) : base(eventAggregator)
     {
-        _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
         _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
         _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
         _logger = LoggerFactory.GetLogger<TourAttributesViewModel>();
             
-        _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
+        EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
+    }
+    
+    
+    /// <summary>
+    /// Event handler for when the selected tour changes.
+    /// </summary>
+    /// <param name="e">The event containing the newly selected tour</param>
+    private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
+    {
+        SelectedTour = e.SelectedTour;
+        
+        // Inform the UI that the command execution state may have changed
+        _executeCalculateAttributes?.RaiseCanExecuteChanged();
     }
     
     

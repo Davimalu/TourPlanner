@@ -29,7 +29,6 @@ public partial class App : Application
     private void ConfigureServices(IServiceCollection services)
     {
         // Services
-        services.AddSingleton<ISelectedTourService, SelectedTourService>();
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<IMapService, MapService>();
@@ -37,7 +36,8 @@ public partial class App : Application
         services.AddSingleton<ISearchQueryService, SearchQueryService>();
         services.AddSingleton<ISearchService, SearchService>();
         services.AddSingleton<IAttributeService, AttributeService>();
-        services.AddSingleton<IEventService, EventService>();
+        services.AddSingleton<IPdfService, PdfService>();
+        services.AddSingleton<IEventAggregator, EventAggregator>();
         
         services.AddTransient<HttpClient>();
         

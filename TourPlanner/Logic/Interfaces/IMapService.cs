@@ -11,6 +11,5 @@ public interface IMapService
     Task<bool> SetViewToCoordinatesAsync(GeoCoordinate coordinates, int zoomLevel = 15);
     Task<bool> ClearMapAsync();
     Task<bool> SwitchControlToMainMapAsync();
-    
-    event EventHandler<GeoCoordinate>? MapClicked;
+    Task<string> CaptureMapImageAsync(Tour tour);
 }

@@ -3,6 +3,7 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 using TourPlanner.Model.Structs;
 
 namespace TourPlanner.Logic;
@@ -10,12 +11,15 @@ namespace TourPlanner.Logic;
 public class MapService : IMapService
 {
     private readonly IWebViewService _webViewService;
+    private readonly IEventAggregator _eventAggregator;
     private readonly ILoggerWrapper _logger;
-    public event EventHandler<GeoCoordinate>? MapClicked;
     
-    public MapService(IWebViewService webViewService)
+    private const string DefaultMapImagePath = "C:\\tmp\\MapImage.png";
+    
+    public MapService(IWebViewService webViewService, IEventAggregator eventAggregator)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
+        _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
         _logger = LoggerFactory.GetLogger<MapService>();
         
         _webViewService.MessageReceived += OnWebViewMessageReceived;
@@ -168,6 +172,44 @@ public class MapService : IMapService
     }
     
     
+    public async Task<string> CaptureMapImageAsync(Tour tour)
+    {
+        if (!_webViewService.IsReady)
+        {
+            _logger.Warn("Failed to capture map image: WebView is not ready.");
+            return string.Empty;
+        }
+        
+        // Inform others that a screenshot of the map is about to be taken
+        _eventAggregator.Publish(new MapScreenshotRequestedEvent());
+
+        // Ensure the map displays the tour's route before capturing the image
+        await ClearMapAsync();
+        await AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
+        await AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
+        await DrawRouteAsync(tour.GeoJsonString);
+
+        try
+        {
+            var success = await _webViewService.TakeScreenshotAsync(DefaultMapImagePath);
+            
+            if (!success)
+            {
+                _logger.Error("Failed to capture map image: Screenshot operation was not successful.");
+                return string.Empty;
+            }
+            
+            _logger.Debug($"Captured map image for tour '{tour.TourName}'");
+            return DefaultMapImagePath;
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Failed to capture map image: {ex.Message}", ex);
+            return string.Empty;
+        }
+    }
+    
+    
     /// <summary>
     /// Handles messages received from the WebView, specifically looking for map click events
     /// </summary>
@@ -177,12 +219,9 @@ public class MapService : IMapService
     {
         try
         {
+            // TODO: Maybe change this to a more general message handler that can report back function return values too
             var mapMessage = JsonSerializer.Deserialize<MapMessage>(message);
-            if (mapMessage?.Type == "MapClick")
-            {
-                MapClicked?.Invoke(this, new GeoCoordinate(mapMessage.Lat, mapMessage.Lon));
-                _logger.Debug($"Map clicked at ({mapMessage.Lat}, {mapMessage.Lon})");
-            }
+            _logger.Debug($"Received map message: Type={mapMessage?.Type}, Lat={mapMessage?.Lat}, Lon={mapMessage?.Lon}");
         }
         catch (Exception ex)
         {

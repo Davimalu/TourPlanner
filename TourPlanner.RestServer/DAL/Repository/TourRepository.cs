@@ -80,6 +80,7 @@ public class TourRepository : ITourRepository
         tour.EstimatedTime = updatedTour.EstimatedTime;
         tour.StartCoordinates = updatedTour.StartCoordinates;
         tour.EndCoordinates = updatedTour.EndCoordinates;
+        tour.GeoJsonString = updatedTour.GeoJsonString;
         tour.Popularity = updatedTour.Popularity;
         tour.ChildFriendlyRating = updatedTour.ChildFriendlyRating;
         tour.AiSummary = updatedTour.AiSummary;

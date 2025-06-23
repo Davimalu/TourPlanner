@@ -7,24 +7,29 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
-        private readonly ISelectedTourService _selectedTourService;
         private readonly IWindowService _windowService;
         private readonly ITourService _tourService;
         private readonly ISearchQueryService _searchQueryService;
         private readonly ISearchService _searchService;
-        private readonly IEventService _eventService;
+        private readonly IIoService _ioService;
+        private readonly IPdfService _pdfService;
         private readonly ILoggerWrapper _logger;
-        
+
         // Commands
         private RelayCommandAsync? _executeDeleteTour;
-        
-        public ICommand ExecuteDeleteTour => _executeDeleteTour ??= 
+        private RelayCommandAsync? _executeExportTour;
+
+        public ICommand ExecuteDeleteTour => _executeDeleteTour ??=
             new RelayCommandAsync(async _ => await DeleteSelectedTour(), _ => SelectedTour != null);
+
+        public ICommand ExecuteExportTour => _executeExportTour ??=
+            new RelayCommandAsync(async _ => await ExportSelectedTourAsPdfAsync(), _ => SelectedTour != null);
 
         [Description(
             "when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
@@ -77,37 +82,31 @@ namespace TourPlanner.ViewModels
                 _selectedTour = value;
                 RaisePropertyChanged(nameof(SelectedTour));
                 
-                _selectedTourService.SelectedTour = _selectedTour; // Update the selected tour in the service
-                
+                // Inform others that the user selected a new tour
+                EventAggregator.Publish(new SelectedTourChangedEvent(_selectedTour));
+
                 // Inform the Delete Action that the SelectedTour has changed
                 _executeDeleteTour?.RaiseCanExecuteChanged();
             }
         }
 
 
-        public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService,
-            IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
-            IEventService eventService)
+        public TourListViewModel(ITourService tourService, IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
+            IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
-            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
+            _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
+            _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             // Subscribe to changes in the search query to filter tours
-            _searchQueryService.QueryChanged += async (sender, query) =>
-            {
-                await SearchToursAsync(query);
-            };
+            _searchQueryService.QueryChanged += async (sender, query) => { await SearchToursAsync(query); };
 
             // Subscribe to changes in the tours to refresh the list of tours
-            _eventService.ToursChanged += async (sender, tours) =>
-            {
-                await LoadToursAsync();
-            };
+            EventAggregator.Subscribe<ToursChangedEvent>(OnToursChangedAsync);
 
             // On Startup, load all tours from the REST API
             _ = LoadToursAsync();
@@ -126,7 +125,7 @@ namespace TourPlanner.ViewModels
             LoadToursAsync();
         }, _ => !string.IsNullOrEmpty(NewTourName));
 
-        
+
         public async Task DeleteSelectedTour()
         {
             if (SelectedTour == null)
@@ -148,7 +147,9 @@ namespace TourPlanner.ViewModels
             }
 
             SelectedTour = null;
-            _eventService.RaiseToursChanged();
+
+            // Inform other components that the tours have changed
+            EventAggregator.Publish(new ToursChangedEvent(_tours?.ToList() ?? new List<Tour>()));
         }
 
 
@@ -199,6 +200,51 @@ namespace TourPlanner.ViewModels
             {
                 _logger.Error($"Error searching tours: {ex.Message}");
             }
+
+            // Inform other components that the tours have changed
+            EventAggregator.Publish(new ToursChangedEvent(_filteredTours?.ToList() ?? new List<Tour>()));
+        }
+
+
+        /// <summary>
+        /// Exports the selected tour as a PDF file
+        /// </summary>
+        /// <returns>True if the export was successful, false otherwise</returns>
+        private Task<bool> ExportSelectedTourAsPdfAsync()
+        {
+            if (SelectedTour == null)
+            {
+                _logger.Warn("No tour selected for export.");
+                return Task.FromResult(false);
+            }
+
+            // Get the file path from the user
+            string filePath = _ioService.OpenFileSaveDialog(
+                "PDF files (*.pdf)|*.pdf|All files (*.*)|*.*",
+                "Export Tour as PDF",
+                $"{SelectedTour.TourName}.pdf");
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                _logger.Warn("Export canceled by user.");
+                return Task.FromResult(false);
+            }
+
+            _logger.Info($"Exporting tour {SelectedTour.TourName} (ID: {SelectedTour.TourId}) to PDF at {filePath}...");
+
+            // Export the tour to PDF
+            return _pdfService.ExportTourAsPdfAsync(SelectedTour, filePath);
+        }
+
+
+        /// <summary>
+        /// Handles the ToursChangedEvent to reload tours when they change
+        /// </summary>
+        /// <param name="toursChangedEvent">The event containing the updated tours</param>
+        private async void OnToursChangedAsync(ToursChangedEvent toursChangedEvent)
+        {
+            _logger.Debug("Tours changed event received, reloading tours...");
+            await LoadToursAsync();
         }
 
 
@@ -216,6 +262,17 @@ namespace TourPlanner.ViewModels
             {
                 _logger.Error($"Error loading tours: {ex.Message}");
             }
+        }
+
+
+        /// <summary>
+        /// Disposes of the ViewModel, unsubscribing from events to prevent memory leaks
+        /// </summary>
+        public void Dispose()
+        {
+            // Unsubscribe from events to prevent memory leaks
+            _searchQueryService.QueryChanged -= async (sender, query) => await SearchToursAsync(query);
+            EventAggregator.Unsubscribe<ToursChangedEvent>(OnToursChangedAsync);
         }
     }
 }

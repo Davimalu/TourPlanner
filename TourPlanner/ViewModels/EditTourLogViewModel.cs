@@ -46,7 +46,7 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(Tour selectedTour, ITourService tourService, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService)
+        public EditTourLogViewModel(Tour selectedTour, ITourService tourService, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));

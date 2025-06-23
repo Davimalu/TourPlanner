@@ -67,7 +67,7 @@
 
                     <!-- Top Column -->
                     <TabControl Grid.Row="0" Margin="10">
-                        <TabItem IsSelected="True">
+                        <TabItem IsSelected="{Binding InfoTabSelected}">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Margin="0,0,6,0" Symbol="BookInformation24" />
@@ -78,7 +78,7 @@
                                 <local:TourDetails x:Name="TourDetails"/>
                             </Grid>
                         </TabItem>
-                        <TabItem>
+                        <TabItem IsSelected="{Binding MapTabSelected}">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Margin="0,0,6,0" Symbol="Map24" />
@@ -89,7 +89,7 @@
                                 <local:Map x:Name="Map"/>
                             </Grid>
                         </TabItem>
-                        <TabItem>
+                        <TabItem IsSelected="{Binding MiscTabSelected}">
                             <TabItem.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Margin="0,0,6,0" Symbol="TextboxMore24" />

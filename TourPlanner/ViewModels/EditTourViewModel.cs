@@ -54,19 +54,32 @@ namespace TourPlanner.ViewModels
         public List<Transport> Transports { get; set; }
 
         // Copy of the original Tour to edit (to avoid changing the original UNTIL the user saves)
-        private Tour _editableTour = null!;
+        private Tour? _editableTour;
         public Tour EditableTour
         {
-            get => _editableTour;
+            get => _editableTour ?? new Tour();
             set
             {
+                // If the start or end point changes, the user needs to find the coordinates and calculate the route again
+                if (_editableTour?.StartLocation != value.StartLocation)
+                {
+                    EditableTour.StartCoordinates = null;
+                    RouteCalculated = false;
+                }
+                
+                if (_editableTour?.EndLocation != value.EndLocation)
+                {
+                    EditableTour.EndCoordinates = null;
+                    RouteCalculated = false;
+                }
+                
                 _editableTour = value;
                 RaisePropertyChanged(nameof(EditableTour));
             }
         }
 
         
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _osrService = orsService ?? throw new ArgumentNullException(nameof(orsService));
@@ -109,6 +122,8 @@ namespace TourPlanner.ViewModels
             await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)EditableTour.StartCoordinates, "Start", EditableTour.StartLocation));
             await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)EditableTour.EndCoordinates, "End", EditableTour.EndLocation));
             await _mapService.DrawRouteAsync(routeInfo.RouteGeometry);
+            
+            EditableTour.GeoJsonString = routeInfo.RouteGeometry;
             
             RouteCalculated = true; // Mark that the route has been calculated
             _executeSave?.RaiseCanExecuteChanged(); // Notify the save command that the route has been calculated and thus it can be saved

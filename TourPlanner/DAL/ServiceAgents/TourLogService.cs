@@ -7,7 +7,6 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Exceptions;
-using TourPlanner.Models;
 
 namespace TourPlanner.DAL.ServiceAgents
 {

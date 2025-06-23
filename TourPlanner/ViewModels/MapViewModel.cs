@@ -1,17 +1,15 @@
-﻿using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
+﻿using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 using TourPlanner.Model.Structs;
 
 namespace TourPlanner.ViewModels
 {
     public class MapViewModel : BaseViewModel
     {
-        private readonly ISelectedTourService? _selectedTourService;
         private readonly IMapService _mapService;
-        private readonly IOrsService _orsService;
         private readonly ILoggerWrapper _logger;
         
         private Tour? _selectedTour;
@@ -27,53 +25,37 @@ namespace TourPlanner.ViewModels
                 }
             }
         }
-
-        public event EventHandler<GeoCoordinate>? MapClicked;
-
         
-        public MapViewModel(ISelectedTourService selectedTourService, IMapService mapService, IOrsService orsService)
+        
+        public MapViewModel(IMapService mapService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-            _orsService = orsService ?? throw new ArgumentNullException(nameof(orsService));
             _logger = LoggerFactory.GetLogger<MapViewModel>();
-            
-            _selectedTourService.SelectedTourChanged += (selectedTour) => SelectedTour = selectedTour; // Get the currently selected tour from the service
-            
-            _mapService.MapClicked += OnMapClicked; // Subscribe to the MapClicked event from the MapService
-            _selectedTourService.SelectedTourChanged += OnSelectedTourChanged; // Subscribe to changes in the selected tour
+
+            EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
         }
         
         
         /// <summary>
         /// Handles changes to the selected tour and updates the map accordingly
         /// </summary>
-        /// <param name="selectedTour">The newly selected tour</param>
-        private async void OnSelectedTourChanged(Tour? selectedTour)
+        /// <param name="e"><see cref="SelectedTourChangedEvent"/> containing the new selected tour</param>
+        private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
         {
-            SelectedTour = selectedTour;
+            // Update the internal selected tour property
+            SelectedTour = e.SelectedTour;
             
-            if (selectedTour != null)
+            if (SelectedTour != null)
             {
-                _logger.Debug($"Selected tour changed: {selectedTour.TourName} (ID: {selectedTour.TourId}). Redrawing route on map...");
-                await DisplayTourRouteAsync(selectedTour);
+                // Redraw the route on the map if a new tour is selected
+                _logger.Debug($"Selected tour changed: {SelectedTour.TourName} (ID: {SelectedTour.TourId}). Redrawing route on map...");
+                await DisplayTourRouteAsync(SelectedTour);
             }
             else
             {
+                // If no tour is selected, clear the map
                 await _mapService.ClearMapAsync();
             }
-        }
-        
-        
-        /// <summary>
-        /// Handles the MapClicked event from the MapService and forwards it to any subscribers
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnMapClicked(object? sender, GeoCoordinate e)
-        {
-            MapClicked?.Invoke(this, e);
-            _logger.Debug($"Map clicked event forwarded: ({e.Latitude}, {e.Longitude})");
         }
         
         
@@ -93,21 +75,11 @@ namespace TourPlanner.ViewModels
             try
             {
                 _logger.Debug($"Displaying route for tour '{tour.TourName}'");
-
-                var route = await _orsService.GetRouteAsync(tour.TransportationType, (GeoCoordinate)tour.StartCoordinates, (GeoCoordinate)tour.EndCoordinates);
-
-                if (route?.RouteGeometry != null)
-                {
-                    await _mapService.ClearMapAsync();
-                    await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
-                    await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
-                    await _mapService.DrawRouteAsync(route.RouteGeometry);
-                }
-                else
-                {
-                    _logger.Warn($"Failed to get route for tour '{tour.TourName}'");
-                    await _mapService.ClearMapAsync();
-                }
+                
+                await _mapService.ClearMapAsync();
+                await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
+                await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
+                await _mapService.DrawRouteAsync(tour.GeoJsonString);
             }
             catch (Exception ex)
             {

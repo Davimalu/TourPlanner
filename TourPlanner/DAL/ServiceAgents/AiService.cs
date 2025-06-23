@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
@@ -69,6 +70,13 @@ public class AiService :IAiService
         }
         catch (HttpRequestException ex)
         {
+            // Gracefully handle specific HTTP request errors
+            if (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                _logger.Warn("Request failed: Unauthorized. Please check your API key.");
+                return "Request failed: Unauthorized. Please check your API key.";
+            }
+            
             throw new Exception($"Request failed: {ex.Message}", ex);
         }
     }
