@@ -270,6 +270,13 @@ public class PdfService : IPdfService
     }
 
 
+    /// <summary>
+    /// Adds the Tours Summary table to the PDF document
+    /// </summary>
+    /// <param name="document"> The PDF document to add the summary table to</param>
+    /// <param name="tours">The list of tours to summarize</param>
+    /// <param name="font">The font to use for normal text</param>
+    /// <param name="boldFont"> The font to use for bold text</param>
     private void AddToursSummaryTable(Document document, List<Tour> tours, PdfFont font, PdfFont boldFont)
     {
         var summaryHeader = new Paragraph("Tours Summary")
@@ -279,12 +286,13 @@ public class PdfService : IPdfService
         document.Add(summaryHeader);
 
         // Create table with appropriate columns
-        var summaryTable = new Table(new[] { 3, 2, 2, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f });
+        var summaryTable = new Table([3, 2, 2, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f]);
         summaryTable.SetWidth(UnitValue.CreatePercentValue(100));
         summaryTable.SetFontSize(10);
 
         // Header row
-        var headerStyle = new Cell().SetBackgroundColor(new DeviceRgb(230, 230, 230))
+        var headerStyle = new Cell()
+            .SetBackgroundColor(new DeviceRgb(230, 230, 230))
             .SetTextAlignment(TextAlignment.CENTER)
             .SetFont(boldFont)
             .SetPadding(8);
@@ -305,30 +313,23 @@ public class PdfService : IPdfService
             var hasLogs = logs.Any();
 
             // Calculate averages
-            var avgRating = hasLogs && logs.Any(l => l.Rating > 0)
-                ? logs.Where(l => l.Rating > 0).Average(l => l.Rating)
-                : 0;
+            var avgRating = hasLogs ? logs.Where(l => l.Rating > 0).Average(l => l.Rating) : 0;
             var avgTime = hasLogs ? logs.Average(l => l.TimeTaken) : 0;
             var avgDistance = hasLogs ? logs.Average(l => l.DistanceTraveled) : 0;
 
-            var cellStyle = new Cell().SetFont(font).SetPadding(6).SetTextAlignment(TextAlignment.CENTER);
+            var cellStyle = new Cell()
+                .SetFont(font)
+                .SetPadding(6)
+                .SetTextAlignment(TextAlignment.CENTER);
 
-            summaryTable.AddCell(cellStyle.Clone(false).SetTextAlignment(TextAlignment.LEFT)
-                .Add(new Paragraph(tour.TourName).SetFont(boldFont)));
-            summaryTable.AddCell(cellStyle.Clone(false).SetTextAlignment(TextAlignment.LEFT)
-                .Add(new Paragraph($"{tour.StartLocation} -> {tour.EndLocation}")));
-            summaryTable.AddCell(cellStyle.Clone(false)
-                .Add(new Paragraph(tour.TransportationType.ToString())));
-            summaryTable.AddCell(cellStyle.Clone(false)
-                .Add(new Paragraph(logs.Count.ToString())));
-            summaryTable.AddCell(cellStyle.Clone(false)
-                .Add(new Paragraph(avgRating > 0 ? $"{avgRating:F1}/5" : "N/A")));
-            summaryTable.AddCell(cellStyle.Clone(false)
-                .Add(new Paragraph(hasLogs ? $"{avgTime:F1}" : "N/A")));
-            summaryTable.AddCell(cellStyle.Clone(false)
-                .Add(new Paragraph(hasLogs ? $"{avgDistance:F1}" : "N/A")));
-            summaryTable.AddCell(cellStyle.Clone(false)
-                .Add(new Paragraph($"{tour.Popularity:F1}%")));
+            summaryTable.AddCell(cellStyle.Clone(false).SetTextAlignment(TextAlignment.LEFT).Add(new Paragraph(tour.TourName).SetFont(boldFont)));
+            summaryTable.AddCell(cellStyle.Clone(false).SetTextAlignment(TextAlignment.LEFT).Add(new Paragraph($"{tour.StartLocation} -> {tour.EndLocation}")));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(tour.TransportationType.ToString())));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(logs.Count.ToString())));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(avgRating > 0 ? $"{avgRating:F1}/5" : "N/A")));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(hasLogs ? $"{avgTime:F1}" : "N/A")));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(hasLogs ? $"{avgDistance:F1}" : "N/A")));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph($"{tour.Popularity:F1}%")));
         }
 
         document.Add(summaryTable);
