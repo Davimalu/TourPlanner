@@ -54,7 +54,7 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourLogsViewModel(ISelectedTourService selectedTourService, IWindowService windowService, ITourLogService tourLogService)
+        public TourLogsViewModel(ISelectedTourService selectedTourService, IWindowService windowService, ITourLogService tourLogService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));

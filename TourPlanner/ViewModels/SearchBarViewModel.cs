@@ -25,7 +25,7 @@ namespace TourPlanner.ViewModels
         }
         
         
-        public SearchBarViewModel(ISearchQueryService searchQueryService)
+        public SearchBarViewModel(ISearchQueryService searchQueryService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _logger = LoggerFactory.GetLogger<SearchBarViewModel>();

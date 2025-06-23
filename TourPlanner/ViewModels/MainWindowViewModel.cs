@@ -1,8 +1,10 @@
-﻿namespace TourPlanner.ViewModels
+﻿using TourPlanner.Logic.Interfaces;
+
+namespace TourPlanner.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
-        public MainWindowViewModel()
+        public MainWindowViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
         }
     }

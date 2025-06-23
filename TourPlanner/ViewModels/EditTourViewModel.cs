@@ -66,7 +66,7 @@ namespace TourPlanner.ViewModels
         }
 
         
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _osrService = orsService ?? throw new ArgumentNullException(nameof(orsService));

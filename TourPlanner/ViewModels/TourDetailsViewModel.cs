@@ -19,7 +19,7 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourDetailsViewModel(ISelectedTourService selectedTourService)
+        public TourDetailsViewModel(ISelectedTourService selectedTourService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             

@@ -31,7 +31,7 @@ namespace TourPlanner.ViewModels
         public event EventHandler<GeoCoordinate>? MapClicked;
 
         
-        public MapViewModel(ISelectedTourService selectedTourService, IMapService mapService, IOrsService orsService)
+        public MapViewModel(ISelectedTourService selectedTourService, IMapService mapService, IOrsService orsService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));

@@ -7,6 +7,7 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
@@ -17,7 +18,6 @@ namespace TourPlanner.ViewModels
         private readonly ITourService _tourService;
         private readonly ISearchQueryService _searchQueryService;
         private readonly ISearchService _searchService;
-        private readonly IEventService _eventService;
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
         private readonly ILoggerWrapper _logger;
@@ -93,14 +93,13 @@ namespace TourPlanner.ViewModels
 
         public TourListViewModel(ISelectedTourService selectedTourService, ITourService tourService,
             IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
-            IEventService eventService, IIoService ioService, IPdfService pdfService)
+            IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
             _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
-            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
@@ -112,10 +111,11 @@ namespace TourPlanner.ViewModels
             };
 
             // Subscribe to changes in the tours to refresh the list of tours
-            _eventService.ToursChanged += async (sender, tours) =>
+            EventAggregator.Subscribe<ToursChangedEvent>(async _ =>
             {
+                _logger.Debug("Tours changed event received, reloading tours...");
                 await LoadToursAsync();
-            };
+            });
 
             // On Startup, load all tours from the REST API
             _ = LoadToursAsync();
@@ -156,7 +156,9 @@ namespace TourPlanner.ViewModels
             }
 
             SelectedTour = null;
-            _eventService.RaiseToursChanged();
+            
+            // Inform other components that the tours have changed
+            EventAggregator.Publish(new ToursChangedEvent(_tours?.ToList() ?? new List<Tour>()));
         }
 
 
@@ -207,6 +209,9 @@ namespace TourPlanner.ViewModels
             {
                 _logger.Error($"Error searching tours: {ex.Message}");
             }
+            
+            // Inform other components that the tours have changed
+            EventAggregator.Publish(new ToursChangedEvent(_filteredTours?.ToList() ?? new List<Tour>()));
         }
         
         

@@ -34,7 +34,7 @@ public class TourAttributesViewModel : BaseViewModel
         }
     }
 
-    public TourAttributesViewModel(ISelectedTourService selectedTourService, ITourService tourService, IAttributeService attributeService)
+    public TourAttributesViewModel(ISelectedTourService selectedTourService, ITourService tourService, IAttributeService attributeService, IEventAggregator eventAggregator) : base(eventAggregator)
     {
         _selectedTourService = selectedTourService ?? throw new ArgumentNullException(nameof(selectedTourService));
         _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));

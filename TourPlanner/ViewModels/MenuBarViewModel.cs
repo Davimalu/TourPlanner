@@ -5,6 +5,7 @@ using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
@@ -13,7 +14,6 @@ namespace TourPlanner.ViewModels
         private readonly ILocalTourService _localTourService;
         private readonly ITourService _tourService;
         private readonly IIoService _ioService;
-        private readonly IEventService _eventService;
         private readonly ILoggerWrapper _logger;
         
         // Commands
@@ -32,12 +32,11 @@ namespace TourPlanner.ViewModels
         
         
         // Constructor
-        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IEventService eventService)
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
-            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
             
             _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
         }
@@ -94,7 +93,7 @@ namespace TourPlanner.ViewModels
             }
             
             // Load tours from the specified file
-            var tours = await _localTourService.LoadToursFromFileAsync(loadPath);
+            var tours = (await _localTourService.LoadToursFromFileAsync(loadPath))?.ToList();
             
             // Check if tours were loaded successfully
             if (tours == null || !tours.Any())
@@ -124,7 +123,7 @@ namespace TourPlanner.ViewModels
             }
             
             // Inform the UI there may be new tours
-            _eventService.RaiseToursChanged();
+            EventAggregator.Publish(new ToursChangedEvent(tours.ToList()));
         }
         
         private void ExitApplication(object? parameter)
