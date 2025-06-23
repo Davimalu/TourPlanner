@@ -94,21 +94,11 @@ namespace TourPlanner.ViewModels
             try
             {
                 _logger.Debug($"Displaying route for tour '{tour.TourName}'");
-
-                var route = await _orsService.GetRouteAsync(tour.TransportationType, (GeoCoordinate)tour.StartCoordinates, (GeoCoordinate)tour.EndCoordinates);
-
-                if (route?.RouteGeometry != null)
-                {
-                    await _mapService.ClearMapAsync();
-                    await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
-                    await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
-                    await _mapService.DrawRouteAsync(route.RouteGeometry);
-                }
-                else
-                {
-                    _logger.Warn($"Failed to get route for tour '{tour.TourName}'");
-                    await _mapService.ClearMapAsync();
-                }
+                
+                await _mapService.ClearMapAsync();
+                await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.StartCoordinates, "Start", tour.StartLocation));
+                await _mapService.AddMarkerAsync(new MapMarker((GeoCoordinate)tour.EndCoordinates, "End", tour.EndLocation));
+                await _mapService.DrawRouteAsync(tour.GeoJsonString);
             }
             catch (Exception ex)
             {
