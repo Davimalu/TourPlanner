@@ -12,6 +12,4 @@ public interface IMapService
     Task<bool> ClearMapAsync();
     Task<bool> SwitchControlToMainMapAsync();
     Task<string> CaptureMapImageAsync(Tour tour);
-    
-    event EventHandler<GeoCoordinate>? MapClicked;
 }

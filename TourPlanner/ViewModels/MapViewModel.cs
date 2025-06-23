@@ -1,5 +1,4 @@
-﻿using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
+﻿using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -11,7 +10,6 @@ namespace TourPlanner.ViewModels
     public class MapViewModel : BaseViewModel
     {
         private readonly IMapService _mapService;
-        private readonly IOrsService _orsService;
         private readonly ILoggerWrapper _logger;
         
         private Tour? _selectedTour;
@@ -27,17 +25,12 @@ namespace TourPlanner.ViewModels
                 }
             }
         }
-
-        public event EventHandler<GeoCoordinate>? MapClicked;
-
         
-        public MapViewModel(IMapService mapService, IOrsService orsService, IEventAggregator eventAggregator) : base(eventAggregator)
+        
+        public MapViewModel(IMapService mapService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-            _orsService = orsService ?? throw new ArgumentNullException(nameof(orsService));
             _logger = LoggerFactory.GetLogger<MapViewModel>();
-            
-            _mapService.MapClicked += OnMapClicked; // Subscribe to the MapClicked event from the MapService
 
             EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
         }
@@ -63,18 +56,6 @@ namespace TourPlanner.ViewModels
                 // If no tour is selected, clear the map
                 await _mapService.ClearMapAsync();
             }
-        }
-        
-        
-        /// <summary>
-        /// Handles the MapClicked event from the MapService and forwards it to any subscribers
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnMapClicked(object? sender, GeoCoordinate e)
-        {
-            MapClicked?.Invoke(this, e);
-            _logger.Debug($"Map clicked event forwarded: ({e.Latitude}, {e.Longitude})");
         }
         
         

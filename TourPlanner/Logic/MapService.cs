@@ -13,7 +13,6 @@ public class MapService : IMapService
     private readonly IWebViewService _webViewService;
     private readonly IEventAggregator _eventAggregator;
     private readonly ILoggerWrapper _logger;
-    public event EventHandler<GeoCoordinate>? MapClicked;
     
     private const string DefaultMapImagePath = "C:\\tmp\\MapImage.png";
     
@@ -220,12 +219,9 @@ public class MapService : IMapService
     {
         try
         {
+            // TODO: Maybe change this to a more general message handler that can report back function return values too
             var mapMessage = JsonSerializer.Deserialize<MapMessage>(message);
-            if (mapMessage?.Type == "MapClick")
-            {
-                MapClicked?.Invoke(this, new GeoCoordinate(mapMessage.Lat, mapMessage.Lon));
-                _logger.Debug($"Map clicked at ({mapMessage.Lat}, {mapMessage.Lon})");
-            }
+            _logger.Debug($"Received map message: Type={mapMessage?.Type}, Lat={mapMessage?.Lat}, Lon={mapMessage?.Lon}");
         }
         catch (Exception ex)
         {
