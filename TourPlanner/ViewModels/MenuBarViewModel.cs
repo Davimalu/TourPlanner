@@ -14,6 +14,7 @@ namespace TourPlanner.ViewModels
         private readonly ILocalTourService _localTourService;
         private readonly ITourService _tourService;
         private readonly IIoService _ioService;
+        private readonly IPdfService _pdfService;
         private readonly ILoggerWrapper _logger;
         
         // Commands
@@ -32,11 +33,12 @@ namespace TourPlanner.ViewModels
         
         
         // Constructor
-        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
+            _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             
             _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
         }
@@ -48,7 +50,7 @@ namespace TourPlanner.ViewModels
         private async Task ExportTours(object? parameter)
         {
             // Get the save path from the user
-            string savePath = _ioService.OpenFileSaveDialog("Tour Files (*.tours)|*.tours", "Export Tours", "%userprofile%");
+            string savePath = _ioService.OpenFileSaveDialog("Tour Files (*.tours)|*.tours|PDF Files (*.pdf)|*.pdf", "Export Tours", "%userprofile%");
             
             if (string.IsNullOrEmpty(savePath))
             {
@@ -64,9 +66,26 @@ namespace TourPlanner.ViewModels
                 return;
             }
             
-            // Export tours to the specified file
-            _logger.Debug($"Exporting {tours.Count} tours to {savePath}");
-            var success = await _localTourService.SaveToursToFileAsync(tours.ToList(), savePath);
+            // Determine the output format based on the file extension
+            var fileExtension = System.IO.Path.GetExtension(savePath).ToLowerInvariant();
+            bool success = false;
+            
+            // If the user selected PDF, create a PDF Summary
+            if (fileExtension == ".pdf")
+            {
+                _logger.Debug($"Exporting {tours.Count} tours as PDF to {savePath}");
+                success = await _pdfService.ExportToursAsPdfAsync(tours, savePath);
+            } else if (fileExtension != ".tours")
+            {
+                // Export tours to the specified file
+                _logger.Debug($"Exporting {tours.Count} tours to {savePath}");
+                success = await _localTourService.SaveToursToFileAsync(tours.ToList(), savePath);
+            }
+            else
+            {
+                MessageBox.Show("Invalid file format. Please use .tours or .pdf.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             
             // Check if the export was successful
             if (success)

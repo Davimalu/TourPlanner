@@ -5,4 +5,5 @@ namespace TourPlanner.Logic.Interfaces;
 public interface IPdfService
 {
     Task<bool> ExportTourAsPdfAsync(Tour tour, string filePath);
+    Task<bool> ExportToursAsPdfAsync(List<Tour> tours, string filePath);
 }
