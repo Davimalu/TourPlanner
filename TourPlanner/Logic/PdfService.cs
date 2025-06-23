@@ -335,6 +335,13 @@ public class PdfService : IPdfService
         document.Add(summaryTable);
     }
 
+    /// <summary>
+    /// Adds the detailed tour breakdown section to the PDF document
+    /// </summary>
+    /// <param name="document">The PDF document to add the breakdown to</param>
+    /// <param name="tours">The list of tours to include in the breakdown</param>
+    /// <param name="font">The font to use for normal text</param>
+    /// <param name="boldFont"> The font to use for bold text</param>
     private void AddDetailedTourBreakdown(Document document, List<Tour> tours, PdfFont font, PdfFont boldFont)
     {
         var detailHeader = new Paragraph("Detailed Tour Breakdown")
@@ -360,7 +367,7 @@ public class PdfService : IPdfService
                 .SetMarginBottom(10);
             tourContainer.Add(tourHeader);
 
-            // Tour basic info
+            // Basic Tour Info
             var tourInfoTable = new Table(2);
             tourInfoTable.SetWidth(UnitValue.CreatePercentValue(100));
             tourInfoTable.SetMarginBottom(10);
@@ -386,7 +393,7 @@ public class PdfService : IPdfService
                 var logStatsTable = new Table(2);
                 logStatsTable.SetWidth(UnitValue.CreatePercentValue(100));
 
-                var avgRating = logs.Any(l => l.Rating > 0) ? logs.Where(l => l.Rating > 0).Average(l => l.Rating) : 0;
+                var avgRating = logs.Where(l => l.Rating > 0).Average(l => l.Rating);
                 var avgDifficulty = logs.Average(l => l.Difficulty);
                 var avgTime = logs.Average(l => l.TimeTaken);
                 var avgDistance = logs.Average(l => l.DistanceTraveled);
@@ -394,8 +401,7 @@ public class PdfService : IPdfService
                 var totalDistance = logs.Sum(l => l.DistanceTraveled);
 
                 AddDetailRow(logStatsTable, "Total Logs:", logs.Count.ToString(), font, boldFont);
-                AddDetailRow(logStatsTable, "Average Rating:", avgRating > 0 ? $"{avgRating:F1}/5" : "No ratings", font,
-                    boldFont);
+                AddDetailRow(logStatsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
                 AddDetailRow(logStatsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
                 AddDetailRow(logStatsTable, "Average Time Taken:", $"{avgTime:F1} hours", font, boldFont);
                 AddDetailRow(logStatsTable, "Average Distance Traveled:", $"{avgDistance:F1} km", font, boldFont);
@@ -403,14 +409,11 @@ public class PdfService : IPdfService
                 AddDetailRow(logStatsTable, "Total Distance Logged:", $"{totalDistance:F1} km", font, boldFont);
 
                 // Efficiency metrics
-                var timeEfficiency =
-                    tour.EstimatedTime > 0 ? avgTime * 60 / tour.EstimatedTime * 100 : 0; // Convert hours to minutes
+                var timeEfficiency = tour.EstimatedTime > 0 ? avgTime * 60 / tour.EstimatedTime * 100 : 0; // Convert hours to minutes
                 var distanceEfficiency = tour.Distance > 0 ? avgDistance / tour.Distance * 100 : 0;
 
-                AddDetailRow(logStatsTable, "Time Efficiency:",
-                    timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);
-                AddDetailRow(logStatsTable, "Distance Efficiency:",
-                    distanceEfficiency > 0 ? $"{distanceEfficiency:F1}% of planned" : "N/A", font, boldFont);
+                AddDetailRow(logStatsTable, "Time Efficiency:", timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);
+                AddDetailRow(logStatsTable, "Distance Efficiency:", distanceEfficiency > 0 ? $"{distanceEfficiency:F1}% of planned" : "N/A", font, boldFont);
 
                 tourContainer.Add(logStatsTable);
             }
