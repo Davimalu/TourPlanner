@@ -54,12 +54,25 @@ namespace TourPlanner.ViewModels
         public List<Transport> Transports { get; set; }
 
         // Copy of the original Tour to edit (to avoid changing the original UNTIL the user saves)
-        private Tour _editableTour = null!;
+        private Tour? _editableTour;
         public Tour EditableTour
         {
-            get => _editableTour;
+            get => _editableTour ?? new Tour();
             set
             {
+                // If the start or end point changes, the user needs to find the coordinates and calculate the route again
+                if (_editableTour?.StartLocation != value.StartLocation)
+                {
+                    EditableTour.StartCoordinates = null;
+                    RouteCalculated = false;
+                }
+                
+                if (_editableTour?.EndLocation != value.EndLocation)
+                {
+                    EditableTour.EndCoordinates = null;
+                    RouteCalculated = false;
+                }
+                
                 _editableTour = value;
                 RaisePropertyChanged(nameof(EditableTour));
             }
