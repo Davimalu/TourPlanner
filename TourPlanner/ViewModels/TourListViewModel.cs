@@ -15,7 +15,6 @@ namespace TourPlanner.ViewModels
     {
         private readonly IWindowService _windowService;
         private readonly ITourService _tourService;
-        private readonly ISearchQueryService _searchQueryService;
         private readonly ISearchService _searchService;
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
@@ -91,19 +90,18 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourListViewModel(ITourService tourService, IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
+        public TourListViewModel(ITourService tourService, IWindowService windowService, ISearchService searchService,
             IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
-            _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             _logger = LoggerFactory.GetLogger<TourListViewModel>();
 
             // Subscribe to changes in the search query to filter tours
-            _searchQueryService.QueryChanged += async (sender, query) => { await SearchToursAsync(query); };
+            EventAggregator.Subscribe<SearchQueryChangedEvent>(OnSearchQueryChanged);
 
             // Subscribe to changes in the tours to refresh the list of tours
             EventAggregator.Subscribe<ToursChangedEvent>(OnToursChangedAsync);
@@ -166,7 +164,7 @@ namespace TourPlanner.ViewModels
         /// Searches for tours (including their logs) based on the provided query.
         /// </summary>
         /// <param name="query">The search query to filter Tours and TourLogs by </param>
-        private async Task SearchToursAsync(string query)
+        private async void OnSearchQueryChanged(SearchQueryChangedEvent query)
         {
             if (_tours == null || _tours.Count == 0)
             {
@@ -174,7 +172,7 @@ namespace TourPlanner.ViewModels
                 return;
             }
 
-            if (string.IsNullOrEmpty(query))
+            if (string.IsNullOrEmpty(query.SearchQuery))
             {
                 _logger.Info("Search query is empty, showing all tours.");
                 _filterActive = false;
@@ -189,7 +187,7 @@ namespace TourPlanner.ViewModels
 
             try
             {
-                List<Tour> filteredTours = await _searchService.SearchToursAsync(query, _tours.ToList());
+                List<Tour> filteredTours = await _searchService.SearchToursAsync(query.SearchQuery, _tours.ToList());
                 _filteredTours = new ObservableCollection<Tour>(filteredTours);
                 _logger.Info($"Found {filteredTours.Count} tours matching the query: {query}");
 
@@ -271,8 +269,8 @@ namespace TourPlanner.ViewModels
         public void Dispose()
         {
             // Unsubscribe from events to prevent memory leaks
-            _searchQueryService.QueryChanged -= async (sender, query) => await SearchToursAsync(query);
             EventAggregator.Unsubscribe<ToursChangedEvent>(OnToursChangedAsync);
+            EventAggregator.Unsubscribe<SearchQueryChangedEvent>(OnSearchQueryChanged);
         }
     }
 }

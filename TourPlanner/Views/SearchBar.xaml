@@ -15,7 +15,7 @@
 
         <ui:TextBox Grid.Column="0"
                     Margin="5"
-                    Text="{Binding Path=SearchText, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{Binding Path=SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                     PlaceholderText="Search..."
                     />
 

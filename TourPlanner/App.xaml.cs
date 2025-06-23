@@ -33,7 +33,6 @@ public partial class App : Application
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<IMapService, MapService>();
         services.AddSingleton<IWebViewService, WebViewService>();
-        services.AddSingleton<ISearchQueryService, SearchQueryService>();
         services.AddSingleton<ISearchService, SearchService>();
         services.AddSingleton<IAttributeService, AttributeService>();
         services.AddSingleton<IPdfService, PdfService>();
