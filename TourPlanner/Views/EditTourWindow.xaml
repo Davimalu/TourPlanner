@@ -33,7 +33,7 @@
 
         <!-- TourName -->
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Name:" Target="{Binding ElementName=NameField}"/>
-        <ui:TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Name="NameField" Text="{Binding EditableTour.TourName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <ui:TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Name="NameField" Text="{Binding TourName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- Description -->
         <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="Description:" Target="{Binding ElementName=DescriptionField}"/>
@@ -47,7 +47,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ui:TextBox Grid.Column="0" Name="StartLocationField" 
-                        Text="{Binding EditableTour.StartLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        Text="{Binding StartLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                         Margin="5,5,0,5" IsReadOnly="False"/>
             <Button Grid.Column="1" Content="Find" Margin="0,5,5,5" 
                     Command="{Binding ExecuteGeocodeStart}"/>
@@ -69,7 +69,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ui:TextBox Grid.Column="0" Name="EndLocationField" 
-                        Text="{Binding EditableTour.EndLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        Text="{Binding EndLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                         Margin="5,5,0,5" IsReadOnly="False"/>
             <Button Grid.Column="1" Content="Find" Margin="0,5,5,5" 
                     Command="{Binding ExecuteGeocodeEnd}"/>

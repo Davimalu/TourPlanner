@@ -42,7 +42,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourWindow()
             {
-                DataContext = new EditTourViewModel(selectedTour, _tourService, _orsService, _mapService, _eventAggregator, App.ServiceProvider.GetService<ILogger<EditTourViewModel>>()),
+                DataContext = new EditTourViewModel(selectedTour, _tourService, _orsService, _mapService, this, _eventAggregator, App.ServiceProvider.GetService<ILogger<EditTourViewModel>>()),
                 Map = { DataContext = _mapViewModel}
             };
 

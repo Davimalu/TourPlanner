@@ -2,20 +2,23 @@
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
 using TourPlanner.Model.Structs;
+using MessageBoxButton = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxButton;
+using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxImage;
+
 namespace TourPlanner.ViewModels
 {
     class EditTourViewModel : BaseViewModel
     {
         // Dependencies
         private readonly ITourService _tourService;
-        private readonly IOrsService _osrService;
+        private readonly IOrsService _orsService;
         private readonly IMapService _mapService;
+        private readonly IWpfService _wpfService;
         private readonly ILogger<EditTourViewModel> _logger;
         
         // Commands
@@ -23,18 +26,22 @@ namespace TourPlanner.ViewModels
         private RelayCommandAsync? _executeSave;
         private RelayCommandAsync? _executeGeocodeStart;
         private RelayCommandAsync? _executeGeocodeEnd;
+        private RelayCommand? _executeCancel;
         
         public ICommand ExecuteCalculateAndDrawRoute => _executeCalculateAndDrawRoute ??= 
             new RelayCommandAsync(CalculateAndDrawRouteAsync, _ => GotStartCoordinates && GotEndCoordinates);
         
         public ICommand ExecuteSave => _executeSave ??= 
-            new RelayCommandAsync(SaveAsync, _ => GotStartCoordinates && GotEndCoordinates && RouteCalculated);
+            new RelayCommandAsync(SaveAsync, _ => GotStartCoordinates && GotEndCoordinates && RouteCalculated && !string.IsNullOrWhiteSpace(TourName));
 
         public ICommand ExecuteGeocodeStart => _executeGeocodeStart ??= 
-            new RelayCommandAsync(GeocodeStartAsync);
+            new RelayCommandAsync(param => GeocodeLocationAsync(param, true));
 
         public ICommand ExecuteGeocodeEnd => _executeGeocodeEnd ??= 
-            new RelayCommandAsync(GeocodeEndAsync);
+            new RelayCommandAsync(param => GeocodeLocationAsync(param, false));
+        
+        public ICommand ExecuteCancel => _executeCancel ??= 
+            new RelayCommand(CancelEditTour);
 
         // Track whether we have valid start and end coordinates to enable / disable buttons accordingly
         private bool GotStartCoordinates => EditableTour.StartCoordinates != null;
@@ -51,39 +58,79 @@ namespace TourPlanner.ViewModels
             }
         }
         
+        // WPF can't bind to enums directly, so we use lists
         public List<Transport> Transports { get; set; }
-
-        // Copy of the original Tour to edit (to avoid changing the original UNTIL the user saves)
+        
+        // The user will edit this Tour while this window is open
+        // If the user cancels, the original Tour remains unchanged | If the user saves, the original Tour is overwritten with this one
         private Tour? _editableTour;
         public Tour EditableTour
         {
             get => _editableTour ?? new Tour();
             set
             {
-                // If the start or end point changes, the user needs to find the coordinates and calculate the route again
-                if (_editableTour?.StartLocation != value.StartLocation)
-                {
-                    EditableTour.StartCoordinates = null;
-                    RouteCalculated = false;
-                }
-                
-                if (_editableTour?.EndLocation != value.EndLocation)
-                {
-                    EditableTour.EndCoordinates = null;
-                    RouteCalculated = false;
-                }
-                
                 _editableTour = value;
                 RaisePropertyChanged(nameof(EditableTour));
             }
         }
+        
+        
+        public string TourName
+        {
+            get => EditableTour.TourName;
+            set
+            {
+                EditableTour.TourName = value;
+                RaisePropertyChanged(nameof(EditableTour));
+                
+                // Notify the save command that the state may have changed
+                _executeSave?.RaiseCanExecuteChanged();
+            }
+        }
+        
+        
+        public string StartLocation
+        {
+            get => EditableTour.StartLocation;
+            set
+            {
+                EditableTour.StartLocation = value;
+                RaisePropertyChanged(nameof(EditableTour));
+                
+                // If the start location changes, the user needs to find the coordinates and calculate the route again
+                EditableTour.StartCoordinates = null;
+                RouteCalculated = false;
+                
+                // Notify the save button its canExecute state may have changed
+                _executeSave?.RaiseCanExecuteChanged();
+            }
+        }
+        
+        
+        public string EndLocation
+        {
+            get => EditableTour.EndLocation;
+            set
+            {
+                EditableTour.EndLocation = value;
+                RaisePropertyChanged(nameof(EditableTour));
+                
+                // If the end location changes, the user needs to find the coordinates and calculate the route again
+                EditableTour.EndCoordinates = null;
+                RouteCalculated = false;
+                
+                // Notify the save button its canExecute state may have changed
+                _executeSave?.RaiseCanExecuteChanged();
+            }
+        }
 
         
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService, IEventAggregator eventAggregator, ILogger<EditTourViewModel> logger) : base(eventAggregator)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService, IWpfService wpfService, IEventAggregator eventAggregator, ILogger<EditTourViewModel> logger) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
-            _osrService = orsService ?? throw new ArgumentNullException(nameof(orsService));
+            _orsService = orsService ?? throw new ArgumentNullException(nameof(orsService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+            _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             EditableTour = new Tour(selectedTour); // Create a copy of the Tour to edit (so that if the user cancels, the original Tour remains unchanged)
@@ -97,6 +144,10 @@ namespace TourPlanner.ViewModels
         }
         
         
+        /// <summary>
+        /// Calculates the route based on the start and end coordinates of the SelectedTour and draws it on the map
+        /// </summary>
+        /// <param name="parameter"></param>
         private async Task CalculateAndDrawRouteAsync(object? parameter)
         {
             if (EditableTour.StartCoordinates == null || EditableTour.EndCoordinates == null)
@@ -105,16 +156,16 @@ namespace TourPlanner.ViewModels
                 return;
             }
             
-            var routeInfo = await _osrService.GetRouteAsync(EditableTour.TransportationType, (GeoCoordinate)EditableTour.StartCoordinates, (GeoCoordinate)EditableTour.EndCoordinates);
+            var routeInfo = await _orsService.GetRouteAsync(EditableTour.TransportationType, (GeoCoordinate)EditableTour.StartCoordinates, (GeoCoordinate)EditableTour.EndCoordinates);
             
             if (routeInfo == null)
             {
                 _logger.Warn("Could not calculate route: Unable to get route information from OSR service.");
+                _wpfService.ShowMessageBox("Route Calculation Error", "Could not calculate the route. Please check your start and end locations.", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             
             EditableTour.Distance = Math.Round(routeInfo.Distance / 1000, 2);
-            _logger.Debug($"Route Info Duration is {routeInfo.Duration} seconds, Distance is {routeInfo.Distance} meters");
             EditableTour.EstimatedTime = TimeSpan.FromSeconds(routeInfo.Duration);
             
             // Draw the route on the map
@@ -130,6 +181,10 @@ namespace TourPlanner.ViewModels
         }
 
 
+        /// <summary>
+        /// Creates or updates the Tour to the database and closes the window
+        /// </summary>
+        /// <param name="parameter"></param>
         private async Task SaveAsync(object? parameter)
         {
             // Check if the Tour already exists (i.e. are we updating an existing Tour or creating a new one?)
@@ -159,33 +214,57 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public ICommand ExecuteCancel => new RelayCommand(_ =>
+        /// <summary>
+        /// Cancels the edit operation and closes the window without saving changes
+        /// </summary>
+        /// <param name="parameter"></param>
+        private void CancelEditTour(object? parameter)
         {
             // Close the window, discarding changes
             CloseWindow();
-        });
+        }
         
         
-        private async Task GeocodeStartAsync(object? parameter)
+        /// <summary>
+        /// Geocodes the start location of the Tour and adds a marker on the map
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="isStartLocation">Indicates whether the start or end location should be geocoded</param>
+        private async Task GeocodeLocationAsync(object? parameter, bool isStartLocation = true)
         {
             // Retrieve the geocoded coordinates for the start location
-            GeoCode? coordinates = await _osrService.GetGeoCodeFromAddressAsync(EditableTour.StartLocation);
+            GeoCode? coordinates = await _orsService.GetGeoCodeFromAddressAsync(isStartLocation ? EditableTour.StartLocation : EditableTour.EndLocation);
 
             if (coordinates == null)
             {
-                _logger.Warn($"Could not find coordinates for address: {EditableTour.StartLocation}");
+                _logger.Warn("Could not find coordinates for address: " + (isStartLocation ? EditableTour.StartLocation : EditableTour.EndLocation));
+                _wpfService.ShowMessageBox("Geocoding Error", "Could not find coordinates for the specified address. Please check the address and try again.", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             
             // Update the tour's fields with the geocoded coordinates
-            EditableTour.StartCoordinates = coordinates.Coordinates;
-            EditableTour.StartLocation = coordinates.Label;
+            if (isStartLocation)
+            {
+                EditableTour.StartCoordinates = coordinates.Coordinates;
+                EditableTour.StartLocation = coordinates.Label;
+                
+                RaisePropertyChanged(nameof(StartLocation));
+            }
+            else
+            {
+                EditableTour.EndCoordinates = coordinates.Coordinates;
+                EditableTour.EndLocation = coordinates.Label;
+                
+                RaisePropertyChanged(nameof(EndLocation));
+            }
             
-            // Remove existing start marker from the map
-            await _mapService.RemoveMarkerByTitleAsync("Start");
+            string markerTitle = isStartLocation ? "Start" : "End";
+            
+            // Remove existing marker from the map
+            await _mapService.RemoveMarkerByTitleAsync(markerTitle);
             
             // Add new marker on the map for the start location
-            await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "Start", coordinates.Label));
+            await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, markerTitle, coordinates.Label));
             await _mapService.SetViewToCoordinatesAsync(coordinates.Coordinates);
             
             // Notify the draw route command that the start coordinates have changed (and thus the route might be able to be calculated)
@@ -193,33 +272,9 @@ namespace TourPlanner.ViewModels
         }
         
         
-        private async Task GeocodeEndAsync(object? parameter)
-        {
-            // Retrieve the geocoded coordinates for the end location
-            GeoCode? coordinates = await _osrService.GetGeoCodeFromAddressAsync(EditableTour.EndLocation);
-            
-            if (coordinates == null)
-            {
-                _logger.Warn($"Could not find coordinates for address: {EditableTour.EndLocation}");
-                return;
-            }
-            
-            // Update the tour's fields with the geocoded coordinates
-            EditableTour.EndCoordinates = coordinates.Coordinates;
-            EditableTour.EndLocation = coordinates.Label;
-            
-            // Remove existing end marker from the map
-            await _mapService.RemoveMarkerByTitleAsync("End");
-            
-            // Add new marker on the map for the end location
-            await _mapService.AddMarkerAsync(new MapMarker(coordinates.Coordinates, "End", coordinates.Label));
-            await _mapService.SetViewToCoordinatesAsync(coordinates.Coordinates);
-            
-            // Notify the draw route command that the end coordinates have changed (and thus the route might be able to be calculated)
-            _executeCalculateAndDrawRoute?.RaiseCanExecuteChanged();
-        }
-        
-
+        /// <summary>
+        /// Closes the current window and switches control back to the main map in the MainWindow
+        /// </summary>
         private void CloseWindow()
         {
             // Make the MapService control the map in the main window again
