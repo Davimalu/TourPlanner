@@ -3,7 +3,6 @@ using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Enums;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -12,12 +11,13 @@ namespace TourPlanner.ViewModels
 {
     public class EditTourLogViewModel : BaseViewModel
     {
-        private readonly ITourLogService _tourLogService;
         private readonly ITourService _tourService;
+        private readonly ITourLogService _tourLogService;
         private readonly IAttributeService _attributeService;
         private readonly ILogger<EditTourLogViewModel> _logger;
         
-        // Copy of the original TourLog to edit (to avoid changing the original UNTIL the user saves)
+        /* stores a copy of the original TourLog that will be edited by the user while this window is open
+         * if the user cancels, the original TourLog remains unchanged | if the user saves, the original TourLog is overwritten with this one */
         private TourLog _editableTourLog = null!;
         public TourLog EditableTourLog
         {
@@ -26,6 +26,20 @@ namespace TourPlanner.ViewModels
             {
                 _editableTourLog = value;
                 RaisePropertyChanged(nameof(EditableTourLog));
+            }
+        }
+        
+        
+        public string Comment
+        {
+            get => EditableTourLog.Comment;
+            set
+            {
+                EditableTourLog.Comment = value;
+                RaisePropertyChanged(nameof(EditableTourLog));
+                
+                // Notify the command that the state may have changed
+                _executeSave?.RaiseCanExecuteChanged();
             }
         }
 
@@ -41,12 +55,31 @@ namespace TourPlanner.ViewModels
             }
         }
 
-
+        
+        // WPF can't bind to enums directly, so we use lists
         public List<Difficulty> Difficulties { get; set; }
         public List<Rating> Ratings { get; set; }
+        
+        
+        // Commands
+        private RelayCommandAsync? _executeSave;
+        private RelayCommand? _executeCancel;
+        
+        public ICommand ExecuteSave => _executeSave ??= 
+            new RelayCommandAsync(SaveSelectedTourLog, _ => !string.IsNullOrWhiteSpace(EditableTourLog.Comment));
+        
+        public ICommand ExecuteCancel => _executeCancel ??= 
+            new RelayCommand(CancelEditTourLog, _ => true);
 
 
-        public EditTourLogViewModel(Tour selectedTour, ITourService tourService, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService, IEventAggregator eventAggregator, ILogger<EditTourLogViewModel> logger) : base(eventAggregator)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditTourLogViewModel"/> class.
+        /// </summary>
+        /// <param name="selectedTour">The tour to which the log belongs</param>
+        /// <param name="selectedTourLog">The tour log to edit or create</param>
+        /// <exception cref="ArgumentNullException">Thrown when any of the required services are null</exception>
+        public EditTourLogViewModel(Tour selectedTour, TourLog selectedTourLog, ITourService tourService, ITourLogService tourLogService,
+            IAttributeService attributeService, IEventAggregator eventAggregator, ILogger<EditTourLogViewModel> logger) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
@@ -56,13 +89,17 @@ namespace TourPlanner.ViewModels
             _selectedTour = selectedTour;
             EditableTourLog = new TourLog(selectedTourLog); // Create a copy of the TourLog to edit (so that if the user cancels, the original TourLog remains unchanged)
 
-            // Initialize enums (WPF can't bind to enums directly, so we use lists)
+            // Initialize enums
             Difficulties = new List<Difficulty> { Difficulty.Easy, Difficulty.Medium, Difficulty.Hard };
             Ratings = new List<Rating> { Rating.Bad, Rating.Okay, Rating.Good, Rating.Great, Rating.Amazing };
         }
 
 
-        public ICommand ExecuteSave => new RelayCommandAsync(async _ =>
+        /// <summary>
+        /// Creates / updates the TourLog in the database and in the local Tour object
+        /// </summary>
+        /// <param name="parameter"></param>
+        private async Task SaveSelectedTourLog(object? parameter)
         {
             // Check if the TourLog already exists in the SelectedTour (i.e. are we updating an existing TourLog or creating a new one?)
             TourLog? existingTourLog = _selectedTour.Logs.FirstOrDefault(log => log.LogId == EditableTourLog.LogId);
@@ -70,6 +107,7 @@ namespace TourPlanner.ViewModels
             // TourLog already exists -> update it
             if (existingTourLog != null)
             {
+                _logger.Debug($"Updating TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
                 TourLog? updatedTourLog = await _tourLogService.UpdateTourLogAsync(EditableTourLog);
 
                 if (updatedTourLog != null)
@@ -89,6 +127,7 @@ namespace TourPlanner.ViewModels
             // TourLog doesn't exist -> create it
             else
             {
+                _logger.Debug($"Creating new TourLog for Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName} with comment: {EditableTourLog.Comment}");
                 TourLog? newTourLog = await _tourLogService.CreateTourLogAsync(SelectedTour.TourId, EditableTourLog);
 
                 if (newTourLog != null)
@@ -101,24 +140,36 @@ namespace TourPlanner.ViewModels
                     _logger.Error($"Failed to create TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
                 }
             }
+            _logger.Info($"TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} saved successfully for Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
             
             // Calculate the attributes of the Tour (change whenever a log is added or updated) and update the Tour in the database
+            _logger.Debug($"Recalculating attributes for Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}...");
+            
             SelectedTour.Popularity = await _attributeService.CalculatePopularityAsync(SelectedTour);
             SelectedTour.ChildFriendlyRating = _attributeService.CalculateChildFriendliness(SelectedTour);
             await _tourService.UpdateTourAsync(SelectedTour);
-
+            
+            _logger.Debug($"Attributes for Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName} calculated and saved successfully");
+            
             // Close the window
             CloseWindow();
-        });
+        }
 
 
-        public ICommand ExecuteCancel => new RelayCommand(_ =>
+        /// <summary>
+        /// Cancels the edit operation and closes the window without saving changes
+        /// </summary>
+        /// <param name="parameter"></param>
+        private void CancelEditTourLog(object? parameter)
         {
             // Close the window, discarding changes
             CloseWindow();
-        });
+        }
 
 
+        /// <summary>
+        /// Closes the current window that this ViewModel is bound to
+        /// </summary>
         private void CloseWindow()
         {
             // Close the window

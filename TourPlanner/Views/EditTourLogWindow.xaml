@@ -33,7 +33,7 @@
 
         <!-- Comment -->
         <Label Grid.Row="2" Content="Comment:" Target="{Binding ElementName=CommentField}"/>
-        <TextBox Grid.Row="3" Name="CommentField" Text="{Binding EditableTourLog.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <TextBox Grid.Row="3" Name="CommentField" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
         <!-- Difficulty -->
         <Label Grid.Row="4" Content="Difficulty:" Target="{Binding ElementName=DifficultySlider}"/>

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using TourPlanner.DAL.Interfaces;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.ViewModels;
@@ -15,7 +16,7 @@ namespace TourPlanner.Logic
     {
         private readonly ITourLogService _tourLogService;
         private readonly ITourService _tourService;
-        private readonly IOrsService _osrService;
+        private readonly IOrsService _orsService;
         private readonly IMapService _mapService;
         private readonly IAttributeService _attributeService;
         private readonly IEventAggregator _eventAggregator;
@@ -26,7 +27,7 @@ namespace TourPlanner.Logic
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
-            _osrService = orsService ?? throw new ArgumentNullException(nameof(orsService));
+            _orsService = orsService ?? throw new ArgumentNullException(nameof(orsService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
             _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
@@ -41,7 +42,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourWindow()
             {
-                DataContext = App.ServiceProvider.GetRequiredService<EditTourViewModel>(),
+                DataContext = new EditTourViewModel(selectedTour, _tourService, _orsService, _mapService, _eventAggregator, App.ServiceProvider.GetService<ILogger<EditTourViewModel>>()),
                 Map = { DataContext = _mapViewModel}
             };
 
@@ -56,7 +57,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = App.ServiceProvider.GetRequiredService<EditTourLogViewModel>(),
+                DataContext = new EditTourLogViewModel(selectedTour, selectedTourLog, _tourService, _tourLogService, _attributeService, _eventAggregator, App.ServiceProvider.GetService<ILogger<EditTourLogViewModel>>()),
             };
 
             editWindow.ShowDialog();
