@@ -7,4 +7,5 @@ public interface ITourPlannerConfig
     string ApiBaseUrl { get; }
     string OpenRouterBaseUrl { get; }
     string OpenRouterApiKey { get; }
+    string TmpFolder { get;  }
 }
