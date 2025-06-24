@@ -1,9 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -13,33 +11,41 @@ namespace TourPlanner.ViewModels
 {
     public class TourListViewModel : BaseViewModel
     {
-        private readonly IWindowService _windowService;
+        private readonly IWpfService _wpfService;
         private readonly ITourService _tourService;
-        private readonly ISearchQueryService _searchQueryService;
         private readonly ISearchService _searchService;
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<TourListViewModel> _logger;
 
         // Commands
+        private RelayCommandAsync? _executeAddNewTour;
+        private RelayCommandAsync? _executeEditTour;
         private RelayCommandAsync? _executeDeleteTour;
         private RelayCommandAsync? _executeExportTour;
 
+        public ICommand ExecuteAddNewTour => _executeAddNewTour ??= 
+            new RelayCommandAsync(async _ => await AddNewTour(), _ => !string.IsNullOrEmpty(NewTourName));
+        
+        public ICommand ExecuteEditTour => _executeEditTour ??=
+            new RelayCommandAsync(async _ => await EditExistingTour(), _ => SelectedTour != null);
+        
         public ICommand ExecuteDeleteTour => _executeDeleteTour ??=
             new RelayCommandAsync(async _ => await DeleteSelectedTour(), _ => SelectedTour != null);
 
         public ICommand ExecuteExportTour => _executeExportTour ??=
             new RelayCommandAsync(async _ => await ExportSelectedTourAsPdfAsync(), _ => SelectedTour != null);
-
-        [Description(
-            "when the user searches for a tour, this flag is set to true and the Tours collection is filtered accordingly")]
+        
+        // UI Bindings
+        
+        // This flag indicates whether the user has applied a search filter
         private bool _filterActive = false;
 
+        // We store all tours in _tours | When the user applies a search query, we filter the tours and store them in _filteredTours
+        // Depending on the _filterActive flag, the Tours property returns either _tours or _filteredTours
         private ObservableCollection<Tour>? _filteredTours;
         private ObservableCollection<Tour>? _tours;
 
-        [Description(
-            "contains all tours that are currently loaded from the REST API | when _filterActive is true, this collection is filtered and the Tours property returns _filteredTours instead")]
         public ObservableCollection<Tour>? Tours
         {
             get
@@ -58,25 +64,26 @@ namespace TourPlanner.ViewModels
             }
         }
 
-
+        
         private string? _newTourName;
-
         public string? NewTourName
         {
-            get { return _newTourName; }
+            get => _newTourName;
             set
             {
                 _newTourName = value;
                 RaisePropertyChanged(nameof(NewTourName));
+                
+                // Notify the AddNewTour command that its execution state may have changed
+                _executeAddNewTour?.RaiseCanExecuteChanged();
             }
         }
 
-
+        
         private Tour? _selectedTour;
-
         public Tour? SelectedTour
         {
-            get { return _selectedTour; }
+            get => _selectedTour;
             set
             {
                 _selectedTour = value;
@@ -85,25 +92,25 @@ namespace TourPlanner.ViewModels
                 // Inform others that the user selected a new tour
                 EventAggregator.Publish(new SelectedTourChangedEvent(_selectedTour));
 
-                // Inform the Delete Action that the SelectedTour has changed
+                // Inform the commands that their execution state may have changed
                 _executeDeleteTour?.RaiseCanExecuteChanged();
+                _executeEditTour?.RaiseCanExecuteChanged();
             }
         }
 
 
-        public TourListViewModel(ITourService tourService, IWindowService windowService, ISearchQueryService searchQueryService, ISearchService searchService,
-            IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public TourListViewModel(ITourService tourService, IWpfService wpfService, ISearchService searchService,
+            IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator, ILogger<TourListViewModel> logger) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
-            _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
-            _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
+            _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
-            _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Subscribe to changes in the search query to filter tours
-            _searchQueryService.QueryChanged += async (sender, query) => { await SearchToursAsync(query); };
+            EventAggregator.Subscribe<SearchQueryChangedEvent>(OnSearchQueryChanged);
 
             // Subscribe to changes in the tours to refresh the list of tours
             EventAggregator.Subscribe<ToursChangedEvent>(OnToursChangedAsync);
@@ -113,20 +120,27 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public ICommand ExecuteAddNewTour => new RelayCommand(_ =>
+        /// <summary>
+        /// Opens the dialog to add a new tour and initializes it with the provided name
+        /// </summary>
+        private async Task AddNewTour()
         {
-            _windowService.SpawnEditTourWindow(new Tour()
+            _wpfService.SpawnEditTourWindow(new Tour()
             {
+                // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
                 TourName = NewTourName!, TourId = -1
-            }); // ID -1 (i.e. an invalid ID) indicates that the Tour is new and not yet saved in the database
+            }); 
             NewTourName = string.Empty;
 
             // Refresh the list of tours
-            LoadToursAsync();
-        }, _ => !string.IsNullOrEmpty(NewTourName));
+            await LoadToursAsync();
+        }
 
 
-        public async Task DeleteSelectedTour()
+        /// <summary>
+        /// Deletes the currently selected tour via the REST API and updates the local collection
+        /// </summary>
+        private async Task DeleteSelectedTour()
         {
             if (SelectedTour == null)
             {
@@ -153,20 +167,23 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public ICommand ExecuteEditTour => new RelayCommand(_ =>
+        /// <summary>
+        /// Opens the dialog to edit the currently selected tour
+        /// </summary>
+        private async Task EditExistingTour()
         {
-            _windowService.SpawnEditTourWindow(SelectedTour!);
+            _wpfService.SpawnEditTourWindow(SelectedTour!);
 
             // Refresh the list of tours
-            LoadToursAsync();
-        }, _ => SelectedTour != null);
+            await LoadToursAsync();
+        }
 
 
         /// <summary>
         /// Searches for tours (including their logs) based on the provided query.
         /// </summary>
         /// <param name="query">The search query to filter Tours and TourLogs by </param>
-        private async Task SearchToursAsync(string query)
+        private async void OnSearchQueryChanged(SearchQueryChangedEvent query)
         {
             if (_tours == null || _tours.Count == 0)
             {
@@ -174,7 +191,7 @@ namespace TourPlanner.ViewModels
                 return;
             }
 
-            if (string.IsNullOrEmpty(query))
+            if (string.IsNullOrEmpty(query.SearchQuery))
             {
                 _logger.Info("Search query is empty, showing all tours.");
                 _filterActive = false;
@@ -189,7 +206,7 @@ namespace TourPlanner.ViewModels
 
             try
             {
-                List<Tour> filteredTours = await _searchService.SearchToursAsync(query, _tours.ToList());
+                List<Tour> filteredTours = await _searchService.SearchToursAsync(query.SearchQuery, _tours.ToList());
                 _filteredTours = new ObservableCollection<Tour>(filteredTours);
                 _logger.Info($"Found {filteredTours.Count} tours matching the query: {query}");
 
@@ -271,8 +288,8 @@ namespace TourPlanner.ViewModels
         public void Dispose()
         {
             // Unsubscribe from events to prevent memory leaks
-            _searchQueryService.QueryChanged -= async (sender, query) => await SearchToursAsync(query);
             EventAggregator.Unsubscribe<ToursChangedEvent>(OnToursChangedAsync);
+            EventAggregator.Unsubscribe<SearchQueryChangedEvent>(OnSearchQueryChanged);
         }
     }
 }

@@ -1,5 +1,5 @@
-using System.Text.Json;
-using TourPlanner.Infrastructure;
+using System.IO;
+using TourPlanner.config.Interfaces;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -12,17 +12,17 @@ public class MapService : IMapService
 {
     private readonly IWebViewService _webViewService;
     private readonly IEventAggregator _eventAggregator;
-    private readonly ILoggerWrapper _logger;
+    private readonly ITourPlannerConfig _tourPlannerConfig;
+    private readonly ILogger<MapService> _logger;
     
-    private const string DefaultMapImagePath = "C:\\tmp\\MapImage.png";
+    private const string TemporaryImageName = "MapImage.png";
     
-    public MapService(IWebViewService webViewService, IEventAggregator eventAggregator)
+    public MapService(IWebViewService webViewService, ITourPlannerConfig tourPlannerConfig, IEventAggregator eventAggregator, ILogger<MapService> logger)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
+        _tourPlannerConfig = tourPlannerConfig ?? throw new ArgumentNullException(nameof(tourPlannerConfig));
         _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
-        _logger = LoggerFactory.GetLogger<MapService>();
-        
-        _webViewService.MessageReceived += OnWebViewMessageReceived;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     
@@ -191,7 +191,7 @@ public class MapService : IMapService
 
         try
         {
-            var success = await _webViewService.TakeScreenshotAsync(DefaultMapImagePath);
+            var success = await _webViewService.TakeScreenshotAsync(Path.Combine(_tourPlannerConfig.TmpFolder, TemporaryImageName));
             
             if (!success)
             {
@@ -200,32 +200,12 @@ public class MapService : IMapService
             }
             
             _logger.Debug($"Captured map image for tour '{tour.TourName}'");
-            return DefaultMapImagePath;
+            return _tourPlannerConfig.TmpFolder + TemporaryImageName;
         }
         catch (Exception ex)
         {
             _logger.Error($"Failed to capture map image: {ex.Message}", ex);
             return string.Empty;
-        }
-    }
-    
-    
-    /// <summary>
-    /// Handles messages received from the WebView, specifically looking for map click events
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="message"></param>
-    private void OnWebViewMessageReceived(object? sender, string message)
-    {
-        try
-        {
-            // TODO: Maybe change this to a more general message handler that can report back function return values too
-            var mapMessage = JsonSerializer.Deserialize<MapMessage>(message);
-            _logger.Debug($"Received map message: Type={mapMessage?.Type}, Lat={mapMessage?.Lat}, Lon={mapMessage?.Lon}");
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Failed to parse map message: {ex.Message}", ex);
         }
     }
     

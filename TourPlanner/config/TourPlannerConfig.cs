@@ -28,4 +28,7 @@ public class TourPlannerConfig : ITourPlannerConfig
     
     public string OpenRouterApiKey => _configuration["OpenRouter:ApiKey"] 
                                             ?? throw new InvalidOperationException("OpenRouter API key is not configured.");
+
+    public string TmpFolder => _configuration["TourPlanner:TmpFolder"] 
+                                            ?? throw new InvalidOperationException("Temporary folder path is not configured.");
 }

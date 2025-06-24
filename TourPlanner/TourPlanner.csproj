@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.7.25104.5739" />
     <PackageReference Include="itext7" Version="9.2.0" />
     <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.2.0" />
     <PackageReference Include="log4net" Version="3.0.4" />

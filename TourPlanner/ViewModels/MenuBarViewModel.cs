@@ -1,11 +1,11 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model.Events;
+using MessageBoxButton = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxButton;
+using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxImage;
 
 namespace TourPlanner.ViewModels
 {
@@ -15,11 +15,25 @@ namespace TourPlanner.ViewModels
         private readonly ITourService _tourService;
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
-        private readonly ILoggerWrapper _logger;
+        private readonly IWpfService _wpfService;
+        private readonly ILogger<MenuBarViewModel> _logger;
+        
+        // UI Elements
+        private bool _themeToggleChecked;
+        public bool ThemeToggleChecked
+        {
+            get => _themeToggleChecked;
+            set
+            {
+                _themeToggleChecked = value;
+                RaisePropertyChanged(nameof(ThemeToggleChecked));
+            }
+        }
         
         // Commands
         private RelayCommandAsync? _executeExportTours;
         private RelayCommandAsync? _executeImportTours;
+        private RelayCommand _executeChangeTheme;
         private RelayCommand? _executeExitApplication;
         
         public ICommand ExecuteExportTours => _executeExportTours ??= 
@@ -27,26 +41,29 @@ namespace TourPlanner.ViewModels
         
         public ICommand ExecuteImportTours => _executeImportTours ??= 
             new RelayCommandAsync(ImportTours, _ => true);
+        
+        public RelayCommand ExecuteChangeTheme => _executeChangeTheme ??=
+            new RelayCommand(ChangeApplicationTheme, _ => true);
 
-        public RelayCommand? ExecuteExitApplication => _executeExitApplication ??= 
-            new RelayCommand(ExitApplication);
+        public RelayCommand? ExecuteExitApplication => _executeExitApplication ??=
+            new RelayCommand(_ => _wpfService.ExitApplication());
         
         
         // Constructor
-        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IWpfService wpfService, IEventAggregator eventAggregator, ILogger<MenuBarViewModel> logger) : base(eventAggregator)
         {
             _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
-            
-            _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
+            _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
-        
-        // TODO: Create MessageBoxService to handle messages in a more consistent way
-        
-        // Implementations        
+        /// <summary>
+        /// Exports all tours to a file or PDF, depending on the user's choice
+        /// </summary>
+        /// <param name="parameter"></param>
         private async Task ExportTours(object? parameter)
         {
             // Get the save path from the user
@@ -62,7 +79,7 @@ namespace TourPlanner.ViewModels
             var tours = await _tourService.GetToursAsync();
             if (tours == null || tours.Count == 0)
             {
-                MessageBox.Show("No tours available to export.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Information);
+                _wpfService.ShowMessageBox("Export Tours", "No tours available to export.", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             
@@ -75,7 +92,7 @@ namespace TourPlanner.ViewModels
             {
                 _logger.Debug($"Exporting {tours.Count} tours as PDF to {savePath}");
                 success = await _pdfService.ExportToursAsPdfAsync(tours, savePath);
-            } else if (fileExtension != ".tours")
+            } else if (fileExtension == ".tours")
             {
                 // Export tours to the specified file
                 _logger.Debug($"Exporting {tours.Count} tours to {savePath}");
@@ -83,7 +100,7 @@ namespace TourPlanner.ViewModels
             }
             else
             {
-                MessageBox.Show("Invalid file format. Please use .tours or .pdf.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Error);
+                _wpfService.ShowMessageBox("Export Tours", "Invalid file format. Please use .tours or .pdf.", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             
@@ -91,15 +108,21 @@ namespace TourPlanner.ViewModels
             if (success)
             {
                 _logger.Info($"Tours exported successfully to {savePath}");
-                MessageBox.Show("Tours exported successfully.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Information);
+                _wpfService.ShowMessageBox("Export Tours", "Tours exported successfully.", MessageBoxButton.OK, MessageBoxImage.Information);
+                
             }
             else
             {
                 _logger.Error($"Failed to export tours to {savePath}");
-                MessageBox.Show("Failed to export tours. Please try again.", "Export Tours", MessageBoxButton.OK, MessageBoxImage.Error);
+                _wpfService.ShowMessageBox("Export Tours", "Failed to export tours. Please try again.", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         
+        
+        /// <summary>
+        /// Imports tours from a file and saves them to the database
+        /// </summary>
+        /// <param name="parameter"></param>
         private async Task ImportTours(object? parameter)
         {
             // Get the file path from the user
@@ -117,7 +140,7 @@ namespace TourPlanner.ViewModels
             // Check if tours were loaded successfully
             if (tours == null || !tours.Any())
             {
-                MessageBox.Show("No tours found in the selected file.", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _wpfService.ShowMessageBox("Import Tours", "No tours found in the selected file.", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             
@@ -133,7 +156,7 @@ namespace TourPlanner.ViewModels
                 if (createdTour == null)
                 {
                     _logger.Error($"Failed to import tour {tour.TourId}: {tour.TourName}");
-                    MessageBox.Show($"Failed to import tour {tour.TourId}: {tour.TourName}", "Import Tours", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _wpfService.ShowMessageBox("Import Tours", $"Failed to import tour {tour.TourId}: {tour.TourName}. Please check the logs for more details.", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
                 {
@@ -144,11 +167,25 @@ namespace TourPlanner.ViewModels
             // Inform the UI there may be new tours
             EventAggregator.Publish(new ToursChangedEvent(tours.ToList()));
         }
-        
-        private void ExitApplication(object? parameter)
+
+
+        /// <summary>
+        /// Changes the application theme based on the toggle state
+        /// </summary>
+        /// <param name="parameter"></param>
+        private void ChangeApplicationTheme(object? parameter)
         {
-            // Close the application
-            Application.Current.Shutdown();
+            // Toggle the theme based on the current state
+            if (ThemeToggleChecked)
+            {
+                _wpfService.ApplyDarkTheme();
+                _logger.Info("Changed application theme to Dark");
+            }
+            else
+            {
+                _wpfService.ApplyLightTheme();
+                _logger.Info("Changed application theme to Light");
+            }
         }
     }
 }

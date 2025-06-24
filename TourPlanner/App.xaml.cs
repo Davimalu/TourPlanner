@@ -5,6 +5,8 @@ using TourPlanner.config;
 using TourPlanner.config.Interfaces;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.DAL.ServiceAgents;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.ViewModels;
@@ -15,9 +17,9 @@ namespace TourPlanner;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App
 {
-    public static IServiceProvider ServiceProvider { get; private set; }
+    public static IServiceProvider? ServiceProvider { get; private set; }
     
     public App()
     {
@@ -30,14 +32,14 @@ public partial class App : Application
     {
         // Services
         services.AddSingleton<ITourPlannerConfig, TourPlannerConfig>();
-        services.AddSingleton<IWindowService, WindowService>();
+        services.AddSingleton<IWpfService, WpfService>();
         services.AddSingleton<IMapService, MapService>();
         services.AddSingleton<IWebViewService, WebViewService>();
-        services.AddSingleton<ISearchQueryService, SearchQueryService>();
         services.AddSingleton<ISearchService, SearchService>();
         services.AddSingleton<IAttributeService, AttributeService>();
         services.AddSingleton<IPdfService, PdfService>();
         services.AddSingleton<IEventAggregator, EventAggregator>();
+        services.AddTransient(typeof(ILogger<>), typeof(Logger<>));
         
         services.AddTransient<HttpClient>();
         
@@ -62,6 +64,11 @@ public partial class App : Application
     
     private void Application_Startup(object sender, StartupEventArgs e)
     {
+        if (ServiceProvider == null)
+        {
+            throw new InvalidOperationException("ServiceProvider is not initialized. Ensure that the App constructor is called before Application_Startup.");
+        }
+        
         // Create the Views (and initialize them with the ViewModels)
         MainWindow mainWindow = new MainWindow
         {
@@ -77,5 +84,9 @@ public partial class App : Application
 
         // Show the MainWindow
         mainWindow.Show();
+        
+        // Initialize the Application with the light theme
+        IWpfService wpfService = ServiceProvider.GetRequiredService<IWpfService>();
+        wpfService.ApplyLightTheme();
     }
 }

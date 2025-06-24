@@ -18,21 +18,18 @@ namespace TourPlanner.Logic;
 
 public class PdfService : IPdfService
 {
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<PdfService> _logger;
     private readonly IMapService _mapService;
 
-    public PdfService(IMapService mapService)
+    public PdfService(IMapService mapService, ILogger<PdfService> logger)
     {
         _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-
-        _logger = LoggerFactory.GetLogger<PdfService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
     // ---------------------------
     // Detailed Tour PDF Export
     // ---------------------------
-
-    // TODO: Refactor statistics calculation logic into a separate service for better separation of concerns; maybe then also display the statistics in the UI
     
     /// <summary>
     /// Exports the details of a single tour as a PDF document
@@ -57,6 +54,14 @@ public class PdfService : IPdfService
             .SetTextAlignment(TextAlignment.CENTER)
             .SetMarginBottom(20);
         document.Add(title);
+        
+        // Generation date
+        var dateGenerated = new Paragraph($"Generated on: {DateTime.Now:dd/MM/yyyy HH:mm}")
+            .SetFont(font)
+            .SetFontSize(12)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(25);
+        document.Add(dateGenerated);
 
         // Route Image
         await AddRouteImage(tour, document);
@@ -103,18 +108,21 @@ public class PdfService : IPdfService
             var avgRating = tour.Logs.Where(l => l.Rating > 0).Average(l => l.Rating);
             var avgDifficulty = tour.Logs.Average(l => l.Difficulty);
             var totalDistance = tour.Logs.Sum(l => l.DistanceTraveled);
-            var totalTime = tour.Logs.Sum(l => l.TimeTaken);
+            
+            // Unfortunately, Linq Sum expressions don't work with TimeSpan
+            var totalTimeMinutes = tour.Logs.Sum(l => l.TimeTaken.TotalMinutes);
+            TimeSpan totalTime = TimeSpan.FromMinutes(totalTimeMinutes);
 
             AddKeyValuePairAsRow(statsTable, "Total Logs:", tour.Logs.Count.ToString(), font, boldFont);
             AddKeyValuePairAsRow(statsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
             AddKeyValuePairAsRow(statsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
             AddKeyValuePairAsRow(statsTable, "Total Distance Logged:", $"{totalDistance:F2} km", font, boldFont);
-            AddKeyValuePairAsRow(statsTable, "Total Time Logged:", $"{totalTime:F1} hours", font, boldFont);
+            AddKeyValuePairAsRow(statsTable, "Total Time Logged:", $"{totalTime.Days} days, {totalTime.Hours} hours, {totalTime.Minutes} minutes, {totalTime.Seconds} seconds", font, boldFont);
 
             document.Add(statsTable);
         }
     }
-
+    
 
     /// <summary>
     /// Adds the AI summary section to the PDF document for the given tour
@@ -174,7 +182,7 @@ public class PdfService : IPdfService
             AddKeyValuePairAsRow(logTable, "Rating:", $"{log.Rating:F1}/5", font, boldFont);
             AddKeyValuePairAsRow(logTable, "Difficulty:", $"{log.Difficulty}/5", font, boldFont);
             AddKeyValuePairAsRow(logTable, "Distance Traveled:", $"{log.DistanceTraveled:F2} km", font, boldFont);
-            AddKeyValuePairAsRow(logTable, "Time Taken:", $"{log.TimeTaken:F1} hours", font, boldFont);
+            AddKeyValuePairAsRow(logTable, "Time Taken:", $"{log.TimeTaken.Days } days, {log.TimeTaken.Hours} hours, {log.TimeTaken.Minutes} minutes, {log.TimeTaken.Seconds} seconds", font, boldFont);
 
             if (!string.IsNullOrWhiteSpace(log.Comment))
                 AddKeyValuePairAsRow(logTable, "Comment:", log.Comment, font, boldFont);
@@ -202,7 +210,7 @@ public class PdfService : IPdfService
         AddKeyValuePairAsRow(detailsTable, "End Location:", tour.EndLocation, font, boldFont);
         AddKeyValuePairAsRow(detailsTable, "Means of transport:", tour.TransportationType.ToString(), font, boldFont);
         AddKeyValuePairAsRow(detailsTable, "Distance:", $"{tour.Distance:F2} km", font, boldFont);
-        AddKeyValuePairAsRow(detailsTable, "Estimated Time:", $"{tour.EstimatedTime:F1} minutes", font, boldFont);
+        AddKeyValuePairAsRow(detailsTable, "Estimated Time:", $"{tour.EstimatedTime.Days } days, {tour.EstimatedTime.Hours} hours, {tour.EstimatedTime.Minutes} minutes, {tour.EstimatedTime.Seconds} seconds", font, boldFont);
 
         AddKeyValuePairAsRow(detailsTable, "Popularity:", $"{tour.Popularity:F2} %", font, boldFont);
         AddKeyValuePairAsRow(detailsTable, "Child-Friendliness Rating:", $"{tour.ChildFriendlyRating:F2} %", font, boldFont);
@@ -387,7 +395,7 @@ public class PdfService : IPdfService
         summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Transport")));
         summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Logs")));
         summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Avg. Rating")));
-        summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Avg. Time (h)")));
+        summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Avg. Time")));
         summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Avg. Distance (km)")));
         summaryTable.AddHeaderCell(headerStyle.Clone(false).Add(new Paragraph("Popularity")));
 
@@ -399,7 +407,8 @@ public class PdfService : IPdfService
 
             // Calculate averages
             var avgRating = hasLogs ? logs.Where(l => l.Rating > 0).Average(l => l.Rating) : 0;
-            var avgTime = hasLogs ? logs.Average(l => l.TimeTaken) : 0;
+            var avgTimeMintues = hasLogs ? logs.Average(l => l.TimeTaken.TotalMinutes) : 0;
+            TimeSpan avgTime = TimeSpan.FromMinutes(avgTimeMintues);
             var avgDistance = hasLogs ? logs.Average(l => l.DistanceTraveled) : 0;
 
             var cellStyle = new Cell()
@@ -412,7 +421,7 @@ public class PdfService : IPdfService
             summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(tour.TransportationType.ToString())));
             summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(logs.Count.ToString())));
             summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(avgRating > 0 ? $"{avgRating:F1}/5" : "N/A")));
-            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(hasLogs ? $"{avgTime:F1}" : "N/A")));
+            summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(hasLogs ? $"{avgTime.Days } days, {avgTime.Hours} hours, {avgTime.Minutes} minutes, {avgTime.Seconds} seconds" : "N/A")));
             summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph(hasLogs ? $"{avgDistance:F1}" : "N/A")));
             summaryTable.AddCell(cellStyle.Clone(false).Add(new Paragraph($"{tour.Popularity:F1}%")));
         }
@@ -460,7 +469,7 @@ public class PdfService : IPdfService
             AddKeyValuePairAsRow(tourInfoTable, "Route:", $"{tour.StartLocation} -> {tour.EndLocation}", font, boldFont);
             AddKeyValuePairAsRow(tourInfoTable, "Means of Transport:", tour.TransportationType.ToString(), font, boldFont);
             AddKeyValuePairAsRow(tourInfoTable, "Planned Distance:", $"{tour.Distance:F2} km", font, boldFont);
-            AddKeyValuePairAsRow(tourInfoTable, "Estimated Time:", $"{tour.EstimatedTime:F1} minutes", font, boldFont);
+            AddKeyValuePairAsRow(tourInfoTable, "Estimated Time:", $"{tour.EstimatedTime.Days} days, {tour.EstimatedTime.Hours} hours, {tour.EstimatedTime.Minutes} minutes, {tour.EstimatedTime.Seconds} seconds", font, boldFont);
             AddKeyValuePairAsRow(tourInfoTable, "Child-Friendliness:", $"{tour.ChildFriendlyRating:F1}%", font, boldFont);
 
             tourContainer.Add(tourInfoTable);
@@ -480,21 +489,23 @@ public class PdfService : IPdfService
 
                 var avgRating = logs.Where(l => l.Rating > 0).Average(l => l.Rating);
                 var avgDifficulty = logs.Average(l => l.Difficulty);
-                var avgTime = logs.Average(l => l.TimeTaken);
+                var avgTimeMinutes = logs.Average(l => l.TimeTaken.TotalMinutes);
+                TimeSpan avgTime = TimeSpan.FromMinutes(avgTimeMinutes);
                 var avgDistance = logs.Average(l => l.DistanceTraveled);
-                var totalTime = logs.Sum(l => l.TimeTaken);
+                var totalTimeMinutes = logs.Sum(l => l.TimeTaken.TotalMinutes);
+                TimeSpan totalTime = TimeSpan.FromMinutes(totalTimeMinutes);
                 var totalDistance = logs.Sum(l => l.DistanceTraveled);
 
                 AddKeyValuePairAsRow(logStatsTable, "Total Logs:", logs.Count.ToString(), font, boldFont);
                 AddKeyValuePairAsRow(logStatsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
                 AddKeyValuePairAsRow(logStatsTable, "Average Difficulty:", $"{avgDifficulty:F1}/5", font, boldFont);
-                AddKeyValuePairAsRow(logStatsTable, "Average Time Taken:", $"{avgTime:F1} hours", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Average Time Taken:", $"{avgTime.Days} days, {avgTime.Hours} hours, {avgTime.Minutes} minutes, {avgTime.Seconds} seconds", font, boldFont);
                 AddKeyValuePairAsRow(logStatsTable, "Average Distance Traveled:", $"{avgDistance:F1} km", font, boldFont);
-                AddKeyValuePairAsRow(logStatsTable, "Total Time Logged:", $"{totalTime:F1} hours", font, boldFont);
+                AddKeyValuePairAsRow(logStatsTable, "Total Time Logged:", $"{totalTime.Days} days, {totalTime.Hours} hours, {totalTime.Minutes} minutes, {totalTime.Seconds} seconds", font, boldFont);
                 AddKeyValuePairAsRow(logStatsTable, "Total Distance Logged:", $"{totalDistance:F1} km", font, boldFont);
 
                 // Efficiency metrics
-                var timeEfficiency = tour.EstimatedTime > 0 ? avgTime * 60 / tour.EstimatedTime * 100 : 0; // Convert hours to minutes
+                var timeEfficiency = totalTimeMinutes > 0 ? avgTimeMinutes / totalTimeMinutes * 100 : 0;
                 var distanceEfficiency = tour.Distance > 0 ? avgDistance / tour.Distance * 100 : 0;
 
                 AddKeyValuePairAsRow(logStatsTable, "Time Efficiency:", timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);

@@ -8,12 +8,13 @@ namespace TourPlanner.Logic;
 
 public class SearchService : ISearchService
 {
-    private ILoggerWrapper _logger;
+    private ILogger<SearchService> _logger;
     
-    public SearchService()
+    public SearchService(ILogger<SearchService> logger)
     {
-        _logger = LoggerFactory.GetLogger<SearchService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
+    
     
     /// <summary>
     /// Performs a full-text search on the list of tours (and their logs) based on the provided query
@@ -44,7 +45,7 @@ public class SearchService : ISearchService
                     tour.EndLocation.ToLowerInvariant().Contains(lowerQuery) ||
                     tour.TransportationType.ToString().ToLowerInvariant().Contains(lowerQuery) ||
                     tour.Distance.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                    tour.EstimatedTime.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                    tour.EstimatedTime.ToString().Contains(lowerQuery) ||
                     tour.Popularity.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                     tour.ChildFriendlyRating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                     tour.AiSummary.ToLowerInvariant().Contains(lowerQuery) ||
@@ -53,7 +54,7 @@ public class SearchService : ISearchService
                         log.Comment.ToLowerInvariant().Contains(lowerQuery) ||
                         log.Difficulty.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                         log.DistanceTraveled.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                        log.TimeTaken.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                        log.TimeTaken.ToString().Contains(lowerQuery) ||
                         log.Rating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery)))
                 .ToList();
         }).ConfigureAwait(false);

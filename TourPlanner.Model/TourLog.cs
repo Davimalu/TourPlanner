@@ -67,8 +67,8 @@ namespace TourPlanner.Model
         }
 
 
-        private float _timeTaken;
-        public float TimeTaken
+        private TimeSpan _timeTaken;
+        public TimeSpan TimeTaken
         {
             get => _timeTaken;
             set

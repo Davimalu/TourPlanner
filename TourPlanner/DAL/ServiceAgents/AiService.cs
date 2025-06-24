@@ -15,13 +15,13 @@ public class AiService :IAiService
 {
     private readonly ITourPlannerConfig _config;
     private readonly HttpClient _httpClient;
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<AiService> _logger;
     
-    public AiService(ITourPlannerConfig config, HttpClient httpClient)
+    public AiService(ITourPlannerConfig config, HttpClient httpClient, ILogger<AiService> logger)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _logger = LoggerFactory.GetLogger<AiService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
         // Set the API Key in the HTTP client headers
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.OpenRouterApiKey}");

@@ -8,7 +8,11 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Padding="10" Background="White">
+            <Border BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    CornerRadius="8"
+                    Padding="10"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>  <!-- Title -->
@@ -16,7 +20,11 @@
                         <RowDefinition Height="Auto"/>  <!-- Button -->
                     </Grid.RowDefinitions>
                     
-                    <ui:TextBlock  FontSize="24" Foreground="Black" FontWeight="Bold" Text="{Binding SelectedTour.TourName, TargetNullValue=''}" Margin="0,0,0,10"/>
+                    <ui:TextBlock  FontSize="24"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" 
+                                   FontWeight="Bold"
+                                   Text="{Binding SelectedTour.TourName, TargetNullValue=''}"
+                                   Margin="0,0,0,10"/>
 
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
@@ -43,7 +51,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                            <ui:SymbolIcon VerticalAlignment="Top" Margin="0,0,6,0" Symbol="BrainCircuit24" /> <!-- MyLocation24 -->
+                            <ui:SymbolIcon VerticalAlignment="Top" Margin="0,0,6,0" Symbol="BrainCircuit24" />
                             <ui:TextBlock VerticalAlignment="Top" Text="AI Summary:" FontWeight="Bold" />
                         </StackPanel>
 

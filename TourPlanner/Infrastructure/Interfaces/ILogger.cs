@@ -1,6 +1,6 @@
 ﻿namespace TourPlanner.Infrastructure.Interfaces
 {
-    public interface ILoggerWrapper
+    public interface ILogger<T>
     {
         void Info(string message);
         void Debug(string message);

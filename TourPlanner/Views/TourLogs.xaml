@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:TourPlanner.ViewModels"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -29,15 +28,15 @@
                                     Width="Auto"/>
 
                 <DataGridTextColumn Header="Difficulty"
-                                    Binding="{Binding Difficulty}"
+                                    Binding="{Binding Difficulty, StringFormat='N1'}"
                                     Width="SizeToHeader"/>
 
                 <DataGridTextColumn Header="Distance (km)"
                                     Binding="{Binding DistanceTraveled, StringFormat={}{0} km}"
                                     Width="Auto"/>
 
-                <DataGridTextColumn Header="Time (hrs)"
-                                    Binding="{Binding TimeTaken, StringFormat={}{0} h}"
+                <DataGridTextColumn Header="Time Taken (dd:hh:mm:ss)"
+                                    Binding="{Binding TimeTaken, StringFormat='dd\\:hh\\:mm\\:ss'}"
                                     Width="Auto"/>
 
                 <DataGridTextColumn Header="Rating"
@@ -53,9 +52,7 @@
         <Grid Grid.Row="1" Margin="10 0 10 10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <!-- TextBox nimmt den restlichen Platz ein -->
                 <ColumnDefinition Width="Auto"/>
-                <!-- Buttons -->
             </Grid.ColumnDefinitions>
 
             <ui:TextBox Grid.Column="0" Margin="5" Text="{Binding Path=NewLogName, UpdateSourceTrigger=PropertyChanged}"/>

@@ -6,6 +6,16 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    
+    <!-- The Menu isn't styled correctly for the dark theme in WPF-UI (and there is no ui:Menu), so we define a custom style here -->
+    <!-- We override the standard brushes of the WPF control with the ones from WPF-UI; DynamicResource ensures that the resource can be changed at runtime -->
+    <UserControl.Resources>
+        <Style TargetType="Menu">
+            <Setter Property="Background" Value="{DynamicResource ApplicationBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+        </Style>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -14,18 +24,9 @@
         
         <Menu Grid.Column="0" FontSize="14">
             <!-- File Menu -->
-            <ui:MenuItem Header="File" Icon="{ui:SymbolIcon DocumentSplitHint24}">
-                <MenuItem Header="Export" Command="{Binding ExecuteExportTours}" />
-                <MenuItem Header="Import" Command="{Binding ExecuteImportTours}"/>
-                <Separator/>
-                <MenuItem Header="Exit" Command="{Binding Path=ExecuteExitApplication}" />
-            </ui:MenuItem>
+            <ui:MenuItem Header="Import" Command="{Binding ExecuteImportTours}" Icon="{ui:SymbolIcon FolderOpen24}"/>
             <!-- Edit Menu -->
-            <ui:MenuItem Header="Edit" Icon="{ui:SymbolIcon DocumentEdit24}" />
-            <!-- Options Menu -->
-            <ui:MenuItem Header="Options" Icon="{ui:SymbolIcon Settings24}" />
-            <!-- Help Menu -->
-            <ui:MenuItem Header="Help" Icon="{ui:SymbolIcon ChatHelp24}" />
+            <ui:MenuItem Header="Export" Command="{Binding ExecuteExportTours}" Icon="{ui:SymbolIcon Save24}"/>
         </Menu>
         
         <ui:ToggleSwitch Grid.Column="1"
@@ -35,7 +36,8 @@
                          HorizontalAlignment="Right"
                          VerticalAlignment="Center"  
                          Margin="0,0,10,0"
-                         Click="ThemeToggleSwitch_Click">
+                         IsChecked="{Binding ThemeToggleChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Command="{Binding ExecuteChangeTheme}">
         </ui:ToggleSwitch>
     </Grid>
 </UserControl>

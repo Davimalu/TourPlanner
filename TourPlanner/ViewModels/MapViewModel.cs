@@ -10,7 +10,7 @@ namespace TourPlanner.ViewModels
     public class MapViewModel : BaseViewModel
     {
         private readonly IMapService _mapService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<MapViewModel> _logger;
         
         private Tour? _selectedTour;
         public Tour? SelectedTour
@@ -27,10 +27,10 @@ namespace TourPlanner.ViewModels
         }
         
         
-        public MapViewModel(IMapService mapService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public MapViewModel(IMapService mapService, IEventAggregator eventAggregator, ILogger<MapViewModel> logger) : base(eventAggregator)
         {
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-            _logger = LoggerFactory.GetLogger<MapViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
         }

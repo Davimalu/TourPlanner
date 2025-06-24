@@ -1,42 +1,55 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
     public class SearchBarViewModel : BaseViewModel
     {
-        private readonly ISearchQueryService _searchQueryService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<SearchBarViewModel> _logger;
         
-        private string _searchText = string.Empty;
-        public string SearchText
+        // Commands
+        private RelayCommand? _executeClearSearchQuery;
+        public ICommand ExecuteClearSearchQuery => _executeClearSearchQuery ??= 
+            new RelayCommand(ClearSearchQuery, _ => !string.IsNullOrEmpty(SearchQuery));
+        
+        // Stores the current search query
+        private string _searchQuery = string.Empty;
+        public string SearchQuery
         {
-            get => _searchText;
+            get => _searchQuery;
             set
             {
-                _searchText = value;
-                RaisePropertyChanged(nameof(SearchText));
+                _searchQuery = value;
+                RaisePropertyChanged(nameof(SearchQuery));
                 
-                _searchQueryService.CurrentQuery = _searchText;
+                // Inform others about the changed search query
+                EventAggregator.Publish(new SearchQueryChangedEvent(_searchQuery));
             }
         }
         
         
-        public SearchBarViewModel(ISearchQueryService searchQueryService, IEventAggregator eventAggregator) : base(eventAggregator)
+        /// <summary>
+        /// Initializes a new instance of the SearchBarViewModel class.
+        /// </summary>
+        /// <param name="eventAggregator">The event aggregator used for publishing and subscribing to events</param>
+        public SearchBarViewModel(IEventAggregator eventAggregator, ILogger<SearchBarViewModel> logger) : base(eventAggregator)
         {
-            _searchQueryService = searchQueryService ?? throw new ArgumentNullException(nameof(searchQueryService));
-            _logger = LoggerFactory.GetLogger<SearchBarViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
         
-        public ICommand ExecuteClearSearchQuery => new RelayCommand(_ =>
+        
+        /// <summary>
+        /// Clears the search query and notifies other components about the change
+        /// </summary>
+        /// <param name="parameter">The parameter is not used, but required by the ICommand interface</param>
+        private void ClearSearchQuery(object? parameter)
         {
-            SearchText = string.Empty;
-            _searchQueryService.CurrentQuery = string.Empty;
+            SearchQuery = string.Empty; // Clear the search query
+            EventAggregator.Publish(new SearchQueryChangedEvent(_searchQuery)); // Inform others about the cleared search query
             _logger.Info("Search query cleared.");
-        }, _ => !string.IsNullOrEmpty(_searchText));
+        }
     }
 }

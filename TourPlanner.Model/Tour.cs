@@ -108,9 +108,9 @@ namespace TourPlanner.Model
             }
         }
         
-        private float _estimatedTime;
+        private TimeSpan _estimatedTime;
         [JsonPropertyName("estimatedTime")]
-        public float EstimatedTime
+        public TimeSpan EstimatedTime
         {
             get => _estimatedTime;
             set

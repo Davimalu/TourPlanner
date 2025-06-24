@@ -1,64 +1,94 @@
 ﻿<!-- EditTourLogWindow.xaml -->
-<Window x:Class="TourPlanner.Views.EditTourLogWindow"
+<ui:FluentWindow x:Class="TourPlanner.Views.EditTourLogWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TourPlanner.ViewModels"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Edit Tour Log" Height="525" Width="400">
+        Title="Edit Tour Log"
+        Height="525"
+        Width="400"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    
+    <ui:FluentWindow.Resources>
+        <!-- Enhanced styling for TimeSpanUpDown | Not a part of WPF-UI, thus we need to style it to match the rest of the UI -->
+        <Style TargetType="xctk:TimeSpanUpDown">
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+        
+        <Style TargetType="xctk:DateTimePicker">
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+    </ui:FluentWindow.Resources>
+    
+    <StackPanel>
+        <!-- WPF UI's Fluent Window doesn't have a title bar on its own -->
+        <ui:TitleBar Margin="0" Padding="0"/>
+    
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+            <!-- TimeStamp -->
+            <Label Grid.Row="0" Content="Time Stamp:" Target="{Binding ElementName=DateField}"/>
+            <xctk:DateTimePicker Grid.Row="1" Name="DateField" Value="{Binding EditableTourLog.TimeStamp, UpdateSourceTrigger=PropertyChanged}" FormatString="yyyy-MM-dd HH:mm" Margin="5"/>
 
-        <!-- TimeStamp -->
-        <Label Grid.Row="0" Content="Time Stamp:" Target="{Binding ElementName=DateField}"/>
-        <DatePicker Grid.Row="1" Name="DateField" SelectedDate="{Binding EditableTourLog.TimeStamp, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <!-- Comment -->
+            <Label Grid.Row="2" Content="Comment:" Target="{Binding ElementName=CommentField}"/>
+            <TextBox Grid.Row="3" Name="CommentField" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-        <!-- Comment -->
-        <Label Grid.Row="2" Content="Comment:" Target="{Binding ElementName=CommentField}"/>
-        <TextBox Grid.Row="3" Name="CommentField" Text="{Binding EditableTourLog.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <!-- Difficulty -->
+            <Label Grid.Row="4" Content="Difficulty:" Target="{Binding ElementName=DifficultySlider}"/>
+            <Slider Grid.Row="5" Name="DifficultySlider" Value="{Binding EditableTourLog.Difficulty, Mode=TwoWay}" Minimum="0" Maximum="5" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Margin="5"></Slider>
 
-        <!-- Difficulty -->
-        <Label Grid.Row="4" Content="Difficulty:" Target="{Binding ElementName=DifficultySlider}"/>
-        <Slider Grid.Row="5" Name="DifficultySlider" Value="{Binding EditableTourLog.Difficulty, Mode=TwoWay}" Minimum="0" Maximum="5" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Margin="5"></Slider>
+            <!-- Distance Traveled -->
+            <Label Grid.Row="6" Content="Distance Traveled:" Target="{Binding ElementName=DistanceField}"/>
+            <!-- See https://stackoverflow.com/questions/14600842/bind-textbox-to-float-value-unable-to-input-dot-comma/44946901 for handling decimal input -->
+            <TextBox Grid.Row="7" Name="DistanceField" Text="{Binding EditableTourLog.DistanceTraveled, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Margin="5" Padding="0,0,30,0"/>
+            <!-- The TextBlock is rendered on top of the TextBox to overlay the "km" label -->
+            <!-- The padding to the right on the TextBox ensures that the text doesn't overlap with the static suffix -->
+            <TextBlock Grid.Row="7" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
 
-        <!-- Distance Traveled -->
-        <Label Grid.Row="6" Content="Distance Traveled:" Target="{Binding ElementName=DistanceField}"/>
-        <!-- The TextBlock is rendered on top of the TextBox to overlay the "km" label -->
-        <!-- The padding to the right on the TextBox ensures that the text doesn't overlap with the static suffix -->
-        <TextBox Grid.Row="7" Name="DistanceField" Text="{Binding EditableTourLog.DistanceTraveled, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
-        <TextBlock Grid.Row="7" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
+            <!-- Time Taken -->
+            <Label Grid.Row="8" Content="Time Taken (days.hh:mm:ss):" Target="{Binding ElementName=TimeField}"/>
+            <!-- TODO: Replace this with ui:TimePicker from WPF UI once it's available; https://github.com/lepoco/wpfui/issues/1071 -->
+            <xctk:TimeSpanUpDown Grid.Row="9" Name="TimeField"
+                                 AllowSpin="True" AllowTextInput="True" Value="{Binding EditableTourLog.TimeTaken, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"></xctk:TimeSpanUpDown>
 
-        <!-- Time Taken -->
-        <Label Grid.Row="8" Content="Time Taken:" Target="{Binding ElementName=TimeField}"/>
-        <TextBox Grid.Row="9" Name="TimeField" Text="{Binding EditableTourLog.TimeTaken, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
-        <TextBlock Grid.Row="9" Text="h" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
+            <!-- Rating -->
+            <Label Grid.Row="10" Content="Rating:" Target="{Binding ElementName=RatingSlider}"/>
+            <ui:RatingControl Name="RatingSlider" Grid.Row="12" Margin="5" Value="{Binding EditableTourLog.Rating, Mode=TwoWay}"/>
 
-        <!-- Rating -->
-        <Label Grid.Row="10" Content="Rating:" Target="{Binding ElementName=RatingSlider}"/>
-        <ui:RatingControl Name="RatingSlider" Grid.Row="11" Margin="5" Value="{Binding EditableTourLog.Rating, Mode=TwoWay}"/>
-
-        <!-- Save and Cancel Buttons -->
-        <StackPanel Grid.Row="13" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
-            <Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
-        </StackPanel>
-    </Grid>
-</Window>
+            <!-- Save and Cancel Buttons -->
+            <StackPanel Grid.Row="13" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
+                <Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</ui:FluentWindow>
