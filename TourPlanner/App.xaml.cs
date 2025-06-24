@@ -17,9 +17,9 @@ namespace TourPlanner;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App
 {
-    public static IServiceProvider ServiceProvider { get; private set; }
+    public static IServiceProvider? ServiceProvider { get; private set; }
     
     public App()
     {
@@ -64,6 +64,11 @@ public partial class App : Application
     
     private void Application_Startup(object sender, StartupEventArgs e)
     {
+        if (ServiceProvider == null)
+        {
+            throw new InvalidOperationException("ServiceProvider is not initialized. Ensure that the App constructor is called before Application_Startup.");
+        }
+        
         // Create the Views (and initialize them with the ViewModels)
         MainWindow mainWindow = new MainWindow
         {
