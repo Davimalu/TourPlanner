@@ -9,9 +9,17 @@
 
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Padding="10" Background="White">
+            <Border BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    CornerRadius="8"
+                    Padding="10"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}">
                 <StackPanel>
-                    <ui:TextBlock  FontSize="24" Foreground="Black" FontWeight="Bold" Text="{Binding SelectedTour.TourName, TargetNullValue=''}" Margin="0,0,0,10"/>
+                    <ui:TextBlock  FontSize="24"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" 
+                                   FontWeight="Bold"
+                                   Text="{Binding SelectedTour.TourName,TargetNullValue=''}"
+                                   Margin="0,0,0,10"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>

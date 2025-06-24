@@ -7,10 +7,9 @@ namespace TourPlanner.ViewModels
     class TourDetailsViewModel : BaseViewModel
     {
         private Tour? _selectedTour;
-
         public Tour? SelectedTour
         {
-            get { return _selectedTour; }
+            get => _selectedTour;
             set
             {
                 _selectedTour = value;
@@ -21,6 +20,7 @@ namespace TourPlanner.ViewModels
 
         public TourDetailsViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
+            // Subscribe to changes in the selected tour so that we can display its details
             EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
         }
 
@@ -29,7 +29,7 @@ namespace TourPlanner.ViewModels
         /// Handles the SelectedTourChangedEvent to update the classes own SelectedTour property.
         /// </summary>
         /// <param name="e">The event containing the newly selected tour</param>
-        private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
+        private void OnSelectedTourChanged(SelectedTourChangedEvent e)
         {
             SelectedTour = e.SelectedTour;
         }
