@@ -42,12 +42,12 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
-                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="LocationLive24" />
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Location24" />
                             <ui:TextBlock Text="Start Location:" FontWeight="Bold" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="Location24" /> <!-- MyLocation24 -->
+                            <ui:SymbolIcon Margin="0,0,6,0" Symbol="MyLocation24" /> <!-- <LocationRipple24> looks nice, but doesn't work for some reason -->
                             <ui:TextBlock Text="End Location:" FontWeight="Bold" />
                         </StackPanel>
 
