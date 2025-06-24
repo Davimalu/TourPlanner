@@ -1,6 +1,5 @@
-using System.Text.Json;
+using System.IO;
 using TourPlanner.config.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -192,7 +191,7 @@ public class MapService : IMapService
 
         try
         {
-            var success = await _webViewService.TakeScreenshotAsync(_tourPlannerConfig.TmpFolder +TemporaryImageName);
+            var success = await _webViewService.TakeScreenshotAsync(Path.Combine(_tourPlannerConfig.TmpFolder, TemporaryImageName));
             
             if (!success)
             {
