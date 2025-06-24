@@ -32,7 +32,7 @@ public class AttributeService : IAttributeService
     // At or beyond this distance, the distance score becomes 0.
     private const float IdealMaxChildDistanceKm = 5.0f;
 
-    // We consider a tour increasingly unfriendly as it approaches this duration.
+    // We consider a tour increasingly unfriendly as it approaches this duration (in minutes)
     // At or beyond this duration, the duration score becomes 0.
     private const float IdealMaxChildDurationMin = 120.0f;
     
@@ -116,7 +116,7 @@ public class AttributeService : IAttributeService
             // Calculate normalized scores for each metric of each log
             double difficultyScore = GetDifficultyScore(log.Difficulty);
             double distanceScore = GetDistanceScore(log.DistanceTraveled);
-            double durationScore = GetDurationScore(log.TimeTaken);
+            double durationScore = GetDurationScore(log.TimeTaken.TotalMinutes);
             
             // Combine the scores using the defined weights
             double combinedScore = (difficultyScore * DifficultyWeight) +
@@ -159,7 +159,7 @@ public class AttributeService : IAttributeService
         return Math.Max(0, score); // Ensure score doesn't go below 0
     }
     
-    private double GetDurationScore(float duration)
+    private double GetDurationScore(double duration)
     {
         if (duration <= 0)
         {

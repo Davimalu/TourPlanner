@@ -36,8 +36,8 @@
                                     Binding="{Binding DistanceTraveled, StringFormat={}{0} km}"
                                     Width="Auto"/>
 
-                <DataGridTextColumn Header="Time (hrs)"
-                                    Binding="{Binding TimeTaken, StringFormat={}{0} h}"
+                <DataGridTextColumn Header="Time Taken (dd:hh:mm:ss)"
+                                    Binding="{Binding TimeTaken, StringFormat='dd\\:hh\\:mm\\:ss'}"
                                     Width="Auto"/>
 
                 <DataGridTextColumn Header="Rating"

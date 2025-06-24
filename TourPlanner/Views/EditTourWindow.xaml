@@ -94,8 +94,16 @@
 
         <!-- Estimated Time -->
         <Label Grid.Row="9" Grid.Column="1" Content="Duration:" Target="{Binding ElementName=EstimatedTimeField}"/>
-        <ui:TextBox Grid.Row="10" Grid.Column="1" Name="EstimatedTimeField" Text="{Binding EditableTour.EstimatedTime, Mode=OneWay}" Margin="5" Padding="0,0,30,0" IsReadOnly="True"/>
-        <ui:TextBlock Grid.Row="10" Grid.Column="1" Text="min" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
+        <ui:TextBox Grid.Row="10" Grid.Column="1" Name="EstimatedTimeField" Margin="5" Padding="0,0,30,0" IsReadOnly="True" TextWrapping="Wrap">
+            <ui:TextBox.Text>
+                <MultiBinding StringFormat="{}{0} days {1} hours {2} minutes {3} seconds" Mode="OneWay">
+                    <Binding Path="EditableTour.EstimatedTime.Days" TargetNullValue="0"/>
+                    <Binding Path="EditableTour.EstimatedTime.Hours" TargetNullValue="0"/>
+                    <Binding Path="EditableTour.EstimatedTime.Minutes" TargetNullValue="0"/>
+                    <Binding Path="EditableTour.EstimatedTime.Seconds" TargetNullValue="0"/>
+                </MultiBinding>
+            </ui:TextBox.Text>
+        </ui:TextBox>
         
         <!-- Calculate Route Button -->
         <Grid Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">

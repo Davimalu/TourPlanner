@@ -103,7 +103,7 @@ public class PdfService : IPdfService
             var avgRating = tour.Logs.Where(l => l.Rating > 0).Average(l => l.Rating);
             var avgDifficulty = tour.Logs.Average(l => l.Difficulty);
             var totalDistance = tour.Logs.Sum(l => l.DistanceTraveled);
-            var totalTime = tour.Logs.Sum(l => l.TimeTaken);
+            var totalTime = tour.Logs.Sum(l => l.TimeTaken.TotalMinutes);
 
             AddKeyValuePairAsRow(statsTable, "Total Logs:", tour.Logs.Count.ToString(), font, boldFont);
             AddKeyValuePairAsRow(statsTable, "Average Rating:", $"{avgRating:F1}/5", font, boldFont);
@@ -399,7 +399,7 @@ public class PdfService : IPdfService
 
             // Calculate averages
             var avgRating = hasLogs ? logs.Where(l => l.Rating > 0).Average(l => l.Rating) : 0;
-            var avgTime = hasLogs ? logs.Average(l => l.TimeTaken) : 0;
+            var avgTime = hasLogs ? logs.Average(l => l.TimeTaken.TotalMinutes) : 0;
             var avgDistance = hasLogs ? logs.Average(l => l.DistanceTraveled) : 0;
 
             var cellStyle = new Cell()
@@ -480,9 +480,9 @@ public class PdfService : IPdfService
 
                 var avgRating = logs.Where(l => l.Rating > 0).Average(l => l.Rating);
                 var avgDifficulty = logs.Average(l => l.Difficulty);
-                var avgTime = logs.Average(l => l.TimeTaken);
+                var avgTime = logs.Average(l => l.TimeTaken.TotalMinutes);
                 var avgDistance = logs.Average(l => l.DistanceTraveled);
-                var totalTime = logs.Sum(l => l.TimeTaken);
+                var totalTime = logs.Sum(l => l.TimeTaken.TotalMinutes);
                 var totalDistance = logs.Sum(l => l.DistanceTraveled);
 
                 AddKeyValuePairAsRow(logStatsTable, "Total Logs:", logs.Count.ToString(), font, boldFont);
@@ -494,7 +494,7 @@ public class PdfService : IPdfService
                 AddKeyValuePairAsRow(logStatsTable, "Total Distance Logged:", $"{totalDistance:F1} km", font, boldFont);
 
                 // Efficiency metrics
-                var timeEfficiency = tour.EstimatedTime > 0 ? avgTime * 60 / tour.EstimatedTime * 100 : 0; // Convert hours to minutes
+                var timeEfficiency = tour.EstimatedTime.TotalMinutes > 0 ? avgTime / tour.EstimatedTime.TotalMinutes * 100 : 0;
                 var distanceEfficiency = tour.Distance > 0 ? avgDistance / tour.Distance * 100 : 0;
 
                 AddKeyValuePairAsRow(logStatsTable, "Time Efficiency:", timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);

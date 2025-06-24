@@ -115,7 +115,8 @@ namespace TourPlanner.ViewModels
             }
             
             EditableTour.Distance = Math.Round(routeInfo.Distance / 1000, 2);
-            EditableTour.EstimatedTime = (float)Math.Round(routeInfo.Duration / 60, 0);
+            _logger.Debug($"Route Info Duration is {routeInfo.Duration} seconds, Distance is {routeInfo.Distance} meters");
+            EditableTour.EstimatedTime = TimeSpan.FromSeconds(routeInfo.Duration);
             
             // Draw the route on the map
             await _mapService.ClearMapAsync(); // Clear existing markers and routes
@@ -218,7 +219,7 @@ namespace TourPlanner.ViewModels
             // Notify the draw route command that the end coordinates have changed (and thus the route might be able to be calculated)
             _executeCalculateAndDrawRoute?.RaiseCanExecuteChanged();
         }
-
+        
 
         private void CloseWindow()
         {

@@ -4,8 +4,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TourPlanner.ViewModels"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Edit Tour Log" Height="525" Width="400">
 
@@ -47,9 +47,10 @@
         <TextBlock Grid.Row="7" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
 
         <!-- Time Taken -->
-        <Label Grid.Row="8" Content="Time Taken:" Target="{Binding ElementName=TimeField}"/>
-        <TextBox Grid.Row="9" Name="TimeField" Text="{Binding EditableTourLog.TimeTaken, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
-        <TextBlock Grid.Row="9" Text="h" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
+        <Label Grid.Row="8" Content="Time Taken (days.hh:mm:ss):" Target="{Binding ElementName=TimeField}"/>
+        <!-- TODO: Replace this with ui:TimePicker from WPF UI once it's available; https://github.com/lepoco/wpfui/issues/1071 -->
+        <xctk:TimeSpanUpDown Grid.Row="9" Name="TimeField"
+                             AllowSpin="True" AllowTextInput="True" Value="{Binding EditableTourLog.TimeTaken, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"></xctk:TimeSpanUpDown>
 
         <!-- Rating -->
         <Label Grid.Row="10" Content="Rating:" Target="{Binding ElementName=RatingSlider}"/>

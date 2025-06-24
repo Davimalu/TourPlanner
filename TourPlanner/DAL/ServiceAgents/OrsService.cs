@@ -118,6 +118,8 @@ public class OrsService : IOrsService
                 return null;
             }
             
+            _logger.Info($"Route found. Distance: {feature.Properties.RouteSummary.Distance} meters, Duration: {feature.Properties.RouteSummary.Duration} seconds");
+            
             return new Route
             {
                 RouteGeometry = feature.Geometry.GetRawText(),

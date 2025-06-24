@@ -44,7 +44,7 @@ public class SearchService : ISearchService
                     tour.EndLocation.ToLowerInvariant().Contains(lowerQuery) ||
                     tour.TransportationType.ToString().ToLowerInvariant().Contains(lowerQuery) ||
                     tour.Distance.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                    tour.EstimatedTime.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                    tour.EstimatedTime.ToString().Contains(lowerQuery) ||
                     tour.Popularity.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                     tour.ChildFriendlyRating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                     tour.AiSummary.ToLowerInvariant().Contains(lowerQuery) ||
@@ -53,7 +53,7 @@ public class SearchService : ISearchService
                         log.Comment.ToLowerInvariant().Contains(lowerQuery) ||
                         log.Difficulty.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
                         log.DistanceTraveled.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
-                        log.TimeTaken.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery) ||
+                        log.TimeTaken.ToString().Contains(lowerQuery) ||
                         log.Rating.ToString(CultureInfo.CurrentCulture).Contains(lowerQuery)))
                 .ToList();
         }).ConfigureAwait(false);
