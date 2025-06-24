@@ -5,6 +5,7 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model.Events;
+using TourPlanner.Views;
 using MessageBoxButton = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxButton;
 using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxImage;
 
@@ -17,7 +18,7 @@ namespace TourPlanner.ViewModels
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
         private readonly IWpfService _wpfService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<MenuBarViewModel> _logger;
         
         // Commands
         private RelayCommandAsync? _executeExportTours;
@@ -35,15 +36,14 @@ namespace TourPlanner.ViewModels
         
         
         // Constructor
-        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IWpfService wpfService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public MenuBarViewModel(ILocalTourService localTourService, ITourService tourService, IIoService ioService, IPdfService pdfService, IWpfService wpfService, IEventAggregator eventAggregator, ILogger<MenuBarViewModel> logger) : base(eventAggregator)
         {
             _localTourService = localTourService ?? throw new ArgumentNullException(nameof(localTourService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
             _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
-            
-            _logger = LoggerFactory.GetLogger<MenuBarViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         

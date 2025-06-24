@@ -16,7 +16,7 @@ namespace TourPlanner.ViewModels
         private readonly ITourService _tourService;
         private readonly IOrsService _osrService;
         private readonly IMapService _mapService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<EditTourViewModel> _logger;
         
         // Commands
         private RelayCommandAsync? _executeCalculateAndDrawRoute;
@@ -79,13 +79,12 @@ namespace TourPlanner.ViewModels
         }
 
         
-        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public EditTourViewModel(Tour selectedTour, ITourService tourService, IOrsService orsService, IMapService mapService, IEventAggregator eventAggregator, ILogger<EditTourViewModel> logger) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _osrService = orsService ?? throw new ArgumentNullException(nameof(orsService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-
-            _logger = LoggerFactory.GetLogger<EditTourViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             EditableTour = new Tour(selectedTour); // Create a copy of the Tour to edit (so that if the user cancels, the original Tour remains unchanged)
 

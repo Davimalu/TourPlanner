@@ -18,14 +18,13 @@ namespace TourPlanner.Logic;
 
 public class PdfService : IPdfService
 {
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<PdfService> _logger;
     private readonly IMapService _mapService;
 
-    public PdfService(IMapService mapService)
+    public PdfService(IMapService mapService, ILogger<PdfService> logger)
     {
         _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
-
-        _logger = LoggerFactory.GetLogger<PdfService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
     // ---------------------------

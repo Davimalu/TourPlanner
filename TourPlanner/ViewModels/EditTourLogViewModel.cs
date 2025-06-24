@@ -15,7 +15,7 @@ namespace TourPlanner.ViewModels
         private readonly ITourLogService _tourLogService;
         private readonly ITourService _tourService;
         private readonly IAttributeService _attributeService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<EditTourLogViewModel> _logger;
         
         // Copy of the original TourLog to edit (to avoid changing the original UNTIL the user saves)
         private TourLog _editableTourLog = null!;
@@ -46,12 +46,12 @@ namespace TourPlanner.ViewModels
         public List<Rating> Ratings { get; set; }
 
 
-        public EditTourLogViewModel(Tour selectedTour, ITourService tourService, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public EditTourLogViewModel(Tour selectedTour, ITourService tourService, TourLog selectedTourLog, ITourLogService tourLogService, IAttributeService attributeService, IEventAggregator eventAggregator, ILogger<EditTourLogViewModel> logger) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
-            _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _selectedTour = selectedTour;
             EditableTourLog = new TourLog(selectedTourLog); // Create a copy of the TourLog to edit (so that if the user cancels, the original TourLog remains unchanged)

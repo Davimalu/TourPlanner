@@ -14,14 +14,14 @@ namespace TourPlanner.DAL.ServiceAgents
     {
         private readonly HttpClient _httpClient;
 
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<TourService> _logger;
 
-        public TourService(HttpClient httpClient, ITourPlannerConfig tourPlannerConfig)
+        public TourService(HttpClient httpClient, ITourPlannerConfig tourPlannerConfig, ILogger<TourService> logger)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
             _httpClient.BaseAddress = new Uri(tourPlannerConfig.ApiBaseUrl);
-
-            _logger = LoggerFactory.GetLogger<TourService>();
         }
 
         public async Task<List<Tour>?> GetToursAsync()

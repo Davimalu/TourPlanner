@@ -10,15 +10,15 @@ namespace TourPlanner.Logic;
 
 public class AttributeService : IAttributeService
 {
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<AttributeService> _logger;
     private readonly ITourService _tourService;
     private readonly IAiService _aiService;
     
-    public AttributeService(ITourService tourService, IAiService aiService)
+    public AttributeService(ITourService tourService, IAiService aiService, ILogger<AttributeService> logger)
     {
         _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
         _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
-        _logger = LoggerFactory.GetLogger<AttributeService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
     // ---------------------------------------------

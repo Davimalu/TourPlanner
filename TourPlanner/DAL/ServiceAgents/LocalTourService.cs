@@ -11,11 +11,11 @@ namespace TourPlanner.DAL.ServiceAgents;
 /// </summary>
 public class LocalTourService : ILocalTourService
 {
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<LocalTourService> _logger;
     
-    public LocalTourService()
+    public LocalTourService(ILogger<LocalTourService> logger)
     {
-        _logger = LoggerFactory.GetLogger<LocalTourService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
 

@@ -14,16 +14,16 @@ public class MapService : IMapService
     private readonly IWebViewService _webViewService;
     private readonly IEventAggregator _eventAggregator;
     private readonly ITourPlannerConfig _tourPlannerConfig;
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<MapService> _logger;
     
     private const string TemporaryImageName = "MapImage.png";
     
-    public MapService(IWebViewService webViewService, ITourPlannerConfig tourPlannerConfig, IEventAggregator eventAggregator)
+    public MapService(IWebViewService webViewService, ITourPlannerConfig tourPlannerConfig, IEventAggregator eventAggregator, ILogger<MapService> logger)
     {
         _webViewService = webViewService ?? throw new ArgumentNullException(nameof(webViewService));
         _tourPlannerConfig = tourPlannerConfig ?? throw new ArgumentNullException(nameof(tourPlannerConfig));
         _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
-        _logger = LoggerFactory.GetLogger<MapService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     

@@ -5,6 +5,8 @@ using TourPlanner.config;
 using TourPlanner.config.Interfaces;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.DAL.ServiceAgents;
+using TourPlanner.Infrastructure;
+using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.ViewModels;
@@ -37,6 +39,7 @@ public partial class App : Application
         services.AddSingleton<IAttributeService, AttributeService>();
         services.AddSingleton<IPdfService, PdfService>();
         services.AddSingleton<IEventAggregator, EventAggregator>();
+        services.AddTransient(typeof(ILogger<>), typeof(Logger<>));
         
         services.AddTransient<HttpClient>();
         

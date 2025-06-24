@@ -15,17 +15,16 @@ namespace TourPlanner.DAL.ServiceAgents;
 public class OrsService : IOrsService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<OrsService> _logger;
     
     private readonly string _apiKey;
     private readonly string _baseUrl;
     
 
-    public OrsService(HttpClient http, ITourPlannerConfig tourPlannerConfig)
+    public OrsService(HttpClient http, ITourPlannerConfig tourPlannerConfig, ILogger<OrsService> logger)
     {
         _httpClient = http ?? throw new ArgumentNullException(nameof(http));
-        
-        _logger = LoggerFactory.GetLogger<OrsService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
         // Get the API key from the configuration file
         _apiKey = tourPlannerConfig.OpenRouteServiceApiKey ?? throw new ArgumentNullException(nameof(tourPlannerConfig.OpenRouteServiceApiKey), "OpenRouteService API key is not configured.");

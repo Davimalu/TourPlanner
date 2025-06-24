@@ -26,11 +26,11 @@ public class WebViewService : IWebViewService
     public event EventHandler<string>? MessageReceived;
     public bool IsReady { get; private set; } = false;
 
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<WebViewService> _logger;
 
-    public WebViewService()
+    public WebViewService(ILogger<WebViewService> logger)
     {
-        _logger = LoggerFactory.GetLogger<WebViewService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
     }
     
     

@@ -8,6 +8,7 @@ using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Events;
+using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
@@ -18,7 +19,7 @@ namespace TourPlanner.ViewModels
         private readonly ISearchService _searchService;
         private readonly IIoService _ioService;
         private readonly IPdfService _pdfService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<TourListViewModel> _logger;
 
         // Commands
         private RelayCommandAsync? _executeDeleteTour;
@@ -91,14 +92,14 @@ namespace TourPlanner.ViewModels
 
 
         public TourListViewModel(ITourService tourService, IWpfService wpfService, ISearchService searchService,
-            IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator) : base(eventAggregator)
+            IIoService ioService, IPdfService pdfService, IEventAggregator eventAggregator, ILogger<TourListViewModel> logger) : base(eventAggregator)
         {
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
             _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
             _ioService = ioService ?? throw new ArgumentNullException(nameof(ioService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
-            _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Subscribe to changes in the search query to filter tours
             EventAggregator.Subscribe<SearchQueryChangedEvent>(OnSearchQueryChanged);

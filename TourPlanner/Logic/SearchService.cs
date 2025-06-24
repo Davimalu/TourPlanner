@@ -8,12 +8,13 @@ namespace TourPlanner.Logic;
 
 public class SearchService : ISearchService
 {
-    private ILoggerWrapper _logger;
+    private ILogger<SearchService> _logger;
     
-    public SearchService()
+    public SearchService(ILogger<SearchService> logger)
     {
-        _logger = LoggerFactory.GetLogger<SearchService>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
+    
     
     /// <summary>
     /// Performs a full-text search on the list of tours (and their logs) based on the provided query

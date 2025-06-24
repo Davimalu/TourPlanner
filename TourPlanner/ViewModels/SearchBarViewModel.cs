@@ -4,12 +4,13 @@ using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model.Events;
+using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
     public class SearchBarViewModel : BaseViewModel
     {
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<SearchBarViewModel> _logger;
         
         // Commands
         private RelayCommand? _executeClearSearchQuery;
@@ -36,9 +37,9 @@ namespace TourPlanner.ViewModels
         /// Initializes a new instance of the SearchBarViewModel class.
         /// </summary>
         /// <param name="eventAggregator">The event aggregator used for publishing and subscribing to events</param>
-        public SearchBarViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public SearchBarViewModel(IEventAggregator eventAggregator, ILogger<SearchBarViewModel> logger) : base(eventAggregator)
         {
-            _logger = LoggerFactory.GetLogger<SearchBarViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         

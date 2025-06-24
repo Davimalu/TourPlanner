@@ -13,7 +13,7 @@ public class TourAttributesViewModel : BaseViewModel
 {
     private readonly ITourService _tourService;
     private readonly IAttributeService _attributeService;
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<TourAttributesViewModel> _logger;
     
     private RelayCommandAsync? _executeCalculateAttributes;
         
@@ -31,11 +31,11 @@ public class TourAttributesViewModel : BaseViewModel
         }
     }
 
-    public TourAttributesViewModel(ITourService tourService, IAttributeService attributeService, IEventAggregator eventAggregator) : base(eventAggregator)
+    public TourAttributesViewModel(ITourService tourService, IAttributeService attributeService, IEventAggregator eventAggregator, ILogger<TourAttributesViewModel> logger) : base(eventAggregator)
     {
         _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
         _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
-        _logger = LoggerFactory.GetLogger<TourAttributesViewModel>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
         EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
     }

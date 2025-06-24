@@ -13,7 +13,7 @@ namespace TourPlanner.ViewModels
     {
         private readonly IWpfService _wpfService;
         private readonly ITourLogService _tourLogService;
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<TourLogsViewModel> _logger;
 
         
         private string? _newLogName;
@@ -52,12 +52,11 @@ namespace TourPlanner.ViewModels
         }
 
 
-        public TourLogsViewModel(IWpfService wpfService, ITourLogService tourLogService, IEventAggregator eventAggregator) : base(eventAggregator)
+        public TourLogsViewModel(IWpfService wpfService, ITourLogService tourLogService, IEventAggregator eventAggregator, ILogger<TourLogsViewModel> logger) : base(eventAggregator)
         {
             _wpfService = wpfService ?? throw new ArgumentNullException(nameof(wpfService));
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
-            
-            _logger = LoggerFactory.GetLogger<TourListViewModel>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
             EventAggregator.Subscribe<SelectedTourChangedEvent>(OnSelectedTourChanged);
         }

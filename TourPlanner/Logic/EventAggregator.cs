@@ -10,11 +10,11 @@ namespace TourPlanner.Logic;
 /// </summary>
 public class EventAggregator : IEventAggregator
 {
-    private readonly ILoggerWrapper _logger;
+    private readonly ILogger<EventAggregator> _logger;
     
-    public EventAggregator()
+    public EventAggregator(ILogger<EventAggregator> logger)
     {
-        _logger = LoggerFactory.GetLogger<EventAggregator>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
     // Maps event types to their subscribers

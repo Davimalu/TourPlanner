@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -40,7 +41,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourWindow()
             {
-                DataContext = new EditTourViewModel(selectedTour, _tourService, _osrService, _mapService, _eventAggregator),
+                DataContext = App.ServiceProvider.GetRequiredService<EditTourViewModel>(),
                 Map = { DataContext = _mapViewModel}
             };
 
@@ -55,7 +56,7 @@ namespace TourPlanner.Logic
         {
             var editWindow = new EditTourLogWindow
             {
-                DataContext = new EditTourLogViewModel(selectedTour, _tourService, selectedTourLog, _tourLogService, _attributeService, _eventAggregator),
+                DataContext = App.ServiceProvider.GetRequiredService<EditTourLogViewModel>(),
             };
 
             editWindow.ShowDialog();

@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 
@@ -10,7 +11,7 @@ namespace TourPlanner.Commands
         private readonly Func<object?, bool> _canExecute;
         private bool _isExecuting;
 
-        private readonly ILoggerWrapper _logger;
+        private readonly ILogger<RelayCommandAsync> _logger;
 
         /// <summary>
         /// Creates a new AsyncRelayCommand.
@@ -21,7 +22,7 @@ namespace TourPlanner.Commands
         {
             _executeAsync = executeAsync ?? throw new ArgumentNullException(nameof(executeAsync));
             _canExecute = canExecute ?? (_ => true);
-            _logger = LoggerFactory.GetLogger<RelayCommandAsync>();
+            _logger = App.ServiceProvider.GetRequiredService<ILogger<RelayCommandAsync>>();
         }
 
         /// <summary>
