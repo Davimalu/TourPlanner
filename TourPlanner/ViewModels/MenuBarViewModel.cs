@@ -1,11 +1,9 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model.Events;
-using TourPlanner.Views;
 using MessageBoxButton = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxButton;
 using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxImage;
 
@@ -20,9 +18,22 @@ namespace TourPlanner.ViewModels
         private readonly IWpfService _wpfService;
         private readonly ILogger<MenuBarViewModel> _logger;
         
+        // UI Elements
+        private bool _themeToggleChecked;
+        public bool ThemeToggleChecked
+        {
+            get => _themeToggleChecked;
+            set
+            {
+                _themeToggleChecked = value;
+                RaisePropertyChanged(nameof(ThemeToggleChecked));
+            }
+        }
+        
         // Commands
         private RelayCommandAsync? _executeExportTours;
         private RelayCommandAsync? _executeImportTours;
+        private RelayCommand _executeChangeTheme;
         private RelayCommand? _executeExitApplication;
         
         public ICommand ExecuteExportTours => _executeExportTours ??= 
@@ -30,6 +41,9 @@ namespace TourPlanner.ViewModels
         
         public ICommand ExecuteImportTours => _executeImportTours ??= 
             new RelayCommandAsync(ImportTours, _ => true);
+        
+        public RelayCommand ExecuteChangeTheme => _executeChangeTheme ??=
+            new RelayCommand(ChangeApplicationTheme, _ => true);
 
         public RelayCommand? ExecuteExitApplication => _executeExitApplication ??=
             new RelayCommand(_ => _wpfService.ExitApplication());
@@ -46,10 +60,10 @@ namespace TourPlanner.ViewModels
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
-        
-        // TODO: Create MessageBoxService to handle messages in a more consistent way
-        
-        // Implementations        
+        /// <summary>
+        /// Exports all tours to a file or PDF, depending on the user's choice
+        /// </summary>
+        /// <param name="parameter"></param>
         private async Task ExportTours(object? parameter)
         {
             // Get the save path from the user
@@ -104,6 +118,11 @@ namespace TourPlanner.ViewModels
             }
         }
         
+        
+        /// <summary>
+        /// Imports tours from a file and saves them to the database
+        /// </summary>
+        /// <param name="parameter"></param>
         private async Task ImportTours(object? parameter)
         {
             // Get the file path from the user
@@ -147,6 +166,26 @@ namespace TourPlanner.ViewModels
             
             // Inform the UI there may be new tours
             EventAggregator.Publish(new ToursChangedEvent(tours.ToList()));
+        }
+
+
+        /// <summary>
+        /// Changes the application theme based on the toggle state
+        /// </summary>
+        /// <param name="parameter"></param>
+        private void ChangeApplicationTheme(object? parameter)
+        {
+            // Toggle the theme based on the current state
+            if (ThemeToggleChecked)
+            {
+                _wpfService.ApplyDarkTheme();
+                _logger.Info("Changed application theme to Dark");
+            }
+            else
+            {
+                _wpfService.ApplyLightTheme();
+                _logger.Info("Changed application theme to Light");
+            }
         }
     }
 }

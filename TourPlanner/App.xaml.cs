@@ -79,5 +79,9 @@ public partial class App : Application
 
         // Show the MainWindow
         mainWindow.Show();
+        
+        // Initialize the Application with the light theme
+        IWpfService wpfService = ServiceProvider.GetRequiredService<IWpfService>();
+        wpfService.ApplyLightTheme();
     }
 }

@@ -79,6 +79,32 @@ namespace TourPlanner.Logic
 
             return MapWpfUiResultToAbstraction(MessageBox.Show(message, title, wpfUiButtons, wpfUiIcon));
         }
+        
+        
+        /// <summary>
+        /// Applies the dark theme to the application
+        /// </summary>
+        public void ApplyDarkTheme()
+        {
+            Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
+                Wpf.Ui.Appearance.ApplicationTheme.Dark,
+                Wpf.Ui.Controls.WindowBackdropType.None,
+                true
+            );
+        }
+
+
+        /// <summary>
+        /// Applies the light theme to the application
+        /// </summary>
+        public void ApplyLightTheme()
+        {
+            Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
+                Wpf.Ui.Appearance.ApplicationTheme.Light,
+                Wpf.Ui.Controls.WindowBackdropType.None, // For whatever reason, this is the only way to get the light theme to work | https://github.com/lepoco/wpfui/issues/1222
+                true
+            );
+        }
 
         
         /// <summary>
