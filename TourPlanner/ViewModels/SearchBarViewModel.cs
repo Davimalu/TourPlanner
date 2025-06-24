@@ -1,10 +1,8 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model.Events;
-using TourPlanner.Views;
 
 namespace TourPlanner.ViewModels
 {
