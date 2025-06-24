@@ -41,9 +41,10 @@
 
         <!-- Distance Traveled -->
         <Label Grid.Row="6" Content="Distance Traveled:" Target="{Binding ElementName=DistanceField}"/>
+        <!-- See https://stackoverflow.com/questions/14600842/bind-textbox-to-float-value-unable-to-input-dot-comma/44946901 for handling decimal input -->
+        <TextBox Grid.Row="7" Name="DistanceField" Text="{Binding EditableTourLog.DistanceTraveled, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" Margin="5" Padding="0,0,30,0"/>
         <!-- The TextBlock is rendered on top of the TextBox to overlay the "km" label -->
         <!-- The padding to the right on the TextBox ensures that the text doesn't overlap with the static suffix -->
-        <TextBox Grid.Row="7" Name="DistanceField" Text="{Binding EditableTourLog.DistanceTraveled, UpdateSourceTrigger=PropertyChanged}" Margin="5" Padding="0,0,30,0"/>
         <TextBlock Grid.Row="7" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False" />
 
         <!-- Time Taken -->
