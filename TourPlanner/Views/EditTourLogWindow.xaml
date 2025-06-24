@@ -10,8 +10,6 @@
         Title="Edit Tour Log"
         Height="525"
         Width="400"
-        WindowStartupLocation="CenterOwner"
-        WindowStyle="SingleBorderWindow"
         Background="{DynamicResource ApplicationBackgroundBrush}"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     
