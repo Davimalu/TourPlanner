@@ -22,6 +22,14 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,5"/>
         </Style>
+        
+        <Style TargetType="xctk:DateTimePicker">
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
     </ui:FluentWindow.Resources>
     
     <StackPanel>
@@ -48,7 +56,7 @@
 
             <!-- TimeStamp -->
             <Label Grid.Row="0" Content="Time Stamp:" Target="{Binding ElementName=DateField}"/>
-            <DatePicker Grid.Row="1" Name="DateField" SelectedDate="{Binding EditableTourLog.TimeStamp, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <xctk:DateTimePicker Grid.Row="1" Name="DateField" Value="{Binding EditableTourLog.TimeStamp, UpdateSourceTrigger=PropertyChanged}" FormatString="yyyy-MM-dd HH:mm" Margin="5"/>
 
             <!-- Comment -->
             <Label Grid.Row="2" Content="Comment:" Target="{Binding ElementName=CommentField}"/>
