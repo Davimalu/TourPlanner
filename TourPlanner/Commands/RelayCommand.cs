@@ -20,15 +20,18 @@ namespace TourPlanner.Commands
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = _ => true;
         }
-
         
         /// <summary>
         /// event that is raised when the ability to execute the command changes
         /// </summary>
-        public event EventHandler? CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
+        public event EventHandler? CanExecuteChanged;
+        
+        /// <summary>
+        /// Raises the CanExecuteChanged event to notify that the command's ability to execute has changed.
+        /// </summary>
+        public void RaiseCanExecuteChanged()
+        {        
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
         
         /// <summary>
