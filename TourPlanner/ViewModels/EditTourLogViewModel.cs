@@ -30,6 +30,7 @@ namespace TourPlanner.ViewModels
         }
         
         
+        // If the UI is bound to EditableTourLog.Comment directly, the setter of EditableTourLog isn't executed and the SaveButton isn't informed that its CanExecute state may have changed
         public string Comment
         {
             get => EditableTourLog.Comment;
