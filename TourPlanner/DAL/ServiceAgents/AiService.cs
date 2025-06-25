@@ -122,6 +122,6 @@ public class AiService :IAiService
     
     public void Dispose()
     {
-        _httpClient?.Dispose();
+        _httpClient.Dispose();
     }
 }
