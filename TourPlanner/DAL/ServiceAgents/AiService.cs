@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TourPlanner.config.Interfaces;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model.Enums;
 

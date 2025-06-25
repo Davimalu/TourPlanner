@@ -32,33 +32,7 @@ public class OrsService : IOrsService
         // Get the base URL from the configuration file
         _baseUrl = tourPlannerConfig.OpenRouteServiceBaseUrl ?? throw new ArgumentNullException(nameof(tourPlannerConfig.OpenRouteServiceBaseUrl), "OpenRouteService base URL is not configured.");
     }
-
     
-    /// <summary>
-    /// <para>maps the <see cref="Transport"/> enum to the OpenRouteService profile string</para>
-    /// <para>(e.g. Transport.Car -> "driving-car")</para>
-    /// </summary>
-    /// <param name="transportType">The type of <see cref="Transport"/> to map</param>
-    /// <returns>The corresponding OpenRouteService profile string</returns>
-    public string GetOrsProfileForTransportType(Transport transportType)
-    {
-        // Mappings are available at https://giscience.github.io/openrouteservice-r/reference/ors_profile.html
-        
-        return transportType switch
-        {
-            Transport.Car => "driving-car",
-            Transport.Truck => "driving-hgv",
-            Transport.Bicycle => "cycling-regular",
-            Transport.Roadbike => "cycling-road",
-            Transport.Mountainbike => "cycling-mountain",
-            Transport.ElectricBicycle => "cycling-electric",
-            Transport.Walking => "foot-walking",
-            Transport.Hiking => "foot-hiking",
-            Transport.Wheelchair => "wheelchair",
-            _ => "driving-car"
-        };
-    }
-
     
     /// <summary>
     /// Calculates the route between two geographical points (provided as <see cref="GeoCoordinate"/>s using the OpenRouteService API
@@ -102,37 +76,7 @@ public class OrsService : IOrsService
         var jsonContent = await response.Content.ReadAsStringAsync();
         return ParseRouteResponse(jsonContent);
     }
-
     
-    private Route? ParseRouteResponse(string json)
-    {
-        try
-        {
-            var orsResponse = JsonSerializer.Deserialize<OrsRouteResponse>(json);
-            var feature = orsResponse?.Features?.FirstOrDefault();
-            
-            if (feature == null)
-            {
-                _logger.Warn("No features found in ORS route response");
-                return null;
-            }
-            
-            _logger.Info($"Route found. Distance: {feature.Properties.RouteSummary.Distance} meters, Duration: {feature.Properties.RouteSummary.Duration} seconds");
-            
-            return new Route
-            {
-                RouteGeometry = feature.Geometry.GetRawText(),
-                Distance = feature.Properties.RouteSummary.Distance,
-                Duration = feature.Properties.RouteSummary.Duration
-            };
-        }
-        catch (JsonException ex)
-        {
-            _logger.Error($"Failed to parse ORS route response: {ex.Message}", ex);
-            return null;
-        }
-    }
-
     
     /// <summary>
     /// Asynchronously retrieves the GeoCode (geographical coordinates, latitude and longitude, and the place's label) for a given address using the OpenRouteService Geocoding API.
@@ -173,6 +117,67 @@ public class OrsService : IOrsService
             _logger.Error($"ORS Geocoding failed: {ex.Message}", ex);
             return null;
         }
+    }
+    
+    
+    /// <summary>
+    /// Parses the JSON response from the OpenRouteService API to extract the route information
+    /// </summary>
+    /// <param name="json">The JSON response string from the ORS API</param>
+    /// <returns>A <see cref="Route"/> object containing the route geometry, distance, and duration, or null if parsing fails</returns>
+    private Route? ParseRouteResponse(string json)
+    {
+        try
+        {
+            var orsResponse = JsonSerializer.Deserialize<OrsRouteResponse>(json);
+            var feature = orsResponse?.Features?.FirstOrDefault();
+            
+            if (feature == null)
+            {
+                _logger.Warn("No features found in ORS route response");
+                return null;
+            }
+            
+            _logger.Info($"Route found. Distance: {feature.Properties.RouteSummary.Distance} meters, Duration: {feature.Properties.RouteSummary.Duration} seconds");
+            
+            return new Route
+            {
+                RouteGeometry = feature.Geometry.GetRawText(),
+                Distance = feature.Properties.RouteSummary.Distance,
+                Duration = feature.Properties.RouteSummary.Duration
+            };
+        }
+        catch (JsonException ex)
+        {
+            _logger.Error($"Failed to parse ORS route response: {ex.Message}", ex);
+            return null;
+        }
+    }
+    
+    
+    /// <summary>
+    /// <para>maps the <see cref="Transport"/> enum to the OpenRouteService profile string</para>
+    /// <para>(e.g. Transport.Car -> "driving-car")</para>
+    /// </summary>
+    /// <param name="transportType">The type of <see cref="Transport"/> to map</param>
+    /// <returns>The corresponding OpenRouteService profile string</returns>
+    private string GetOrsProfileForTransportType(Transport transportType)
+    {
+        // Mappings are available at https://giscience.github.io/openrouteservice-r/reference/ors_profile.html
+        
+        return transportType switch
+        {
+            Transport.Car => "driving-car",
+            Transport.Truck => "driving-hgv",
+            Transport.Bicycle => "cycling-regular",
+            Transport.Roadbike => "cycling-road",
+            Transport.Mountainbike => "cycling-mountain",
+            Transport.ElectricBicycle => "cycling-electric",
+            Transport.Walking => "foot-walking",
+            Transport.Hiking => "foot-hiking",
+            Transport.Wheelchair => "wheelchair",
+            _ => "driving-car"
+        };
     }
     
     
