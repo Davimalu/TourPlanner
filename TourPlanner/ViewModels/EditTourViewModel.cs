@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure.Interfaces;
@@ -13,7 +12,7 @@ using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBox
 
 namespace TourPlanner.ViewModels
 {
-    class EditTourViewModel : BaseViewModel
+    public class EditTourViewModel : BaseViewModel
     {
         // Dependencies
         private readonly ITourService _tourService;
@@ -223,7 +222,7 @@ namespace TourPlanner.ViewModels
         /// </summary>
         /// <param name="parameter"></param>
         /// <param name="isStartLocation">Indicates whether the start or end location should be geocoded</param>
-        private async Task GeocodeLocationAsync(object? parameter, bool isStartLocation = true)
+        private async Task GeocodeLocationAsync(object? parameter, bool isStartLocation)
         {
             // Retrieve the geocoded coordinates for the start location
             GeoCode? coordinates = await _orsService.GetGeoCodeFromAddressAsync(isStartLocation ? EditableTour.StartLocation : EditableTour.EndLocation);
@@ -293,7 +292,6 @@ namespace TourPlanner.ViewModels
             {
                 EditableTour.EndCoordinates = null;
             }
-            
             RouteCalculated = false;
             
             // Notify the save command that its execution state may have changed
