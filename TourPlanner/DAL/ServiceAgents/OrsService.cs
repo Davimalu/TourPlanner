@@ -20,9 +20,9 @@ public class OrsService : IOrsService
     private readonly string _baseUrl;
     
 
-    public OrsService(HttpClient http, ITourPlannerConfig tourPlannerConfig, ILogger<OrsService> logger)
+    public OrsService(HttpClient httpClient, ITourPlannerConfig tourPlannerConfig, ILogger<OrsService> logger)
     {
-        _httpClient = http ?? throw new ArgumentNullException(nameof(http));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
         // Get the API key from the configuration file
