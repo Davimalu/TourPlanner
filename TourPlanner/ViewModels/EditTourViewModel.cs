@@ -99,11 +99,7 @@ namespace TourPlanner.ViewModels
                 RaisePropertyChanged(nameof(EditableTour));
                 
                 // If the start location changes, the user needs to find the coordinates and calculate the route again
-                EditableTour.StartCoordinates = null;
-                RouteCalculated = false;
-                
-                // Notify the save button its canExecute state may have changed
-                _executeSave?.RaiseCanExecuteChanged();
+                ResetRouteCalculatedState(true);
             }
         }
         
@@ -117,11 +113,7 @@ namespace TourPlanner.ViewModels
                 RaisePropertyChanged(nameof(EditableTour));
                 
                 // If the end location changes, the user needs to find the coordinates and calculate the route again
-                EditableTour.EndCoordinates = null;
-                RouteCalculated = false;
-                
-                // Notify the save button its canExecute state may have changed
-                _executeSave?.RaiseCanExecuteChanged();
+                ResetRouteCalculatedState(false);
             }
         }
 
@@ -283,6 +275,29 @@ namespace TourPlanner.ViewModels
             
             // Request the UI to close the window
             EventAggregator.Publish(new CloseWindowRequestedEvent(this));
+        }
+        
+        
+        /// <summary>
+        /// Resets the route calculated state when the start or end location changes (-> forces the user to geocode the location again and recalculate the route)
+        /// </summary>
+        /// <param name="isStartLocation">Indicates whether the start or end location was changed</param>
+        private void ResetRouteCalculatedState(bool isStartLocation)
+        {
+            // If the user changes the start or end location, we need to reset the route calculated state so that the user has to find the coordinates and recalculate the route before saving
+            if (isStartLocation)
+            {
+                EditableTour.StartCoordinates = null;
+            }
+            else
+            {
+                EditableTour.EndCoordinates = null;
+            }
+            
+            RouteCalculated = false;
+            
+            // Notify the save command that its execution state may have changed
+            _executeSave?.RaiseCanExecuteChanged();
         }
     }
 }
