@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using TourPlanner.config.Interfaces;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
@@ -73,6 +72,8 @@ public class OrsService : IOrsService
             return null;
         }
         
+        _logger.Debug($"ORS Route calculation successful. Status code: {response.StatusCode}");
+        
         var jsonContent = await response.Content.ReadAsStringAsync();
         return ParseRouteResponse(jsonContent);
     }
@@ -130,7 +131,7 @@ public class OrsService : IOrsService
         try
         {
             var orsResponse = JsonSerializer.Deserialize<OrsRouteResponse>(json);
-            var feature = orsResponse?.Features?.FirstOrDefault();
+            var feature = orsResponse?.Features.FirstOrDefault();
             
             if (feature == null)
             {
@@ -208,6 +209,8 @@ public class OrsService : IOrsService
             coords[0].GetDouble() // Longitude
         );
         
+        _logger.Info($"Geocoding successful: {orsResponse.Features[0].Properties.Label} at {coordsStruct.Latitude}, {coordsStruct.Longitude}");
+        
         return new GeoCode(orsResponse.Features[0].Properties.Label, coordsStruct);
     }
     
@@ -221,10 +224,10 @@ public class OrsService : IOrsService
     /// <item><description>One response from the ORS API contains a list of features</description></item>
     /// </list>
     /// </summary>
-    private class OrsGeocodeResponse
+    private class OrsGeocodeResponse(List<OrsGeocodeFeature> features)
     {
         [JsonPropertyName("features")]
-        public List<OrsGeocodeFeature> Features { get; set; }
+        public List<OrsGeocodeFeature> Features { get; set; } = features;
     }
     
     /// <summary>
@@ -235,42 +238,49 @@ public class OrsService : IOrsService
     /// <item><description>The properties contain metadata about the location, such as Name, street, housenumber, postal code, city, ...</description></item>
     /// </list>
     /// </summary>
-    private class OrsGeocodeFeature
+    private class OrsGeocodeFeature(OrsGeocodeProperties properties, JsonElement geometry)
     {
         [JsonPropertyName("geometry")]
-        public JsonElement Geometry { get; set; }
+        public JsonElement Geometry { get; } = geometry;
+
         [JsonPropertyName("properties")]
-        public OrsGeocodeProperties Properties { get; set; }
+        public OrsGeocodeProperties Properties { get; } = properties;
     }
     
     /// <summary>
     /// used to deserialize the properties of a geocoded location from ORS
     /// </summary>
-    private class OrsGeocodeProperties
+    private class OrsGeocodeProperties(string label, string country, string region, string street, string houseNumber, string postalCode)
     {
         [JsonPropertyName("label")]
-        public string Label { get; set; }
+        public string Label { get; } = label;
+
         [JsonPropertyName("country")]
-        public string Country { get; set; }
+        public string Country { get; set; } = country;
+
         [JsonPropertyName("region")]
-        public string Region { get; set; }
+        public string Region { get; set; } = region;
+
         [JsonPropertyName("street")]
-        public string Street { get; set; }
+        public string Street { get; set; } = street;
+
         [JsonPropertyName("housenumber")]
-        public string HouseNumber { get; set; }
+        public string HouseNumber { get; set; } = houseNumber;
+
         [JsonPropertyName("postalcode")]
-        public string PostalCode { get; set; }
+        public string PostalCode { get; set; } = postalCode;
     }
 
     /// <summary>
     /// used to deserialize the response from ORS when calculating a route
     /// </summary>
-    private class OrsRouteResponse
+    private class OrsRouteResponse(List<OrsRouteFeature> features, List<double> boundingBox)
     {
         [JsonPropertyName("features")]
-        public List<OrsRouteFeature> Features { get; set; }
+        public List<OrsRouteFeature> Features { get; set; } = features;
+
         [JsonPropertyName("bbox")]
-        public List<double> BoundingBox { get; set; }
+        public List<double> BoundingBox { get; set; } = boundingBox;
     }
     
     /// <summary>
@@ -281,32 +291,33 @@ public class OrsService : IOrsService
     /// <item><description>The properties contain metadata about the route, such as distance and duration</description></item>
     /// </list>
     /// </summary>
-    private class OrsRouteFeature
+    private class OrsRouteFeature(OrsRouteProperties properties, JsonElement geometry)
     {
         [JsonPropertyName("geometry")]
-        public JsonElement Geometry { get; set; }
+        public JsonElement Geometry { get; } = geometry;
+
         [JsonPropertyName("properties")]
-        public OrsRouteProperties Properties { get; set; }
+        public OrsRouteProperties Properties { get; } = properties;
     }
     
     /// <summary>
     /// used to deserialize the properties of a route from ORS
     /// </summary>
-    private class OrsRouteProperties
+    private class OrsRouteProperties(OrsRouteSummary routeSummary)
     {
         [JsonPropertyName("summary")]
-        public OrsRouteSummary RouteSummary { get; set; }
+        public OrsRouteSummary RouteSummary { get; } = routeSummary;
     }
     
     /// <summary>
     /// used to deserialize the summary of a route from ORS
     /// </summary>
-    private class OrsRouteSummary
+    private class OrsRouteSummary(double distance, double duration)
     {
         [JsonPropertyName("distance")]
-        public double Distance { get; set; } // in meters
+        public double Distance { get; } = distance; // in meters
         [JsonPropertyName("duration")]
-        public double Duration { get; set; } // in seconds
+        public double Duration { get; } = duration; // in seconds
     }
     
 }
