@@ -8,7 +8,7 @@ namespace TourPlanner.Logic;
 
 public class SearchService : ISearchService
 {
-    private ILogger<SearchService> _logger;
+    private readonly ILogger<SearchService> _logger;
     
     public SearchService(ILogger<SearchService> logger)
     {
