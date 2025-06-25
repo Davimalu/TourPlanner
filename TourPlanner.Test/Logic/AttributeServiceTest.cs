@@ -10,7 +10,7 @@ using TourPlanner.Model.Enums;
 namespace TourPlanner.Test.Logic
 {
     [TestFixture]
-    public class AttributeServiceTests
+    public class AttributeServiceTest
     {
         // Mocks for dependencies
         private ILogger<AttributeService> _mockLogger;
