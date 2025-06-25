@@ -4,6 +4,7 @@ using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 using TourPlanner.ViewModels;
 using TourPlanner.Views;
 
@@ -45,6 +46,9 @@ namespace TourPlanner.Logic
                 DataContext = new EditTourViewModel(selectedTour, _tourService, _orsService, _mapService, this, _eventAggregator, App.ServiceProvider.GetService<ILogger<EditTourViewModel>>()),
                 Map = { DataContext = _mapViewModel}
             };
+            
+            // Subscribe to the CloseWindowRequestedEvent to close the window when requested
+            _eventAggregator.Subscribe<CloseWindowRequestedEvent>(OnCloseWindowRequested);
 
             editWindow.ShowDialog();
         }
@@ -113,6 +117,23 @@ namespace TourPlanner.Logic
         public void ExitApplication()
         {
             Application.Current.Shutdown();
+        }
+
+        
+        /// <summary>
+        /// Closes a window that has been requested to close by the CloseWindowRequestedEvent
+        /// </summary>
+        /// <param name="closeWindowRequestedEvent">The event containing the data context of the window to close</param>
+        public void OnCloseWindowRequested(CloseWindowRequestedEvent closeWindowRequestedEvent)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.DataContext == closeWindowRequestedEvent.DataContextOfWindowToClose)
+                {
+                    window.Close();
+                    break;
+                }
+            }
         }
 
 

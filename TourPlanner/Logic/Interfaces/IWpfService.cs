@@ -1,5 +1,6 @@
 ﻿using TourPlanner.Model;
 using TourPlanner.Model.Enums.MessageBoxAbstraction;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.Logic.Interfaces
 {
@@ -11,5 +12,6 @@ namespace TourPlanner.Logic.Interfaces
         public void ApplyLightTheme();
         public void ApplyDarkTheme();
         public void ExitApplication();
+        public void OnCloseWindowRequested(CloseWindowRequestedEvent closeWindowRequestedEvent);
     }
 }
