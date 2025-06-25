@@ -1,6 +1,5 @@
 ﻿using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 
 namespace TourPlanner.Commands
@@ -11,18 +10,24 @@ namespace TourPlanner.Commands
         private readonly Func<object?, bool> _canExecute;
         private bool _isExecuting;
 
-        private readonly ILogger<RelayCommandAsync> _logger;
+        private readonly ILogger<RelayCommandAsync>? _logger;
 
         /// <summary>
         /// Creates a new AsyncRelayCommand.
         /// </summary>
         /// <param name="executeAsync">The asynchronous operation to run when the command is executed</param>
+        /// <param name="logger">The logger to log errors during command execution</param>
         /// <param name="canExecute">whether the command can be executed or not</param>
         public RelayCommandAsync(Func<object?, Task> executeAsync, Func<object?, bool>? canExecute = null)
         {
             _executeAsync = executeAsync ?? throw new ArgumentNullException(nameof(executeAsync));
             _canExecute = canExecute ?? (_ => true);
-            _logger = App.ServiceProvider.GetRequiredService<ILogger<RelayCommandAsync>>();
+
+            // In Unit Tests, the Service Provider might not be available, so we check for null
+            if (App.ServiceProvider != null)
+            {
+                _logger = App.ServiceProvider.GetRequiredService<ILogger<RelayCommandAsync>>();
+            }
         }
 
         /// <summary>
@@ -66,12 +71,40 @@ namespace TourPlanner.Commands
             }
             catch (Exception ex)
             {
-                _logger.Error($"Async command execution failed", ex);
+                _logger?.Error($"Async command execution failed", ex);
             }
             finally
             {
                 _isExecuting = false;
                 RaiseCanExecuteChanged(); // Notify that the command can now execute again
+            }
+        }
+        
+        
+        /// <summary>
+        /// Executes the command asynchronously and returns a Task (used for UnitTesting - not compatible with the void return type of ICommand.Execute).
+        /// </summary>
+        public async Task ExecuteAsync(object? parameter)
+        {
+            if (!CanExecute(parameter))
+            {
+                return;
+            }
+            _isExecuting = true;
+            RaiseCanExecuteChanged();
+        
+            try
+            {
+                await _executeAsync(parameter);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"Async command execution failed", ex);
+            }
+            finally
+            {
+                _isExecuting = false;
+                RaiseCanExecuteChanged();
             }
         }
     }

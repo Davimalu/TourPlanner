@@ -123,6 +123,7 @@ namespace TourPlanner.ViewModels
                 else
                 {
                     _logger.Error($"Failed to update TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                    return;
                 }
             }
             // TourLog doesn't exist -> create it
@@ -139,6 +140,7 @@ namespace TourPlanner.ViewModels
                 else
                 {
                     _logger.Error($"Failed to create TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                    return;
                 }
             }
             _logger.Info($"TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} saved successfully for Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
