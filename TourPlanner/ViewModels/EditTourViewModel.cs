@@ -6,6 +6,7 @@ using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
+using TourPlanner.Model.Events;
 using TourPlanner.Model.Structs;
 using MessageBoxButton = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxButton;
 using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxImage;
@@ -280,14 +281,8 @@ namespace TourPlanner.ViewModels
             // Make the MapService control the map in the main window again
             _mapService.SwitchControlToMainMapAsync();
             
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window.DataContext == this)
-                {
-                    window.Close();
-                    break;
-                }
-            }
+            // Request the UI to close the window
+            EventAggregator.Publish(new CloseWindowRequestedEvent(this));
         }
     }
 }
