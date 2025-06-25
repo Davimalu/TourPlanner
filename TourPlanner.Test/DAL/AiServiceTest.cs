@@ -51,33 +51,24 @@ namespace TourPlanner.Test.DAL
         [Test]
         public void Constructor_WhenConfigIsNull_ThrowsArgumentNullException()
         {
-            // Arrange
-            ITourPlannerConfig? nullConfig = null;
-
             // Act & Assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new AiService(nullConfig!, _httpClient, _mockLogger));
+            var ex = Assert.Throws<ArgumentNullException>(() => new AiService(null!, _httpClient, _mockLogger));
             Assert.That(ex.ParamName, Is.EqualTo("config"));
         }
 
         [Test]
         public void Constructor_WhenHttpClientIsNull_ThrowsArgumentNullException()
         {
-            // Arrange
-            HttpClient? nullClient = null;
-
             // Act & Assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new AiService(_mockConfig, nullClient!, _mockLogger));
+            var ex = Assert.Throws<ArgumentNullException>(() => new AiService(_mockConfig, null!, _mockLogger));
             Assert.That(ex.ParamName, Is.EqualTo("httpClient"));
         }
 
         [Test]
         public void Constructor_WhenLoggerIsNull_ThrowsArgumentNullException()
         {
-            // Arrange
-            ILogger<AiService>? nullLogger = null;
-
             // Act & Assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new AiService(_mockConfig, _httpClient, nullLogger!));
+            var ex = Assert.Throws<ArgumentNullException>(() => new AiService(_mockConfig, _httpClient, null!));
             Assert.That(ex.ParamName, Is.EqualTo("logger"));
         }
 
