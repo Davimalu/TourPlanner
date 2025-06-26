@@ -9,7 +9,7 @@ using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBox
 
 namespace TourPlanner.ViewModels
 {
-    class MenuBarViewModel : BaseViewModel
+    public class MenuBarViewModel : BaseViewModel
     {
         private readonly ILocalTourService _localTourService;
         private readonly ITourService _tourService;
@@ -33,7 +33,7 @@ namespace TourPlanner.ViewModels
         // Commands
         private RelayCommandAsync? _executeExportTours;
         private RelayCommandAsync? _executeImportTours;
-        private RelayCommand _executeChangeTheme;
+        private RelayCommand? _executeChangeTheme;
         private RelayCommand? _executeExitApplication;
         
         public ICommand ExecuteExportTours => _executeExportTours ??= 
@@ -45,7 +45,7 @@ namespace TourPlanner.ViewModels
         public RelayCommand ExecuteChangeTheme => _executeChangeTheme ??=
             new RelayCommand(ChangeApplicationTheme, _ => true);
 
-        public RelayCommand? ExecuteExitApplication => _executeExitApplication ??=
+        public RelayCommand ExecuteExitApplication => _executeExitApplication ??=
             new RelayCommand(_ => _wpfService.ExitApplication());
         
         

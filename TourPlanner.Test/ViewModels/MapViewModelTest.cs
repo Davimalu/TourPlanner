@@ -1,10 +1,6 @@
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
-using TourPlanner.Model;
-using TourPlanner.Model.Events;
-using TourPlanner.Model.Structs;
 using TourPlanner.ViewModels;
 
 namespace TourPlanner.Test.ViewModels
