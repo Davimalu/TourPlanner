@@ -45,31 +45,31 @@ namespace TourPlanner.Test.ViewModels
         [Test]
         public void Constructor_WhenLocalTourServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(null, _mockTourService, _mockIoService, _mockPdfService, _mockWpfService, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(null!, _mockTourService, _mockIoService, _mockPdfService, _mockWpfService, _mockEventAggregator, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenTourServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, null, _mockIoService, _mockPdfService, _mockWpfService, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, null!, _mockIoService, _mockPdfService, _mockWpfService, _mockEventAggregator, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenIoServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, _mockTourService, null, _mockPdfService, _mockWpfService, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, _mockTourService, null!, _mockPdfService, _mockWpfService, _mockEventAggregator, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenPdfServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, _mockTourService, _mockIoService, null, _mockWpfService, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, _mockTourService, _mockIoService, null!, _mockWpfService, _mockEventAggregator, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenWpfServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, _mockTourService, _mockIoService, _mockPdfService, null, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new MenuBarViewModel(_mockLocalTourService, _mockTourService, _mockIoService, _mockPdfService, null!, _mockEventAggregator, _mockLogger));
         }
         
         [Test]

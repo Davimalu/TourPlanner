@@ -35,6 +35,7 @@ namespace TourPlanner.ViewModels
         /// Initializes a new instance of the SearchBarViewModel class.
         /// </summary>
         /// <param name="eventAggregator">The event aggregator used for publishing and subscribing to events</param>
+        /// <param name="logger">The logger used for logging information and errors</param>
         public SearchBarViewModel(IEventAggregator eventAggregator, ILogger<SearchBarViewModel> logger) : base(eventAggregator)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
