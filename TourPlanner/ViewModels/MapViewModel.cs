@@ -1,5 +1,4 @@
-﻿using TourPlanner.Infrastructure;
-using TourPlanner.Infrastructure.Interfaces;
+﻿using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Events;
@@ -42,18 +41,26 @@ namespace TourPlanner.ViewModels
         /// <param name="e"><see cref="SelectedTourChangedEvent"/> containing the new selected tour</param>
         private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
         {
-            // Update the internal selected tour property
-            SelectedTour = e.SelectedTour;
+            try
+            {
+                // Update the internal selected tour property
+                SelectedTour = e.SelectedTour;
             
-            if (SelectedTour != null)
-            {
-                // Redraw the route on the map if a new tour is selected
-                _logger.Debug($"Selected tour changed: {SelectedTour.TourName} (ID: {SelectedTour.TourId}). Redrawing route on map...");
-                await DisplayTourRouteAsync(SelectedTour);
+                if (SelectedTour != null)
+                {
+                    // Redraw the route on the map if a new tour is selected
+                    _logger.Debug($"Selected tour changed: {SelectedTour.TourName} (ID: {SelectedTour.TourId}). Redrawing route on map...");
+                    await DisplayTourRouteAsync(SelectedTour);
+                }
+                else
+                {
+                    // If no tour is selected, clear the map
+                    await _mapService.ClearMapAsync();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // If no tour is selected, clear the map
+                _logger.Error($"Error handling selected tour change: {ex.Message}", ex);
                 await _mapService.ClearMapAsync();
             }
         }
