@@ -1,7 +1,6 @@
 ﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
@@ -130,7 +129,7 @@ namespace TourPlanner.ViewModels
         /// Handles the event when the selected tour changes and updates the ViewModels own SelectedTour property
         /// </summary>
         /// <param name="e">The event containing the newly selected tour</param>
-        private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
+        private void OnSelectedTourChanged(SelectedTourChangedEvent e)
         {
             SelectedTour = e.SelectedTour;
         }
