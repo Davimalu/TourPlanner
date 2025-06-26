@@ -1,5 +1,4 @@
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure.Interfaces;
@@ -34,8 +33,11 @@ namespace TourPlanner.Test.ViewModels
             _mockEventAggregator = Substitute.For<IEventAggregator>();
             _mockLogger = Substitute.For<ILogger<TourAttributesViewModel>>();
 
-            // Capture the subscribed event handler when the ViewModel is created
-            _mockEventAggregator.Subscribe(Arg.Do<Action<SelectedTourChangedEvent>>(handler => _selectedTourChangedHandler = handler));
+            // // tell the mock that when Subscribe is called, it should run our code, which captures the provided delegate into our local field
+            _mockEventAggregator.Subscribe<SelectedTourChangedEvent>(Arg.Do<Action<SelectedTourChangedEvent>>(handler =>
+            {
+                _selectedTourChangedHandler = handler;
+            }));
             
             // Initialize the ViewModel with the mocked dependencies
             _viewModel = new TourAttributesViewModel(_mockTourService, _mockAttributeService, _mockEventAggregator, _mockLogger);
@@ -44,25 +46,25 @@ namespace TourPlanner.Test.ViewModels
         [Test]
         public void Constructor_WhenTourServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(null, _mockAttributeService, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(null!, _mockAttributeService, _mockEventAggregator, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenAttributeServiceIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(_mockTourService, null, _mockEventAggregator, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(_mockTourService, null!, _mockEventAggregator, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenEventAggregatorIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(_mockTourService, _mockAttributeService, null, _mockLogger));
+            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(_mockTourService, _mockAttributeService, null!, _mockLogger));
         }
         
         [Test]
         public void Constructor_WhenLoggerIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(_mockTourService, _mockAttributeService, _mockEventAggregator, null));
+            Assert.Throws<ArgumentNullException>(() => new TourAttributesViewModel(_mockTourService, _mockAttributeService, _mockEventAggregator, null!));
         }
 
         [Test]
