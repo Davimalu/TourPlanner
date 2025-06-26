@@ -6,6 +6,6 @@ public class SelectedTourChangedEvent
     
     public SelectedTourChangedEvent(Tour? selectedTour)
     {
-        SelectedTour = selectedTour ?? throw new ArgumentNullException(nameof(selectedTour));
+        SelectedTour = selectedTour; // null is allowed, e.g. when the user clears the selection in the UI
     }
 }
