@@ -48,7 +48,7 @@ public class TourAttributesViewModel : BaseViewModel
     /// Event handler for when the selected tour changes.
     /// </summary>
     /// <param name="e">The event containing the newly selected tour</param>
-    private async void OnSelectedTourChanged(SelectedTourChangedEvent e)
+    private void OnSelectedTourChanged(SelectedTourChangedEvent e)
     {
         SelectedTour = e.SelectedTour;
         
@@ -72,9 +72,17 @@ public class TourAttributesViewModel : BaseViewModel
         _logger.Info($"Calculating attributes for tour: {SelectedTour.TourName} (ID: {SelectedTour.TourId})");
         
         // Calculate the tour attributes asynchronously
-        SelectedTour.Popularity = await _attributeService.CalculatePopularityAsync(SelectedTour);
-        SelectedTour.ChildFriendlyRating = _attributeService.CalculateChildFriendliness(SelectedTour);
-        SelectedTour.AiSummary = await _attributeService.GetAiSummaryAsync(SelectedTour);
+        try
+        {
+            SelectedTour.Popularity = await _attributeService.CalculatePopularityAsync(SelectedTour);
+            SelectedTour.ChildFriendlyRating = _attributeService.CalculateChildFriendliness(SelectedTour);
+            SelectedTour.AiSummary = await _attributeService.GetAiSummaryAsync(SelectedTour);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("Error calculating attributes for tour.", ex);
+            return;
+        }
 
         // Raise property changed to update the UI
         RaisePropertyChanged(nameof(SelectedTour));

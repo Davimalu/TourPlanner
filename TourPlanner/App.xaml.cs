@@ -39,7 +39,10 @@ public partial class App
         services.AddSingleton<IAttributeService, AttributeService>();
         services.AddSingleton<IPdfService, PdfService>();
         services.AddSingleton<IEventAggregator, EventAggregator>();
+        
+        // Infrastructure
         services.AddTransient(typeof(ILogger<>), typeof(Logger<>));
+        services.AddSingleton<IFileSystemWrapper, FileSystemWrapper>();
         
         services.AddTransient<HttpClient>();
         

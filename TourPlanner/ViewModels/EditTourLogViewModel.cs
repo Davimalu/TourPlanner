@@ -1,11 +1,11 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Enums;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
+using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
@@ -123,6 +123,7 @@ namespace TourPlanner.ViewModels
                 else
                 {
                     _logger.Error($"Failed to update TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                    return;
                 }
             }
             // TourLog doesn't exist -> create it
@@ -139,6 +140,7 @@ namespace TourPlanner.ViewModels
                 else
                 {
                     _logger.Error($"Failed to create TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} from Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
+                    return;
                 }
             }
             _logger.Info($"TourLog with ID {EditableTourLog.LogId}: {EditableTourLog.Comment} saved successfully for Tour with ID {SelectedTour.TourId}: {SelectedTour.TourName}");
@@ -173,15 +175,8 @@ namespace TourPlanner.ViewModels
         /// </summary>
         private void CloseWindow()
         {
-            // Close the window
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window.DataContext == this)
-                {
-                    window.Close();
-                    break;
-                }
-            }
+            // Request the UI to close the window
+            EventAggregator.Publish(new CloseWindowRequestedEvent(this));
         }
     }
 }

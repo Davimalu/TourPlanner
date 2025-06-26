@@ -4,7 +4,7 @@ using TourPlanner.Model.Events;
 
 namespace TourPlanner.ViewModels
 {
-    class TourDetailsViewModel : BaseViewModel
+    public class TourDetailsViewModel : BaseViewModel
     {
         private Tour? _selectedTour;
         public Tour? SelectedTour

@@ -41,7 +41,7 @@ public class MapService : IMapService
 
         try
         {
-            var result = await _webViewService.CallFunctionAsync("addMarker", marker.Coordinates.Latitude, marker.Coordinates.Longitude, marker.Name, marker.Description ?? "");
+            await _webViewService.CallFunctionAsync("addMarker", marker.Coordinates.Latitude, marker.Coordinates.Longitude, marker.Name, marker.Description);
             _logger.Debug($"Added marker at {marker.Coordinates.Latitude}, {marker.Coordinates.Longitude} with name '{marker.Name}' and description '{marker.Description}'");
             return true;
         }
@@ -68,7 +68,7 @@ public class MapService : IMapService
         
         try
         {
-            var result = await _webViewService.CallFunctionAsync("removeMarkerByTitle", markerTitle);
+            await _webViewService.CallFunctionAsync("removeMarkerByTitle", markerTitle);
             _logger.Debug($"Removed marker with title '{markerTitle}'");
             return true;
         }
@@ -96,7 +96,7 @@ public class MapService : IMapService
         
         try 
         {
-            var result = await _webViewService.CallFunctionAsync("flyToLocation", coordinates.Latitude, coordinates.Longitude, zoomLevel);
+            await _webViewService.CallFunctionAsync("flyToLocation", coordinates.Latitude, coordinates.Longitude, zoomLevel);
             _logger.Debug($"Set map view to coordinates ({coordinates.Latitude}, {coordinates.Longitude})");
             return true;
         }
@@ -123,7 +123,7 @@ public class MapService : IMapService
 
         try
         {
-            var result = await _webViewService.CallFunctionAsync("drawRoute", geoJsonRoute);
+            await _webViewService.CallFunctionAsync("drawRoute", geoJsonRoute);
             _logger.Debug("Route drawn successfully");
             return true;
         }
@@ -149,7 +149,7 @@ public class MapService : IMapService
 
         try
         {
-            var result = await _webViewService.CallFunctionAsync("clearMap");
+            await _webViewService.CallFunctionAsync("clearMap");
             _logger.Debug("Map cleared successfully");
             return true;
         }
@@ -180,6 +180,12 @@ public class MapService : IMapService
             return string.Empty;
         }
         
+        if (tour.StartCoordinates == null || tour.EndCoordinates == null || string.IsNullOrEmpty(tour.GeoJsonString))
+        {
+            _logger.Warn("Failed to capture map image: Tour does not have valid start / end coordinates or route data.");
+            return string.Empty;
+        }
+        
         // Inform others that a screenshot of the map is about to be taken
         _eventAggregator.Publish(new MapScreenshotRequestedEvent());
 
@@ -207,16 +213,5 @@ public class MapService : IMapService
             _logger.Error($"Failed to capture map image: {ex.Message}", ex);
             return string.Empty;
         }
-    }
-    
-    
-    /// <summary>
-    /// used to deserialize messages from the WebView
-    /// </summary>
-    private class MapMessage
-    {
-        public string Type { get; set; } = string.Empty;
-        public double Lat { get; set; }
-        public double Lon { get; set; }
     }
 }

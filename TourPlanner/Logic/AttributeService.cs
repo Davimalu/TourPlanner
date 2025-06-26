@@ -1,6 +1,4 @@
-using System.Text.Json;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;

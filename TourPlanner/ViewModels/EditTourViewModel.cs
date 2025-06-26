@@ -1,18 +1,18 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using TourPlanner.Commands;
 using TourPlanner.DAL.Interfaces;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Logic.Interfaces;
 using TourPlanner.Model;
 using TourPlanner.Model.Enums;
+using TourPlanner.Model.Events;
 using TourPlanner.Model.Structs;
 using MessageBoxButton = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxButton;
 using MessageBoxImage = TourPlanner.Model.Enums.MessageBoxAbstraction.MessageBoxImage;
 
 namespace TourPlanner.ViewModels
 {
-    class EditTourViewModel : BaseViewModel
+    public class EditTourViewModel : BaseViewModel
     {
         // Dependencies
         private readonly ITourService _tourService;
@@ -98,11 +98,7 @@ namespace TourPlanner.ViewModels
                 RaisePropertyChanged(nameof(EditableTour));
                 
                 // If the start location changes, the user needs to find the coordinates and calculate the route again
-                EditableTour.StartCoordinates = null;
-                RouteCalculated = false;
-                
-                // Notify the save button its canExecute state may have changed
-                _executeSave?.RaiseCanExecuteChanged();
+                ResetRouteCalculatedState(true);
             }
         }
         
@@ -116,11 +112,7 @@ namespace TourPlanner.ViewModels
                 RaisePropertyChanged(nameof(EditableTour));
                 
                 // If the end location changes, the user needs to find the coordinates and calculate the route again
-                EditableTour.EndCoordinates = null;
-                RouteCalculated = false;
-                
-                // Notify the save button its canExecute state may have changed
-                _executeSave?.RaiseCanExecuteChanged();
+                ResetRouteCalculatedState(false);
             }
         }
 
@@ -230,7 +222,7 @@ namespace TourPlanner.ViewModels
         /// </summary>
         /// <param name="parameter"></param>
         /// <param name="isStartLocation">Indicates whether the start or end location should be geocoded</param>
-        private async Task GeocodeLocationAsync(object? parameter, bool isStartLocation = true)
+        private async Task GeocodeLocationAsync(object? parameter, bool isStartLocation)
         {
             // Retrieve the geocoded coordinates for the start location
             GeoCode? coordinates = await _orsService.GetGeoCodeFromAddressAsync(isStartLocation ? EditableTour.StartLocation : EditableTour.EndLocation);
@@ -280,14 +272,30 @@ namespace TourPlanner.ViewModels
             // Make the MapService control the map in the main window again
             _mapService.SwitchControlToMainMapAsync();
             
-            foreach (Window window in Application.Current.Windows)
+            // Request the UI to close the window
+            EventAggregator.Publish(new CloseWindowRequestedEvent(this));
+        }
+        
+        
+        /// <summary>
+        /// Resets the route calculated state when the start or end location changes (-> forces the user to geocode the location again and recalculate the route)
+        /// </summary>
+        /// <param name="isStartLocation">Indicates whether the start or end location was changed</param>
+        private void ResetRouteCalculatedState(bool isStartLocation)
+        {
+            // If the user changes the start or end location, we need to reset the route calculated state so that the user has to find the coordinates and recalculate the route before saving
+            if (isStartLocation)
             {
-                if (window.DataContext == this)
-                {
-                    window.Close();
-                    break;
-                }
+                EditableTour.StartCoordinates = null;
             }
+            else
+            {
+                EditableTour.EndCoordinates = null;
+            }
+            RouteCalculated = false;
+            
+            // Notify the save command that its execution state may have changed
+            _executeSave?.RaiseCanExecuteChanged();
         }
     }
 }

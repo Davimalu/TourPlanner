@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using TourPlanner.DAL.Interfaces;
-using TourPlanner.Infrastructure;
 using TourPlanner.Infrastructure.Interfaces;
 using TourPlanner.Model;
 
@@ -12,10 +11,12 @@ namespace TourPlanner.DAL.ServiceAgents;
 public class LocalTourService : ILocalTourService
 {
     private readonly ILogger<LocalTourService> _logger;
+    private readonly IFileSystemWrapper _fileSystemWrapper;
     
-    public LocalTourService(ILogger<LocalTourService> logger)
+    public LocalTourService(ILogger<LocalTourService> logger, IFileSystemWrapper fileSystemWrapper)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _fileSystemWrapper = fileSystemWrapper ?? throw new ArgumentNullException(nameof(fileSystemWrapper));
     }
 
 
@@ -33,7 +34,7 @@ public class LocalTourService : ILocalTourService
             string jsonString = JsonConvert.SerializeObject(tours);
             
             // Write the serialized data to the specified file path
-            await System.IO.File.WriteAllTextAsync(path, jsonString);
+            await _fileSystemWrapper.WriteAllTextAsync(path, jsonString);
             
             _logger.Info($"Tours saved successfully to {path}");
             
@@ -57,14 +58,14 @@ public class LocalTourService : ILocalTourService
         try
         {
             // Check if the file exists
-            if (!System.IO.File.Exists(path))
+            if (!_fileSystemWrapper.Exists(path))
             {
                 _logger.Warn($"Couldn't load tours from file: {path} does not exist");
                 return null;
             }
             
             // Read JSON string from the specified file path
-            string jsonString = await System.IO.File.ReadAllTextAsync(path);
+            string jsonString = await _fileSystemWrapper.ReadAllTextAsync(path);
             
             // Deserialize the JSON string back to a collection of Tour objects
             var tours = JsonConvert.DeserializeObject<List<Tour>>(jsonString);
