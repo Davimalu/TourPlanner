@@ -2,153 +2,160 @@
 Karlheinz Lunatschek & David Zeugner
 
 ## Architecture
-Wie in der Spezifikation für dieses Projekt gefordert, handelt es sich beim TourPlanner um eine Windows Presentation Foundation (WPF) GUI-Anwendung, die das `MVVM-Pattern` (Model-View-ViewModel) verwendet.
-Die Anwendung implementiert zudem die `Layered Architecture`, um bestimmte Geschäftsbereiche der Anwendung korrekt von anderen zu trennen. So sind Anfragen an externe Services (bspw. die REST-API, OpenRouteService API, etc.) in den Data Access Layer (DAL) ausgelagert.
-Die UI-Komponenten sind (wie es auch MVVM vorschreibt) von der restlichen Anwendung getrennt und unabhängig; die ViewModels implementieren die zur UI gehörigen Logik, ohne direkt von ihr abhängig zu sein, sodass sie auch mit anderen UI-Frameworks verwendet werden könnten; die Business Logic für die Verarbeitung der Daten und andere Operationen befindet sich ebenfalls in einem eigenen Layer.
-Parallel dazu existieren Services, wie bspw. die Konfigurationsverwaltung `TourPlannerConfig.cs`, die sämtliche Layer überspannt.
+As required in the specification for this project, **TourPlanner** is a Windows Presentation Foundation (WPF) GUI application that uses the `MVVM pattern` (Model-View-ViewModel).  
+The application also implements a `Layered Architecture` to separate certain business areas of the application from others. For example, requests to external services (such as the REST API, OpenRouteService API, etc.) are outsourced to the Data Access Layer (DAL).  
+The UI components are, as prescribed by MVVM, separated from and independent of the rest of the application; the ViewModels implement the logic belonging to the UI without being directly dependent on it, so that they could also be used with other UI frameworks; the business logic for data processing and other operations is also located in its own layer.  
+Furthermore, there are services such as the configuration management `TourPlannerConfig.cs`, which span all layers.
 
-Die Logik für die Persistenz der Daten ist sogar in eine andere Solution `TourPlanner.RestServer` ausgelagert. Die Frontend Applikation kommuniziert über eine Restful-API mit dem Backend, das das Speichern/Updaten/Löschen der Daten in einer PostgreSQL Datenbank übernimmt.
-Die Model-Klassen sind zudem ebenfalls in eine eigenen Solution `TourPlanner.Model` ausgelagert und werden sowohl von `TourPlanner` als auch von `TourPlanner.RestServer` verwendet.
+The logic for data persistence is outsourced into a completely separate solution, `TourPlanner.RestServer`. The frontend application communicates with the backend via a RESTful API, which is responsible for the saving/updating/deleting of data in a PostgreSQL database.  
+The model classes are also outsourced into their own solution, `TourPlanner.Model`, and are used by both `TourPlanner` and `TourPlanner.RestServer`.
 
-### Einschränkungen / Kompromisse
-Wir haben einige der von uns uns soeben genannten Best Practices und Design Patterns (welche genau wir implementiert haben, wird später noch erwähnt) an einigen Stellen bewusst (an manchen Stellen sicher auch unbewusst) verletzt. So implementieren bspw. einige Model-Klassen in `TourPlanner.Model` `INotifyPropertyChanged` und damit zu gewissen Teilen auch Business Logic. Dies war eine pragmatische Entscheidung, um zu vermeiden, dass die ViewModels sämtliche Properties der Models reimplementieren müssen, was zu sehr viel Duplicate Code geführt hätte.
+### Restrictions / Trade-offs
 
-Die CodeBehind Datei von `Map.xaml` enthält Business Logic für die Initialisierung des WebViews und der Services, die es dann managen (Verletzung des MVVM Patterns). Diese Logik aus dem Code Behind auszulagern würde zu einem massiven Anstieg der Komplexität der Applikation bei geringem bis keinen Nutzen führen, da die Logik für die Initialisierung von bspw. WebView2 so spezifisch zum verwendeten UI-Framework ist, dass diese ohnehin nicht an anderer Stelle wiederverwertet werden kann.
+We have consciously (and, probably, in some cases unconsciously too) violated some of the best practices and design patterns we just mentioned (exactly which ones we implemented will be discussed later) at certain points. For example, some model classes in `TourPlanner.Model` implement `INotifyPropertyChanged` and thereby include parts of the business logic. This was a pragmatic decision to avoid having the ViewModels re-implement all properties of the models, which would have resulted in a significant amount of duplicate code.
 
-### Besonderheiten / Herausforderungen
-Eine große Herausforderung war es, die Logik zur Kontrolle des WebViews (und damit in weiterer Folge der Map) unter Einhaltung des `MVVM-Patterns` zu implementieren. Um mit der Map zu interagieren (die sich in einem WebView2 befindet) müssen bestimmte Methoden von `Microsoft.Web.WebView2` aufgerufen werden (bspw. `EnsureCoreWebView2Async`, `ExecuteScriptAsync`, `CapturePreviewAsync`, etc.). Die Best Practices verbieten jedoch, dass wir in unserem ViewModel direkte Abhängigkeiten zu diesen Komponenten haben sollten und die Logik sollte auch nicht im Code Behind File implementiert werden.
-Wir haben daher eine Service-Klasse `WebViewService.cs` implementiert, die das `IWebViewService` implementiert und Methoden bereitstellt, um mit dem WebView2 in der View zu interagieren. Andere Klassen können dieses Interface dann als Abstraktion verwenden, um Befehle an das WebView zu senden ohne direkt von ihm abhängig zu sein. 
-Wir sind uns bewusst, dass auch diese Lösung nicht vollkommen sauber ist. Eine Service-Klasse sollte eigentlich keine Abhängigkeit zu UI-Komponenten wie dem WebView haben - um diese Abhänhgigkeit zu lösen hätten wir theoretisch eine weitere Abstraktion für die WebView2 Control einführen können und `WebViewServive.cs` dann von dieser abhängig machen. In unseren Augen hätte das aber sehr viel unnötige Komplexität eingeführt und kaum zusätzlichen Nutzen, da `WebViewService.cs` ohnehin so spezifisch auf die WebView2 Komponenten ausgerichtet ist, dass man auch eine Abhängigkeit argumentieren kann.
+The CodeBehind file of `Map.xaml` contains business logic for initializing the WebView and the services that manage it (a violation of the MVVM pattern). Outsourcing this logic from the CodeBehind would have lead to a massive increase in the complexity of the application, with little to no benefit, since the initialization logic for, for example, WebView2 is so specific to the UI framework being used that it cannot realistically be reused elsewhere.
 
-Ein Problem ähnlicher Natur war, dass wir in manchen Fällen in den ViewModels Funktionalität von WPF benötigten (neue Fenster wie `EditTour(Log)Window` spawnen, `MessageBox`es erstellen, Fenster wieder schließen, etc.). Allerdings verbietet das MVVM Pattern eine direkte Abhängigkeit der ViewModels von der View. Aus diesem Grund haben wir einen `WpfService.cs` implementiert, der mithilfe des `IWpfService.cs` Interfaces eine Abstraktionsebene für unsere ViewModels und auch andere Klassen darstellt.
-Diese Klasse ist somit direkt von WPF (`System.Windows`) abhängig (was auch nicht unbedingt Best Practices entspricht - da auch hier die Funktionalität wieder vollkommen spezifisch für WPF ist, haben wir auf eine Abstraktion der WPF-Komponenten verzichtet, um unnötige Komplexität zu vermeiden) und orchestriert verschiedenste UI-Befehle. Andere Klassen können diesen Service dann nutzen, um auf WPF Funktionalitäten zuzugreifen ohne direkt von `System.Windows` abhängig zu sein.
+### Special Features / Challenges
+One major challenge was implementing the logic for controlling the WebView (and thus, the map) while adhering to the `MVVM pattern`. To interact with the map (which resides within a WebView2), certain methods from `Microsoft.Web.WebView2` need to be called (e.g., `EnsureCoreWebView2Async`, `ExecuteScriptAsync`, `CapturePreviewAsync`, etc.). However, best practices dictate that we should not introduce direct dependencies on these components within the ViewModel, and the logic should also not be implemented in the code-behind file.
+Therefore, we implemented a service class, `WebViewService.cs`, which implements the `IWebViewService` interface and provides methods to interact with the WebView2 in the view. Other classes can then use this interface as an abstraction to send commands to the WebView without being directly dependent on it.
+We are aware that this solution is not entirely clean either. Service classes should, strictly speaking, not have dependencies on UI components such as WebView. To eliminate this dependency, we could theoretically have introduced another abstraction layer for the WebView2 control and made `WebViewService.cs` dependent on that. In our view, however, this would have introduced a lot of unnecessary complexity with little added benefit, since `WebViewService.cs` is already so specifically tailored to the WebView2 components that such a dependency can be justified.
 
-Eine weitere große Herausforderung war es, die Kommunikation zwischen verschiedenen Klassen unter Berücksichtigung der S.O.L.I.D. Kriterien und loser Kupplung zwischen den Komponenten umzusetzen. Darauf werden wir dann im Abschnitt `Design Patterns` zurückkommen.
+A similar problem arose in cases where we needed WPF functionality within the ViewModels (such as spawning new windows like `EditTour(Log)Window`, creating `MessageBox`es, closing windows, etc.). The MVVM pattern, however, forbids direct dependencies of ViewModels on the View. For this reason, we implemented a `WpfService.cs`, which—using the `IWpfService.cs` interface—provides an abstraction layer for our ViewModels and other classes.
+This class is therefore directly dependent on WPF (`System.Windows`) (which is also not entirely in line with best practices—but since the functionality is already completely specific to WPF, we chose to forego abstracting WPF components to avoid unnecessary complexity) and orchestrates various UI commands. Other classes can then use this service to access WPF functionalities without being directly dependent on `System.Windows`.
 
-### Klassendiagramm
-Folgendes Klassendiagramm bietet einen Überblick über die Architektur der Applikation:
+Another significant challenge was implementing communication between the various classes in accordance with SOLID principles and loose coupling between components. We will revisit this in the section on `Design Patterns`.
 
-## Use cases
+### Class Diagram
+
+The following class diagram provides an overview of the application's architecture:
+
+## Use Cases
 ![Use Case Diagram showcasing the basic functionality of the TourPlanner application](Assets/UML/MainUseCasesTourPlanner.drawio.png)
 
-Dieses Use Case Diagramm zeigt die grundlegenden Funktionalitäten, die unsere Applikation einem User bietet. Es sei angemerkt, dass wir - um das Diagramm nicht zu überladen - nicht alle Funktionen der Anwendung dargestellt haben.
+This use case diagram illustrates the basic functionalities our application offers to a user. It should be noted that not every function of the application is displayed here, in order to avoid overloading the diagram.
 
 ## UI / UX
-Nach dem Start der Applikation öffnet sich das `MainWindow`, das Herzstück der Applikation:
+
+After starting the application, the `MainWindow`-the centerpiece of the application-opens:
 
 ![The Main Window](Assets/UML/MainWindow.drawio.png)
 
-- Durch Klick auf den `Import` Button oben links kann der User Touren (und Logs) aus einer `.tours` Datei importieren
-- Durch Klick auf den `Export` Button daneben kann der User sämtliche Touren (und Logs) als `.tours` Datei exportieren oder einen Tour Summary PDF Report generieren
-- Rechts oben befindet sich ein Toggle, mit dem der User den Dark-Mode der Applikation aktivieren kann (wird im PNG aus irgendeinem Grund nicht richtig dargestellt - das .drawio file enthält den Toggle)
-- Darunter befindet sich die Search Bar - der User kann hier einen Suchbegriff eingeben, woraufhin in der Tourliste links nur noch jene Touren angezeigt werden, die den Suchbegriff enthalten (oder deren Logs, den Suchbegriff enthalten)
-- Wie nun erwähnt befindet sich auf der linken Seite eine Liste an Touren - durch Klick auf eine der Touren wird sie ausgewählt und Details zu ihr auf der rechten Bildschirmhälfte angezeigt
-- Der "Map" Tab enthält eine Karte, die den Start- und Endpunkt sowie die Route der Tour zeigt
-- Der "Route Information" Tab enthält allgemeine Informationen über die Route, wie bspw. Name, Beschreibung, Dauer, Verkehrsmittel, etc.
-- Der "Misc." Tab enthält Attributes wie bspw. Popularity, Kinderfreundlichkeit oder die AI Summary
-- Unter den Tabs findet sich eine Tabelle, die alle Logs anzeigt, die mit dieser Tour assoziiert sind
+- By clicking the `Import` button in the top left, the user can import tours (and logs) from a `.tours` file.
+- By clicking the adjacent `Export` button, the user can export all tours (and logs) as a `.tours` file or generate a tour summary PDF report.
+- In the top right, there is a toggle that allows the user to activate the application's dark mode (for some reason, this toggle is not displayed correctly in the PNG - the .drawio file does contain the toggle).
+- Below that is the search bar - here the user can enter a search term, and only those tours whose details (or logs) contain the search term are displayed in the tour list to the left.
+- As just mentioned, the left side contains a list of tours - by clicking on one, it is selected and its details are displayed on the right half of the screen.
+- The "Map" tab displays a map showing the starting point, destination, and route of the tour.
+- The "Route Information" tab contains general information about the route, such as name, description, duration, means of transport, etc.
+- The "Misc." tab contains attributes such as popularity, child-friendliness, or the AI summary.
+- Below the tabs is a table showing all logs associated with the selected tour.
 
-Eine neue Tour kann hinzugefügt werden, indem unten links im "Tour Name..." Feld ein Tour Name eingegeben wird und anschließend der "Add" Button geklickt wird.
-Ein neuer Tour Log kann hinzufegügt werden, indem unten mittig im "Log Comment" Feld ein Log Kommentar eingegeben wird und anschließend der "Add" Button geklickt wird.
+A new tour can be added by entering a tour name in the "Tour Name..." field at the bottom left and then clicking the "Add" button.  
+A new tour log can be added by entering a comment in the "Log Comment" field at the bottom center and then clicking the "Add" button.
 
-Eine Tour kann gelöscht oder editiert werden, indem man auf ihren Listeneintrag rechtsklickt und dann "Edit" oder "Delete" auswählt. Auch der "Export" für ein PDF Dokument dieser Tour findet sich hier.
-Tour Logs hingegen können bearbeitet oder gelöscht werden, indem in der Tabelle der Tour Log angeklickt wird und anschließend der "Edit" oder "Delete" Button unten rechts geklickt wird.
+A tour can be deleted or edited by right-clicking its entry in the list and then selecting "Edit" or "Delete". Exporting the tour as a PDF document is also available here.  
+Tour logs can be edited or deleted by clicking the log entry in the table and then clicking the "Edit" or "Delete" button at the bottom right.
 
 ![The Edit Tour Window](Assets/UML/EditTourWindow.drawio.png)
 
-Wird eine Tour hinzufegügt oder eine bestehende editiert, öffnet sich das `Edit Tour Window`. Dieses enthält Textfelder, mit denen der User die Tour beschreiben kann.
-Bevor die Tour gespeichert werden kann, muss eine Start- und Endlocation angegeben worden sein und der "Find" Button neben ihnen geklickt worden sein - dieser führt das Geocoding durch, wo der Location-String, den der User angegeben hat, zu Koordinaten umgewandelt wird.
-Sobald dies geschehen ist, kann der "Calculate Route" Button geklickt werden, der die Route zwischen Start- und Endpunkt berechnet und auf der Karte anzeigt. Die "Distance" und "Duration" Felder werden dann ebenfalls automatisch ausgefüllt.
+When a new tour is added or an existing one is edited, the `Edit Tour Window` opens. This window contains text fields that allow the user to describe the tour.
+Before the tour can be saved, a start and end location must be specified, and the "Find" button next to each must be clicked - this performs geocoding, converting the location string entered by the user into coordinates.
+Once this is done, the "Calculate Route" button can be clicked. This calculates the route between the start and end points and displays it on the map. The "Distance" and "Duration" fields are then filled in automatically.
 
-Erst nachdem die Route berechnet wurde, kann die Tour gespeichert werden.
+Only after the route has been calculated can the tour be saved.
 
 ![The Edit Tour Log Window](Assets/UML/EditTourLogWindow.drawio.png)
 
-Wird ein Tour Log hinzugefügt oder bearbeitet, öffnet sich das `Edit Tour Log Window`. Auch dieses enthält die notwendigen Textfelder, um den Log zu beschreiben.
-Im Timestamp Feld kann Ort- und Datum für die Aufzeichnung ausgewählt werden. Bei der Difficulty handelt es sich um einen Slider, der Integer Werte zwischen 1 und 5 annehmen kann.
-Das Rating wird in Form von Sternen angegeben, wobei 0,5 bis 5 Sterne vergeben werden können.
+When a tour log is added or edited, the `Edit Tour Log Window` opens. This window also contains the necessary text fields for describing the log.
+In the timestamp field, the user can select the date and time of the recording. The difficulty is set using a slider, which can take integer values from 1 to 5.  
+The rating is specified in the form of stars, with values ranging from 0.5 to 5 stars.
 
-In beiden Dialogfenstern kann auf "Save" geklickt werden, um die Änderungen zu speichern oder auf "Cancel", um die Änderungen zu verwerfen.
+In both dialog windows, clicking "Save" will save the changes, while clicking "Cancel" will discard them.
 
 ## Library Decisions
-Nachfolgend wollen wir die relevantesten Libraries / Abhängigkeiten (keine vollständige Auflistung!) in unserem Projekt vorstellen und jeweils erklären, warum diese notwendig sind bzw. wir uns für sie entschieden haben:
+Below, we present the most relevant libraries/dependencies (not a complete list!) used in our project, explaining why they were necessary or why we chose them:
 
-- NUnit / NSubstitute
-  - Diese Libraries verwenden wir für die Unit-Tests unseres Projekts (erklären wir unten noch etwas genauer). Wir haben uns für diese Library entschieden, da wir beide in der Vergangenheit schon mit NUnit / NSubstitue gearbeitet haben.
-- Npgsql.EntityFrameworkCore.PostgreSQL
-  - Da wir uns für die Verwendung einer PostgreSQL Datenbank und Entity Framework Core verwendet haben, mus[README.md](../README.md)sten wir diese Library verwenden, um die beiden miteinander verwenden zu können
-- Newtonsoft.Json
-  - Wir hätten hier auch die Standard-JSON Library von Microsoft verwenden können, aber laut Internet-Recherchen ist Newtonsoft.Json etwas schneller. Zudem bietet es auch ein paar mehr Funktionen und ist (unserer Meinung nach) komfortabler zu nutzen
-- WPF-UI
-  - Hierbei handelt es sich um eine UI-Library für WPF, die der Applikation einen modernen (Windows 11 like) Style verleiht. Zudem fügt sich auch einige neue UI-Komponenten hinzu.
-  - Wir haben uns für diese Library entschieden, dass uns ihr Design am besten gefiehl, es eine "okaye" Dokumentation gibt und die Library sehr populär und well maintained ist.
-- Extended.Wpf.Toolkit
-  - Im Rahmen der Entwicklung unserer Applikation ist uns aufgefallen, dass uns ein paar UI-Komponenten, die wir gerne einbauen möchten, fehlen. Dazu zählt bspw. ein DatePicker, der es auch erlaubt eine Uhrzeit anzugeben oder TimeSpan Picker (sprich ein Textfeld, das eine Zeitspanne anzeigt / akzeptiert)
-  - ExtendedWpfToolkit fügt eine Reihe von weiteren Controls für WPF hinzu und ist ein extrem bekanntes, gut maintaintes Projekt
-- itext7
-  - Wir verwenden diese Library, um PDF Dokumente zu generieren. Diese Entscheidung file hauptsächlich deswegen, weil wir beide keine Libraries aus diesem Bereich kannte und iText7 die Library war, die wir in den Präsenzphasen von SWEN durchgemacht haben.
-  - Online-Recherchen zeigten auch, dass diese Library gut gepflegt wird und vergleichsweise einfach zu nutzen ist. Wir verwenden sie nur in `PdfService` (haben bewusst keine Abstraktionsebene für diese Library eingebaut, da wir sie ohnehin nur in einem Service verwenden, der sehr spezifisch auf die Library zugeschnitten ist)
-- log4net
-  - Für diese Library haben wir uns ebenfalls hauptsächlich deshalb entschieden, da sie es war, die wir in der Lehrveranstaltung behandelt haben. Privat habe ich auch schon Erfahrung mit NLog gemacht - im Endeffekt funktionieren alle großen Logging-Libraries nahezu ident.
-  - Da wir eine Abstraktionsebene für das Logging eingeführt haben, kann das Logging-Framework auch jederzeit einfach ausgetauscht werden.
-- Microsoft.Extensions.*
-  - Wir verwenden verschiedenste Abstraktionen, die direkt von Microsoft zur Verfügung gestellt werden. Bspw. für Dependency Injection oder die Konfiguration.
-  - Natürlich gibt es hier auch Third Party Lösungen, aber die Lösungen von Microsoft stellen in der .NET Welt quasi den Industry-Standard da und werden gut gepflegt, weshalb wir uns für sie entschieden haben.
+- **NUnit / NSubstitute**
+  - These libraries are used for unit testing in our project (we'll explain more about this below). We chose them because both of us had previous experience with NUnit / NSubstitute.
+- **Npgsql.EntityFrameworkCore.PostgreSQL**
+  - Since we chose to use a PostgreSQL database together with Entity Framework Core, we needed this library to allow both to work together.
+- **Newtonsoft.Json**
+  - We could have used Microsoft’s standard JSON library, but according to our research, Newtonsoft.Json is somewhat faster, offers a few more features, and is (in our opinion) more convenient to use.
+- **WPF-UI**
+  - This is a UI library for WPF that provides the application with a modern (Windows 11-like) style, as well as additional new UI components.
+  - We chose this library because we liked its design best, it has "okay-ish" documentation, and it is both popular and well maintained.
+- **Extended.Wpf.Toolkit**
+  - During development, we noticed that a few UI components we wanted to use were missing. For example, a date picker that also allows time selection or a TimeSpan picker (a textbox that accepts/displays a timespan).
+  - Extended.Wpf.Toolkit adds a range of additional controls for WPF and is a very well-known, well-maintained project.
+- **iText7**
+  - We use this library to generate PDF documents. This choice was mainly due to the fact that neither of us was familiar with PDF libraries, and iText7 was the one covered in the SWEN course sessions.
+  - Online research showed that this library is well maintained and comparatively easy to use. We use it only in `PdfService` (and deliberately did not add an additional abstraction layer for this library, since it is used only in a service that is highly specific to iText7 anyway).
+- **log4net**
+  - We chose this library mainly because it was covered during the course. I also have private experience with NLog; in practice, all major logging libraries work nearly identically anyway.
+  - Since we introduced an abstraction layer for logging, the logging framework can also be easily swapped at any time.
+- **Microsoft.Extensions.\***
+  - We use various abstractions provided directly by Microsoft, such as for dependency injection or configuration.
+  - There are of course third-party solutions here as well, but Microsoft’s solutions are essentially the industry standard in the .NET world, and are well maintained, which is why we chose them.
 
 ## Design Patterns
 
 ### MVVM Pattern
-Keine Überraschung, daher halten wir diesen Absatz auch recht kurz, aber unsere Applikation implementiert offensichtlich das MVVM Pattern (dessen Implementierung für diese Abgabe ja auch ein K.O. Kriterium ist ).
+No surprise here (and since this was a requirement for this project), our application clearly implements the MVVM (Model-View-ViewModel) pattern.
 
 ### Repository Pattern
-Zur Kommunikation mit der externen Datenbank verwenden wir in `TourPlanner.RestServer` das Repository Pattern. Die Logik für die Kommunikation mit der Datenbank ist in `TourLogRepository.cs` und `TourRepository.cs` ausgelagert - andere Klassen können dann die Interfaces der Repositories als Abstraktion für Datenbankoperationen verwenden.
+For communication with the external database, we use the Repository Pattern in `TourPlanner.RestServer`. The logic for database communication is encapsulated in `TourLogRepository.cs` and `TourRepository.cs`. Other classes can use the repository interfaces as an abstraction for database operations.
 
 ### Event Aggregator Pattern
-Oben haben wir ja schon erwähnt, dass es eine ziemliche Herausfoderung war, die Kommunikation zwischen den einzelnen Komponenten unserer Anwendung unter Berücksichtigung der Best Practices, die wir einhalten wollen, umzusetzen.
+As mentioned above, one of the biggest challenges was enabling effective communication between various components of our application while adhering to best practices and promoting loose coupling.
 
-In unserer Applikation gibt es einige Ereignisse, auf die von verschiedenen Komponenten reagiert werden muss. Bspw. wenn der User eine neue Tour auswählt (Map muss geupdated werden, neue Information angezeigt), eine Suche startet (Suche durchgeführt, Tourliste eingeschränkt), neue Touren hinzufügt / löscht (UI Updates, Datenbankoperationen), etc. etc.
-Ursprünglich hatten wir für diese Kommunikation das Observer Pattern in seiner primitivsten Form eingesetzt. Bspw. stellte das `TourListViewModel.cs` ein `TourChangedEvent` zur Verfügung, das von anderen abboniert werden konnte, wenn sie darüber informiert werden wollten, wenn der User in der TourList eine andere Tour auswählt. (ähnliches Vorgehen auch für andere Events). Allerdings hat das dazu geführt, dass wir viele Abhängigkeiten der Komponenten untereinander hatten, die eigentlich keinen Nutzen hatten außer den Austausch der Events.
-Wir haben daher zunächst als Notlösung eigene Services erstellt, bspw. einen `SelectedTourService.cs`, der stets Informationen über die aktuell vom Nutzer ausgewählte Tour enthielt und von allen an der aktuell selektieren Tour interessierten Komponenten als Abstraktion genutzt werden konnte (um nicht direkt von `TourListViewModel` abhängig zu sein). Allerdings war auch dieser Ansatz nicht optimal, denn mit steigender Anzahl von Events, benötigten wir immer mehr solche Services (bspw. `SearchQueryService`, etc.).
+There are several events in our application that multiple components need to react to. For example: when the user selects a new tour (the map needs to update, new information needs to be displayed, ...), when a search is performed (run the search, tour list is filtered, ...), when new tours are added or deleted (UI updates, database operations, ...), etc. etc.
 
-Da wir uns gedacht haben, dass dieses Problem sicherlich schon viele Leute beim Entwicklen von UI Applikationen haben musste, haben wir uns online umgeschaut und sind auf das `EventAggregatorPattern` gestoßen: Wir definieren eine zentrale Klasse (die natürlich auch gegen ein Interface implementiert ist), die das Publishes, Subscriben und Unscubscriben von verschiedensten Events (werden in `TourPlanner.Model` definiert) managed.
-So gibt es jetzt ein einheitliches System, das die Kommunikation zwischen verschiedenen Komponenten regelt, ohne dass diese dafür voneinander abhängig sein müssen. Durch die Definition der Event-Klassen in `TourPlanner.Model` können auch die zu übergebenden Daten komplett frei gewählt werden.
+Originally, we used a very basic form of the Observer Pattern for this communication. For example, `TourListViewModel.cs` exposed a `TourChangedEvent` that could be subscribed to by other classes interested in being notified when the user selected a different tour in the tour list (and we did the same for a lot of other events too). However, this resulted in many unnecessary dependencies between components, whose sole purpose was event exchange.
+As a workaround, we then created dedicated services, like a `SelectedTourService.cs`, which always contained information about the currently selected tour and could be used by all components interested in the currently selected tour, to avoid direct dependencies on `TourListViewModel` (and did something similar for other events too e.g., `SearchQueryService`). But this approach didn't scale well - as the number of events grew, more and more such services were required.
+
+Realizing that this is likely a common problem in UI application development, we did some research and came across the Event Aggregator Pattern. We implemented a central class (of course, against an interface) that centrally manages the publishing, subscribing, and unsubscribing of various events (defined in `TourPlanner.Model`). With this system, components can communicate through a consistent infrastructure without being directly dependent on each other. Since the event classes themselves are defined in `TourPlanner.Model`, the data carried by events can be structured completely flexibly.
 
 ### Dependency Injection / Singleton Pattern
-Wir verwenden ein Dependency Injection Framework, um die Dependencies für unsere Klassen zentral zu Verwalten und sie ihnen bei Bedarf automatisiert zur Verfügung zu stellen.
-Viele dieser Klassen werden dabei als Singleton gemanaged, wodurch auch das Singleton Pattern in unserer Applikation implementiert wird.
+We use a dependency injection framework to centrally manage dependencies for our classes and automatically provide them as needed. Many of our services are managed as singletons, meaning only one instance exists per application lifetime, thereby implementing the Singleton Pattern.
 
 ### Command Pattern
-Wir verwenden das Command Pattern, um das View vom ViewModel zu entkoppeln. Stattdessen binden wir das Command Property der UI-Elemente auf eine Methoden in unserem ViewModel, das das `ICommand` Interface implementiert.
-Dazu haben wir `RelayCommand.cs` und (für asynchrone Operationen) `RelayCommandAsync.cs` implementiert. Außerhalb des akademischen Umfelds wäre es vermutlich sinnvoll, eine bereits vorhandene Implementierung zu nutzen anstatt diese selbst zu schreiben.
+We employ the Command Pattern to decouple the View from the ViewModel. Instead of directly connecting UI events to code, the command properties of UI elements are bound to methods in the ViewModel that implement the `ICommand` interface. For this purpose, we implemented `RelayCommand.cs` and (for asynchronous operations) `RelayCommandAsync.cs`. Outside of an academic context, it would probably make sense to use an existing library implementation rather than writing these ourselves.
 
 ### Facade Pattern
-Das Facade Pattern wird verwendet, um eine einfache Abstraktion für ein komplexes zugrundeliegendes System zur Verfügung stellen. Wir nutzen dieses Pattern bspw. in `WpfService`, `OrsService`, `AiService` oder `PdfService`, indem wir die zugrundeliegenden Library-Funktionen vom Rest der Appliaktion verstecken und ihnen stattdessen mit diesen Klassen (und ihren zugehörigen Interfaces) eine High-Level Abstraktion dafür anbieten.
+The Facade Pattern is used to provide an easy and unified interface to a complex underlying subsystem. We use this pattern, for example, in `WpfService`, `OrsService`, `AiService`, and `PdfService` by hiding the underlying library details from the rest of the application and instead offering high-level abstractions through these classes (and their respective interfaces).
 
 ### Adapter Pattern
-Das Adapter Pattern ist ein Design Pattern, das verwendet werden kann, um eine Abstraktionseben zwischen unserem Code und einem externen (oft inkompatiblen) System zur Verfügung zu stellen.
-Wir implementieren es im `FileSystemWrapper`, um unseren Klassen eine Abstraktion des Filesystems zur Verfügung zu stellen und auch Unit Tests zu ermöglichen.
+The Adapter Pattern provides an abstraction layer between our code and an external, often incompatible, system.
+We implement this in the `FileSystemWrapper` to provide our classes with a testable abstraction of the file system and to enable effective unit testing.
 
 ## Unit Tests
-Das Schreiben der Unit Tests gestaltete sich in diesem Semester aufgrund der höheren Komplexität einerseits etwas schwieriger, aufgrund der bereits im Vorfeld verwendeten Best Practices wie Dependency Injection und den o.g. Design Patterns gleichzeitig aber auch um einiges einfacher (im Sinne, dass viel weniger Refactoring-Arbeit notwendig war, um den Code testbar zu machen).
-Wir wollen an dieser Stelle auch gleich offenlegen, dass wir die Unit Tests für das Projekt (nachdem wir einige selbst geschrieben hatten, um die zugrundeliegenden Konzepte, v.a. der MVVM Unit Tests, zu verstehen) mithilfe von künstlicher Intelligenz erstellt haben. Wir haben sämtliche Unit Tests allerdings durchgelesen, nachvollzogen und ggf. angepasst. Wir haben zudem auch darauf geachtet, dass wir den gesamten Code, den wir von der KI erhalten haben, selbst verstehen und seinen Nutzen nachvollziehen können.
 
-### Herausforderungen
-Da wir - wie oben bereits erwähnt - bei einigen Komponenten auf die Einführung von Abstraktionsebenen verzichtet haben (um keine zusätzliche Komplexität einzuführen) - bspw. ist `WebViewService` direkt von der WebView2 Komponente, `WpfService.cs` direkt von den WPF-UI Komponenten, `PdfService.cs` direkt von der iText7Library abhängig - konnten wir einige der Service-Klassen quasi überhaupt nicht testen, weshalb wir für diese auch keine Unit Tests geschrieben haben.
-Hier wäre ggf. abzuwägen, ob es nicht doch sinnvoll wäre, Abstraktionen für diese Komponenten (in Form von Interfaces) einzuführen, um diese Klassen dennoch Unit testen zu können, da sie durchaus einiges an komplexer Logik beinhalten. Unserer Meinung nach würde das jetzt aber den Scope der Lehrveranstaltungen sprengen.
+Writing unit tests this semester proved to be more challenging due to the increased complexity of the project. However, thanks to best practices implemented early on - such as dependency injection and the use of the design patterns described above - making the code testable involved far less refactoring work than it did last year.
 
-Ein weiteres Problem war, dass wir in unserer Applikation (v.a. da asynchrone Programmierung für uns noch recht neu war), mehrfach `async void` Methoden verwendet haben (mit entsprechendem Error-Handling), die von NUnit nicht korrekt Unit getestet werden können. Diese haben wir zum Teil refactored - manchmal wäre dies aber ohne größeren Aufwand nicht möglich gewesen, weshalb wir dann auf das Unit Testen dieser Komponenten verzichtet haben. 
-Hier denken wir, dass es vermutlich am besten wäre, beim nächsten Mal von Anfang an darauf zu achten keine `async void` Methoden zu verwenden, da diese ohnehin (wobei es hier verschiedene Meinungen gibt) nicht unbedingt Best Practice sind.
+We would also like to be transparent and disclose that, after writing some unit tests ourselves (to understand the underlying concepts, especially around MVVM unit testing), we created many of the remaining unit tests in this project with the help of artificial intelligence. We carefully reviewed, understood, and, where necessary, adapted all AI-generated tests. We also made sure we understood all code we received from the AI and checked their business value.
+
+### Challenges
+As mentioned above, in some places (to avoid unnecessary complexity), we intentionally decided not to introduce additional abstraction layers. For example, `WebViewService` relies directly on the WebView2 component, `WpfService.cs` directly on WPF UI components, and `PdfService.cs` directly on the iText7 library. As a result, some of these service classes are basically untestable with unit tests, so we have not written tests for them.
+It's worth considering whether introducing abstractions for these components (e.g., via interfaces) would be beneficial to make these classes unit-testable, especially since they encapsulate some complex logic. In our opinion, however, this would go beyond the scope of the coursework.
+
+Another problem was that, especially since asynchronous programming was relatively new for us, we sometimes used `async void` methods (with appropriate error handling) in the application, which cannot be properly unit tested with NUnit. We refactored some of these methods, but in cases where refactoring would have required too much effort, we simply chose not to unit test those parts.
+Next time, we think it would be best to just avoid using `async void` methods altogether from the start, since (though there seem to be differing opinions on this) they are generally not considered best practice.
 
 ## Unique Features
-Wir haben in unser Projekt gleich zwei Unique Features eingebaut:
-Einerseits haben wir eine AI-Integration eingebaut. Der User kann im `Misc.` Tab der Tour-Ansicht den "Generate" Button drücken und es wird ihm von einem LLM (standardmäßig von GPT 4.1) eine Zusammenfassung über die Route und seiner geloggten Log-Einträge generiert:
 
-Da David allerdings bereits im letzten Semester eine AI-Integration als Unique Feature verwendet hatte, fand er es etwas langweilig, die Idee einfach für dieses Projekt zu recyclen, weshalb wir zusätzlich auch noch einen Dark Mode eingebaut haben, der sich per Schalter oben rechts im UI ein- und ausschalten lässt:
+We have implemented two unique features in our project:
+
+### 1. AI Integration
+We integrated ✨AI✨ to enhance the user experience. In the `Misc.` tab of the tour details view, the user can click the "Generate" button to receive a summary about the selected route and its associated log entries. This summary is generated by a Large Language Model via OpenRouter (by default GPT 4.1).
+
+### 2. Dark Mode
+Since David had already used an AI integration as a unique feature last semester, he found it a bit boring to simply recycle the idea for this project and thus we decided to go a step further and also implement a dark mode. The dark mode can be toggled on or off using the switch located at the top right of the main window.
 
 ## Search Sequence Diagram
-In der Spezifikation war noch ein Sequence Diagramm für die Suchfunktion gefordert, das wir hier nun als letzten Punkt liefern wollen. Es hätte vom Fluss her schon früher besser ins Protokoll gepasst, aber wir wollten mit der Inklusion warten bis wir das Event Aggregator Pattern erklärt haben.
-Jetzt, wo das aber getan ist, hier das Sequence Diagramm zur Suchfunktion:
+As required, we are also providing a sequence diagram for the application's search functionality. While it might have fit better earlier in this document, we wanted to wait until after explaining the Event Aggregator Pattern since it plays a key role here.
+Now that the necessary background has been covered, here is the sequence diagram for the search feature:
 
 ![Sequence Diagram illustrating the Search functionality of the application](Assets/UML/FullTextSearch.drawio.png)
 
-Anmerkung: Das "Raise ToursChangedEvent" spielt für diesen Workflow keine Rolle - "Display matching tours" läuft ebenfalls über ein Two-Way Data Binding ab. Wir wollten es aber dennoch in das Diagramm aufnehmen, um zu zeigen, wie auch andere Komponentne über die Änderungen in der Liste der Touren informiert werden.
+**Note:** The "Raise ToursChangedEvent" is not crucial for this workflow - displaying the matching tours also relies on two-way data binding. However, we included it in the diagram to illustrate how other components are informed too about changes in the tour list.
