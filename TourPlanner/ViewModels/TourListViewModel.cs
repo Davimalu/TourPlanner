@@ -193,7 +193,7 @@ namespace TourPlanner.ViewModels
                 _logger.Warn("No tours available to search.");
                 return;
             }
-
+ 
             if (string.IsNullOrEmpty(query.SearchQuery))
             {
                 _logger.Info("Search query is empty, showing all tours.");

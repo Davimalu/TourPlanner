@@ -25,13 +25,50 @@ Diese Klasse ist somit direkt von WPF (`System.Windows`) abhängig (was auch nic
 
 Eine weitere große Herausforderung war es, die Kommunikation zwischen verschiedenen Klassen unter Berücksichtigung der S.O.L.I.D. Kriterien und loser Kupplung zwischen den Komponenten umzusetzen. Darauf werden wir dann im Abschnitt `Design Patterns` zurückkommen.
 
-## Use cases
-Actor -> Manage Tours / Import Tours / Export Tours (includes Single Tour Export, Summary Export, Tour Export) / Manage Tour Logs / Search Tours
+### Klassendiagramm
+Folgendes Klassendiagramm bietet einen Überblick über die Architektur der Applikation:
 
-keine vollständige Auflistung
+## Use cases
+![Use Case Diagram showcasing the basic functionality of the TourPlanner application](Assets/UML/MainUseCasesTourPlanner.drawio.png)
+
+Dieses Use Case Diagramm zeigt die grundlegenden Funktionalitäten, die unsere Applikation einem User bietet. Es sei angemerkt, dass wir - um das Diagramm nicht zu überladen - nicht alle Funktionen der Anwendung dargestellt haben.
 
 ## UI / UX
-MainWindow, EditTourLogWindow, EditTourWindow
+Nach dem Start der Applikation öffnet sich das `MainWindow`, das Herzstück der Applikation:
+
+![The Main Window](Assets/UML/MainWindow.drawio.png)
+
+- Durch Klick auf den `Import` Button oben links kann der User Touren (und Logs) aus einer `.tours` Datei importieren
+- Durch Klick auf den `Export` Button daneben kann der User sämtliche Touren (und Logs) als `.tours` Datei exportieren oder einen Tour Summary PDF Report generieren
+- Rechts oben befindet sich ein Toggle, mit dem der User den Dark-Mode der Applikation aktivieren kann (wird im PNG aus irgendeinem Grund nicht richtig dargestellt - das .drawio file enthält den Toggle)
+- Darunter befindet sich die Search Bar - der User kann hier einen Suchbegriff eingeben, woraufhin in der Tourliste links nur noch jene Touren angezeigt werden, die den Suchbegriff enthalten (oder deren Logs, den Suchbegriff enthalten)
+- Wie nun erwähnt befindet sich auf der linken Seite eine Liste an Touren - durch Klick auf eine der Touren wird sie ausgewählt und Details zu ihr auf der rechten Bildschirmhälfte angezeigt
+- Der "Map" Tab enthält eine Karte, die den Start- und Endpunkt sowie die Route der Tour zeigt
+- Der "Route Information" Tab enthält allgemeine Informationen über die Route, wie bspw. Name, Beschreibung, Dauer, Verkehrsmittel, etc.
+- Der "Misc." Tab enthält Attributes wie bspw. Popularity, Kinderfreundlichkeit oder die AI Summary
+- Unter den Tabs findet sich eine Tabelle, die alle Logs anzeigt, die mit dieser Tour assoziiert sind
+
+Eine neue Tour kann hinzugefügt werden, indem unten links im "Tour Name..." Feld ein Tour Name eingegeben wird und anschließend der "Add" Button geklickt wird.
+Ein neuer Tour Log kann hinzufegügt werden, indem unten mittig im "Log Comment" Feld ein Log Kommentar eingegeben wird und anschließend der "Add" Button geklickt wird.
+
+Eine Tour kann gelöscht oder editiert werden, indem man auf ihren Listeneintrag rechtsklickt und dann "Edit" oder "Delete" auswählt. Auch der "Export" für ein PDF Dokument dieser Tour findet sich hier.
+Tour Logs hingegen können bearbeitet oder gelöscht werden, indem in der Tabelle der Tour Log angeklickt wird und anschließend der "Edit" oder "Delete" Button unten rechts geklickt wird.
+
+![The Edit Tour Window](Assets/UML/EditTourWindow.drawio.png)
+
+Wird eine Tour hinzufegügt oder eine bestehende editiert, öffnet sich das `Edit Tour Window`. Dieses enthält Textfelder, mit denen der User die Tour beschreiben kann.
+Bevor die Tour gespeichert werden kann, muss eine Start- und Endlocation angegeben worden sein und der "Find" Button neben ihnen geklickt worden sein - dieser führt das Geocoding durch, wo der Location-String, den der User angegeben hat, zu Koordinaten umgewandelt wird.
+Sobald dies geschehen ist, kann der "Calculate Route" Button geklickt werden, der die Route zwischen Start- und Endpunkt berechnet und auf der Karte anzeigt. Die "Distance" und "Duration" Felder werden dann ebenfalls automatisch ausgefüllt.
+
+Erst nachdem die Route berechnet wurde, kann die Tour gespeichert werden.
+
+![The Edit Tour Log Window](Assets/UML/EditTourLogWindow.drawio.png)
+
+Wird ein Tour Log hinzugefügt oder bearbeitet, öffnet sich das `Edit Tour Log Window`. Auch dieses enthält die notwendigen Textfelder, um den Log zu beschreiben.
+Im Timestamp Feld kann Ort- und Datum für die Aufzeichnung ausgewählt werden. Bei der Difficulty handelt es sich um einen Slider, der Integer Werte zwischen 1 und 5 annehmen kann.
+Das Rating wird in Form von Sternen angegeben, wobei 0,5 bis 5 Sterne vergeben werden können.
+
+In beiden Dialogfenstern kann auf "Save" geklickt werden, um die Änderungen zu speichern oder auf "Cancel", um die Änderungen zu verwerfen.
 
 ## Library Decisions
 Nachfolgend wollen wir die relevantesten Libraries / Abhängigkeiten (keine vollständige Auflistung!) in unserem Projekt vorstellen und jeweils erklären, warum diese notwendig sind bzw. wir uns für sie entschieden haben:
@@ -39,7 +76,7 @@ Nachfolgend wollen wir die relevantesten Libraries / Abhängigkeiten (keine voll
 - NUnit / NSubstitute
   - Diese Libraries verwenden wir für die Unit-Tests unseres Projekts (erklären wir unten noch etwas genauer). Wir haben uns für diese Library entschieden, da wir beide in der Vergangenheit schon mit NUnit / NSubstitue gearbeitet haben.
 - Npgsql.EntityFrameworkCore.PostgreSQL
-  - Da wir uns für die Verwendung einer PostgreSQL Datenbank und Entity Framework Core verwendet haben, mussten wir diese Library verwenden, um die beiden miteinander verwenden zu können
+  - Da wir uns für die Verwendung einer PostgreSQL Datenbank und Entity Framework Core verwendet haben, mus[README.md](../README.md)sten wir diese Library verwenden, um die beiden miteinander verwenden zu können
 - Newtonsoft.Json
   - Wir hätten hier auch die Standard-JSON Library von Microsoft verwenden können, aber laut Internet-Recherchen ist Newtonsoft.Json etwas schneller. Zudem bietet es auch ein paar mehr Funktionen und ist (unserer Meinung nach) komfortabler zu nutzen
 - WPF-UI
@@ -107,3 +144,11 @@ Wir haben in unser Projekt gleich zwei Unique Features eingebaut:
 Einerseits haben wir eine AI-Integration eingebaut. Der User kann im `Misc.` Tab der Tour-Ansicht den "Generate" Button drücken und es wird ihm von einem LLM (standardmäßig von GPT 4.1) eine Zusammenfassung über die Route und seiner geloggten Log-Einträge generiert:
 
 Da David allerdings bereits im letzten Semester eine AI-Integration als Unique Feature verwendet hatte, fand er es etwas langweilig, die Idee einfach für dieses Projekt zu recyclen, weshalb wir zusätzlich auch noch einen Dark Mode eingebaut haben, der sich per Schalter oben rechts im UI ein- und ausschalten lässt:
+
+## Search Sequence Diagram
+In der Spezifikation war noch ein Sequence Diagramm für die Suchfunktion gefordert, das wir hier nun als letzten Punkt liefern wollen. Es hätte vom Fluss her schon früher besser ins Protokoll gepasst, aber wir wollten mit der Inklusion warten bis wir das Event Aggregator Pattern erklärt haben.
+Jetzt, wo das aber getan ist, hier das Sequence Diagramm zur Suchfunktion:
+
+![Sequence Diagram illustrating the Search functionality of the application](Assets/UML/FullTextSearch.drawio.png)
+
+Anmerkung: Das "Raise ToursChangedEvent" spielt für diesen Workflow keine Rolle - "Display matching tours" läuft ebenfalls über ein Two-Way Data Binding ab. Wir wollten es aber dennoch in das Diagramm aufnehmen, um zu zeigen, wie auch andere Komponentne über die Änderungen in der Liste der Touren informiert werden.
