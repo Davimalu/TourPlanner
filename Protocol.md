@@ -92,8 +92,18 @@ Das Adapter Pattern ist ein Design Pattern, das verwendet werden kann, um eine A
 Wir implementieren es im `FileSystemWrapper`, um unseren Klassen eine Abstraktion des Filesystems zur Verfügung zu stellen und auch Unit Tests zu ermöglichen.
 
 ## Unit Tests
+Das Schreiben der Unit Tests gestaltete sich in diesem Semester aufgrund der höheren Komplexität einerseits etwas schwieriger, aufgrund der bereits im Vorfeld verwendeten Best Practices wie Dependency Injection und den o.g. Design Patterns gleichzeitig aber auch um einiges einfacher (im Sinne, dass viel weniger Refactoring-Arbeit notwendig war, um den Code testbar zu machen).
+Wir wollen an dieser Stelle auch gleich offenlegen, dass wir die Unit Tests für das Projekt (nachdem wir einige selbst geschrieben hatten, um die zugrundeliegenden Konzepte, v.a. der MVVM Unit Tests, zu verstehen) mithilfe von künstlicher Intelligenz erstellt haben. Wir haben sämtliche Unit Tests allerdings durchgelesen, nachvollzogen und ggf. angepasst. Wir haben zudem auch darauf geachtet, dass wir den gesamten Code, den wir von der KI erhalten haben, selbst verstehen und seinen Nutzen nachvollziehen können.
+
+### Herausforderungen
+Da wir - wie oben bereits erwähnt - bei einigen Komponenten auf die Einführung von Abstraktionsebenen verzichtet haben (um keine zusätzliche Komplexität einzuführen) - bspw. ist `WebViewService` direkt von der WebView2 Komponente, `WpfService.cs` direkt von den WPF-UI Komponenten, `PdfService.cs` direkt von der iText7Library abhängig - konnten wir einige der Service-Klassen quasi überhaupt nicht testen, weshalb wir für diese auch keine Unit Tests geschrieben haben.
+Hier wäre ggf. abzuwägen, ob es nicht doch sinnvoll wäre, Abstraktionen für diese Komponenten (in Form von Interfaces) einzuführen, um diese Klassen dennoch Unit testen zu können, da sie durchaus einiges an komplexer Logik beinhalten. Unserer Meinung nach würde das jetzt aber den Scope der Lehrveranstaltungen sprengen.
+
+Ein weiteres Problem war, dass wir in unserer Applikation (v.a. da asynchrone Programmierung für uns noch recht neu war), mehrfach `async void` Methoden verwendet haben (mit entsprechendem Error-Handling), die von NUnit nicht korrekt Unit getestet werden können. Diese haben wir zum Teil refactored - manchmal wäre dies aber ohne größeren Aufwand nicht möglich gewesen, weshalb wir dann auf das Unit Testen dieser Komponenten verzichtet haben. 
+Hier denken wir, dass es vermutlich am besten wäre, beim nächsten Mal von Anfang an darauf zu achten keine `async void` Methoden zu verwenden, da diese ohnehin (wobei es hier verschiedene Meinungen gibt) nicht unbedingt Best Practice sind.
 
 ## Unique Features
-AI
+Wir haben in unser Projekt gleich zwei Unique Features eingebaut:
+Einerseits haben wir eine AI-Integration eingebaut. Der User kann im `Misc.` Tab der Tour-Ansicht den "Generate" Button drücken und es wird ihm von einem LLM (standardmäßig von GPT 4.1) eine Zusammenfassung über die Route und seiner geloggten Log-Einträge generiert:
 
-Dark Mode
+Da David allerdings bereits im letzten Semester eine AI-Integration als Unique Feature verwendet hatte, fand er es etwas langweilig, die Idee einfach für dieses Projekt zu recyclen, weshalb wir zusätzlich auch noch einen Dark Mode eingebaut haben, der sich per Schalter oben rechts im UI ein- und ausschalten lässt:
