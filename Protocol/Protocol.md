@@ -37,7 +37,7 @@ This use case diagram illustrates the basic functionalities our application offe
 
 ## UI / UX
 
-After starting the application, the `MainWindow`-the centerpiece of the application-opens:
+After starting the application, the `MainWindow` - the centerpiece of the application - opens:
 
 ![The Main Window](Assets/UML/MainWindow.drawio.png)
 
@@ -152,7 +152,7 @@ We integrated ✨AI✨ to enhance the user experience. In the `Misc.` tab of the
 ### 2. Dark Mode
 Since David had already used an AI integration as a unique feature last semester, he found it a bit boring to simply recycle the idea for this project and thus we decided to go a step further and also implement a dark mode. The dark mode can be toggled on or off using the switch located at the top right of the main window.
 
-## Search Sequence Diagram
+## Search | Sequence Diagram
 As required, we are also providing a sequence diagram for the application's search functionality. While it might have fit better earlier in this document, we wanted to wait until after explaining the Event Aggregator Pattern since it plays a key role here.
 Now that the necessary background has been covered, here is the sequence diagram for the search feature:
 
