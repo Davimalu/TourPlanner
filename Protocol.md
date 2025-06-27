@@ -28,6 +28,8 @@ Eine weitere große Herausforderung war es, die Kommunikation zwischen verschied
 ## Use cases
 Actor -> Manage Tours / Import Tours / Export Tours (includes Single Tour Export, Summary Export, Tour Export) / Manage Tour Logs / Search Tours
 
+keine vollständige Auflistung
+
 ## UI / UX
 MainWindow, EditTourLogWindow, EditTourWindow
 
@@ -58,7 +60,40 @@ Nachfolgend wollen wir die relevantesten Libraries / Abhängigkeiten (keine voll
 
 ## Design Patterns
 
+### MVVM Pattern
+Keine Überraschung, daher halten wir diesen Absatz auch recht kurz, aber unsere Applikation implementiert offensichtlich das MVVM Pattern (dessen Implementierung für diese Abgabe ja auch ein K.O. Kriterium ist ).
+
+### Repository Pattern
+Zur Kommunikation mit der externen Datenbank verwenden wir in `TourPlanner.RestServer` das Repository Pattern. Die Logik für die Kommunikation mit der Datenbank ist in `TourLogRepository.cs` und `TourRepository.cs` ausgelagert - andere Klassen können dann die Interfaces der Repositories als Abstraktion für Datenbankoperationen verwenden.
+
+### Event Aggregator Pattern
+Oben haben wir ja schon erwähnt, dass es eine ziemliche Herausfoderung war, die Kommunikation zwischen den einzelnen Komponenten unserer Anwendung unter Berücksichtigung der Best Practices, die wir einhalten wollen, umzusetzen.
+
+In unserer Applikation gibt es einige Ereignisse, auf die von verschiedenen Komponenten reagiert werden muss. Bspw. wenn der User eine neue Tour auswählt (Map muss geupdated werden, neue Information angezeigt), eine Suche startet (Suche durchgeführt, Tourliste eingeschränkt), neue Touren hinzufügt / löscht (UI Updates, Datenbankoperationen), etc. etc.
+Ursprünglich hatten wir für diese Kommunikation das Observer Pattern in seiner primitivsten Form eingesetzt. Bspw. stellte das `TourListViewModel.cs` ein `TourChangedEvent` zur Verfügung, das von anderen abboniert werden konnte, wenn sie darüber informiert werden wollten, wenn der User in der TourList eine andere Tour auswählt. (ähnliches Vorgehen auch für andere Events). Allerdings hat das dazu geführt, dass wir viele Abhängigkeiten der Komponenten untereinander hatten, die eigentlich keinen Nutzen hatten außer den Austausch der Events.
+Wir haben daher zunächst als Notlösung eigene Services erstellt, bspw. einen `SelectedTourService.cs`, der stets Informationen über die aktuell vom Nutzer ausgewählte Tour enthielt und von allen an der aktuell selektieren Tour interessierten Komponenten als Abstraktion genutzt werden konnte (um nicht direkt von `TourListViewModel` abhängig zu sein). Allerdings war auch dieser Ansatz nicht optimal, denn mit steigender Anzahl von Events, benötigten wir immer mehr solche Services (bspw. `SearchQueryService`, etc.).
+
+Da wir uns gedacht haben, dass dieses Problem sicherlich schon viele Leute beim Entwicklen von UI Applikationen haben musste, haben wir uns online umgeschaut und sind auf das `EventAggregatorPattern` gestoßen: Wir definieren eine zentrale Klasse (die natürlich auch gegen ein Interface implementiert ist), die das Publishes, Subscriben und Unscubscriben von verschiedensten Events (werden in `TourPlanner.Model` definiert) managed.
+So gibt es jetzt ein einheitliches System, das die Kommunikation zwischen verschiedenen Komponenten regelt, ohne dass diese dafür voneinander abhängig sein müssen. Durch die Definition der Event-Klassen in `TourPlanner.Model` können auch die zu übergebenden Daten komplett frei gewählt werden.
+
+### Dependency Injection / Singleton Pattern
+Wir verwenden ein Dependency Injection Framework, um die Dependencies für unsere Klassen zentral zu Verwalten und sie ihnen bei Bedarf automatisiert zur Verfügung zu stellen.
+Viele dieser Klassen werden dabei als Singleton gemanaged, wodurch auch das Singleton Pattern in unserer Applikation implementiert wird.
+
+### Command Pattern
+Wir verwenden das Command Pattern, um das View vom ViewModel zu entkoppeln. Stattdessen binden wir das Command Property der UI-Elemente auf eine Methoden in unserem ViewModel, das das `ICommand` Interface implementiert.
+Dazu haben wir `RelayCommand.cs` und (für asynchrone Operationen) `RelayCommandAsync.cs` implementiert. Außerhalb des akademischen Umfelds wäre es vermutlich sinnvoll, eine bereits vorhandene Implementierung zu nutzen anstatt diese selbst zu schreiben.
+
+### Facade Pattern
+Das Facade Pattern wird verwendet, um eine einfache Abstraktion für ein komplexes zugrundeliegendes System zur Verfügung stellen. Wir nutzen dieses Pattern bspw. in `WpfService`, `OrsService`, `AiService` oder `PdfService`, indem wir die zugrundeliegenden Library-Funktionen vom Rest der Appliaktion verstecken und ihnen stattdessen mit diesen Klassen (und ihren zugehörigen Interfaces) eine High-Level Abstraktion dafür anbieten.
+
+### Adapter Pattern
+Das Adapter Pattern ist ein Design Pattern, das verwendet werden kann, um eine Abstraktionseben zwischen unserem Code und einem externen (oft inkompatiblen) System zur Verfügung zu stellen.
+Wir implementieren es im `FileSystemWrapper`, um unseren Klassen eine Abstraktion des Filesystems zur Verfügung zu stellen und auch Unit Tests zu ermöglichen.
 
 ## Unit Tests
 
 ## Unique Features
+AI
+
+Dark Mode
