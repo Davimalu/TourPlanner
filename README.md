@@ -1,4 +1,6 @@
 # TourPlanner 🚴
+![The main window of the TourPlanner application](Protocol/Assets/MainWindow.png)
+
 TourPlanner is an application we developed for the course SWEN2 in the summer semester of 2025. The application is a GUI app running on Windows Presentation Foundation (WPF), implementing the MVVM design pattern along with numerous other best practices, such as the S.O.L.I.D. principles.  
 As the name suggests, this application enables users to manage tours. Features include, among others:
 
