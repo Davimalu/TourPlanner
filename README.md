@@ -48,7 +48,7 @@ dotnet run --project .\TourPlanner.RestServer\TourPlanner.RestServer.csproj
 
 ### Frontend
 
-1. Enter the URL of the REST API server in the `appsettings.json` file of `TourPlanner`, e.g., `http://localhost:5168`
+1. Enter the URL of the REST API server in the `appsettings.json` file of `TourPlanner`, e.g. `http://localhost:5168`
 2. Enter your OpenRouteService and OpenRouter API key in the `appsettings.json` file of `TourPlanner`. For OpenRouter, you can use an invalid API key if you want to run the app without AI features.
 3. Start the WPF application:
 
