@@ -15,6 +15,12 @@ public class TourLogRepository : ITourLogRepository
     }
     
     
+    /// <summary>
+    /// Retrieves a TourLog by its ID
+    /// </summary>
+    /// <param name="id">The ID of the TourLog to retrieve</param>
+    /// <returns>The <see cref="TourLog"/> with the specified ID</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no TourLog with the specified ID exists</exception>
     public async Task<TourLog> GetTourLogByIdAsync(int id)
     {
         var log = await _context.TourLogs.FirstOrDefaultAsync(l => l.LogId == id);
@@ -27,7 +33,14 @@ public class TourLogRepository : ITourLogRepository
         return log;
     }
 
-    
+
+    /// <summary>
+    /// Adds a new TourLog to the specified tour
+    /// </summary>
+    /// <param name="parentTourId">The ID of the tour to which the new TourLog should be added</param>
+    /// <param name="newLog">The TourLog object to add</param>
+    /// <returns>The newly added <see cref="TourLog"/> object, including its auto-generated ID</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no tour with the specified ID exists</exception>
     public async Task<TourLog> AddTourLogAsync(int parentTourId, TourLog newLog)
     {
         var tour = await _context.Tours
@@ -47,7 +60,13 @@ public class TourLogRepository : ITourLogRepository
         return newLog; // The ID field is updated to the new auto-generated value automatically when calling SaveChangesAsync
     }
 
-    
+
+    /// <summary>
+    /// Updates an existing TourLog with new details.
+    /// </summary>
+    /// <param name="updatedTourLog">The TourLog object containing updated information</param>
+    /// <returns>The updated <see cref="TourLog"/> object</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no TourLog with the specified ID exists</exception>
     public async Task<TourLog> UpdateTourLogAsync(TourLog updatedTourLog)
     {
         var log = await _context.TourLogs.FirstOrDefaultAsync(l => l.LogId == updatedTourLog.LogId);
@@ -69,7 +88,13 @@ public class TourLogRepository : ITourLogRepository
         return log;
     }
 
-    
+
+    /// <summary>
+    /// Deletes a TourLog by its ID
+    /// </summary>
+    /// <param name="id">The ID of the TourLog to delete</param>
+    /// <returns>A boolean indicating whether the deletion was successful</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no TourLog with the specified ID exists</exception>
     public async Task<bool> DeleteTourLogAsync(int id)
     {
         var log = await _context.TourLogs.FirstOrDefaultAsync(l => l.LogId == id);

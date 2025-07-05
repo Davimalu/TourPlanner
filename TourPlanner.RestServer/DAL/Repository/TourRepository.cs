@@ -16,7 +16,11 @@ public class TourRepository : ITourRepository
         _tourLogRepository = tourLogRepository;
     }
 
-    
+
+    /// <summary>
+    /// Asynchronously retrieves all tours, including their associated logs, from the database.
+    /// </summary>
+    /// <returns>An enumerable collection of <see cref="Tour"/> objects, each containing its associated logs.</returns>
     public async Task<IEnumerable<Tour>> GetAllToursAsync()
     {
         var tours = await _context.Tours
@@ -26,7 +30,13 @@ public class TourRepository : ITourRepository
         return tours;
     }
 
-    
+
+    /// <summary>
+    /// Asynchronously retrieves a tour with the specified ID, including its associated logs, from the database.
+    /// </summary>
+    /// <param name="id">The ID of the tour to retrieve.</param>
+    /// <returns>A <see cref="Tour"/> object containing the tour details and its associated logs.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no tour with the specified ID is found.</exception>
     public async Task<Tour> GetTourByIdAsync(int id)
     {
         var tour = await _context.Tours
@@ -41,7 +51,12 @@ public class TourRepository : ITourRepository
         return tour;
     }
 
-    
+
+    /// <summary>
+    /// Asynchronously adds a new tour to the database along with its associated logs.
+    /// </summary>
+    /// <param name="newTour">The new <see cref="Tour"/> object to be added to the database. Must include all required properties.</param>
+    /// <returns>The newly added <see cref="Tour"/> object, including the auto-generated ID by the database.</returns>
     public async Task<Tour> AddTourAsync(Tour newTour)
     {
         // Clear IDs already associated with the tour and its logs to avoid database conflicts
@@ -57,7 +72,12 @@ public class TourRepository : ITourRepository
         return newTour; // The ID field is updated to the new auto-generated value automatically when calling SaveChangesAsync
     }
 
-    
+
+    /// <summary>
+    /// Asynchronously updates an existing tour and its associated logs in the database.
+    /// </summary>
+    /// <param name="updatedTour">The updated <see cref="Tour"/> object containing the new data for the tour and its logs.</param>
+    /// <returns>The updated <see cref="Tour"/> object, reflecting the changes applied to the database.</returns>
     public async Task<Tour> UpdateTourAsync(Tour updatedTour)
     { 
         // Retrieve the existing tour from the database, including its logs
@@ -128,7 +148,12 @@ public class TourRepository : ITourRepository
         return tour;
     }
 
-    
+
+    /// <summary>
+    /// Asynchronously deletes the tour with the specified ID, along with its associated logs, from the database.
+    /// </summary>
+    /// <param name="id">The unique identifier of the tour to be deleted.</param>
+    /// <returns>A boolean value indicating whether the deletion was successful.</returns>
     public async Task<bool> DeleteTourAsync(int id)
     {
         var tour = await _context.Tours

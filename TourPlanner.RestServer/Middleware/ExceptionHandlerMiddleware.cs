@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Text.Json; // Add this using
+using System.Text.Json;
 
 namespace TourPlanner.RestServer.Middleware;
 
 public class ExceptionHandlerMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlerMiddleware> _logger; // Use the standard logger
-
-    // We inject the logger here
+    private readonly ILogger<ExceptionHandlerMiddleware> _logger;
+    
     public ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
     {
         _next = next;
@@ -35,12 +34,9 @@ public class ExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            // THIS IS THE MOST IMPORTANT PART
-            // It will log the full error with a stack trace to the server's console.
             _logger.LogError(ex, "An unhandled exception has occurred."); 
             
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            // Optionally, return more error detail in development
             var response = new { message = "An unexpected error occurred.", detail = ex.ToString() };
             var jsonResponse = JsonSerializer.Serialize(response);
             await httpContext.Response.WriteAsync(jsonResponse);
