@@ -27,8 +27,8 @@ This class is therefore directly dependent on WPF (`System.Windows`) (which is a
 Another significant challenge was implementing communication between the various classes in accordance with SOLID principles and loose coupling between components. We will revisit this in the section on `Design Patterns`.
 
 ### Class Diagram
-
 The following class diagram provides an overview of the application's architecture:
+![Class Diagram showing the basic structure of the TourPlanner application](Assets/UML/TourPlanner.png)
 
 ## Use Cases
 ![Use Case Diagram showcasing the basic functionality of the TourPlanner application](Assets/UML/MainUseCasesTourPlanner.drawio.png)
@@ -159,3 +159,11 @@ Now that the necessary background has been covered, here is the sequence diagram
 ![Sequence Diagram illustrating the Search functionality of the application](Assets/UML/FullTextSearch.drawio.png)
 
 **Note:** The "Raise ToursChangedEvent" is not crucial for this workflow - displaying the matching tours also relies on two-way data binding. However, we included it in the diagram to illustrate how other components are informed too about changes in the tour list.
+
+## Time Tracked
+Unfortunately, we did not keep precise track of how much time we spent on the project. We thought about using tools like [git-hours](https://github.com/kimmobrunfeldt/git-hours) to estimate the invested hours from the Git history. However, since this year we worked with feature branches and deleted them after merging (to keep the project organized), a large part of the history is no longer available (or at least not in a format that git-hours can read - for example, on GitHub you can see a list of all commits included in a pull request in its description and can even click on them / view the single commits, even if the feature branch was deleted).
+
+Nevertheless, based on the scope of our solution, we estimate that both of us easily invested more than the intended 5 ECTS * 25 hours = 125 hours.
+
+## Git
+We managed the project in the following Git repository: [github.com/Davimalu/TourPlanner/](https://github.com/Davimalu/TourPlanner/)

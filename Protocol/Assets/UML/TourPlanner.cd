@@ -234,7 +234,7 @@
   <Class Name="TourPlanner.Logic.WpfService" Collapsed="true">
     <Position X="16.5" Y="4.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EAAAAEECIAAIAAAAAABIEAAEAAABBAAAAAABAICAACI=</HashCode>
+      <HashCode>EAAAAEECIAAIAAAAAABIEAAEIAABBAAAAAABAICAACI=</HashCode>
       <FileName>Logic\WpfService.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />

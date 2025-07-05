@@ -261,6 +261,11 @@ namespace TourPlanner.ViewModels
             
             // Notify the draw route command that the start coordinates have changed (and thus the route might be able to be calculated)
             _executeCalculateAndDrawRoute?.RaiseCanExecuteChanged();
+            
+            // The user could click the "Find" Button without editing the text box and OpenRouteServices might return a different location than before
+            // Thus we reset the route calculated state to force the user to recalculate the route (even if he didn't explictly change the location but only geocoded it)
+            RouteCalculated = false;
+            _executeSave?.RaiseCanExecuteChanged();
         }
         
         

@@ -21,10 +21,11 @@ namespace TourPlanner.Logic
         private readonly IMapService _mapService;
         private readonly IAttributeService _attributeService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly ILogger<WpfService> _logger;
         
         private readonly MapViewModel _mapViewModel;
         
-        public WpfService(ITourLogService tourLogService, ITourService tourService, IOrsService orsService, IMapService mapService, MapViewModel mapViewModel, IAttributeService attributeService, IEventAggregator eventAggregator)
+        public WpfService(ITourLogService tourLogService, ITourService tourService, IOrsService orsService, IMapService mapService, MapViewModel mapViewModel, IAttributeService attributeService, IEventAggregator eventAggregator, ILogger<WpfService> logger)
         {
             _tourLogService = tourLogService ?? throw new ArgumentNullException(nameof(tourLogService));
             _tourService = tourService ?? throw new ArgumentNullException(nameof(tourService));
@@ -33,6 +34,10 @@ namespace TourPlanner.Logic
             _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
             _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
+            // Subscribe to the CloseWindowRequestedEvent to handle window closing requests
+            _eventAggregator.Subscribe<CloseWindowRequestedEvent>(OnCloseWindowRequested);
         }
         
         
@@ -46,9 +51,6 @@ namespace TourPlanner.Logic
                 DataContext = new EditTourViewModel(selectedTour, _tourService, _orsService, _mapService, this, _eventAggregator, App.ServiceProvider.GetService<ILogger<EditTourViewModel>>()),
                 Map = { DataContext = _mapViewModel}
             };
-            
-            // Subscribe to the CloseWindowRequestedEvent to close the window when requested
-            _eventAggregator.Subscribe<CloseWindowRequestedEvent>(OnCloseWindowRequested);
 
             editWindow.ShowDialog();
         }
@@ -95,6 +97,8 @@ namespace TourPlanner.Logic
                 Wpf.Ui.Controls.WindowBackdropType.None,
                 true
             );
+            
+            _logger.Info("Applied dark theme to the application");
         }
 
 
@@ -108,6 +112,8 @@ namespace TourPlanner.Logic
                 Wpf.Ui.Controls.WindowBackdropType.None, // For whatever reason, this is the only way to get the light theme to work | https://github.com/lepoco/wpfui/issues/1222
                 true
             );
+            
+            _logger.Info("Applied light theme to the application");
         }
 
         
@@ -116,6 +122,7 @@ namespace TourPlanner.Logic
         /// </summary>
         public void ExitApplication()
         {
+            _logger.Info("Received request to exit application");
             Application.Current.Shutdown();
         }
 
@@ -126,14 +133,19 @@ namespace TourPlanner.Logic
         /// <param name="closeWindowRequestedEvent">The event containing the data context of the window to close</param>
         public void OnCloseWindowRequested(CloseWindowRequestedEvent closeWindowRequestedEvent)
         {
+            _logger.Debug($"Received request to close window with DataContext: {closeWindowRequestedEvent.DataContextOfWindowToClose}");
+            
             foreach (Window window in Application.Current.Windows)
             {
                 if (window.DataContext == closeWindowRequestedEvent.DataContextOfWindowToClose)
                 {
                     window.Close();
-                    break;
+                    _logger.Debug($"Closed window with DataContext: {closeWindowRequestedEvent.DataContextOfWindowToClose}");
+                    return;
                 }
             }
+            
+            _logger.Warn($"Couldn't close window: No window found with DataContext: {closeWindowRequestedEvent.DataContextOfWindowToClose}");
         }
 
 
