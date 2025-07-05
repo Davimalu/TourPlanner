@@ -1,0 +1,141 @@
+﻿<ui:FluentWindow x:Class="TourPlanner.Views.EditTourWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:TourPlanner.Views"
+        mc:Ignorable="d"
+        Title="Edit Tour"
+        Height="850"
+        Width="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Title Bar -->
+            <RowDefinition Height="*"/>    <!-- Main Content -->
+        </Grid.RowDefinitions>
+        
+        <!-- WPF UI's Fluent Window doesn't have a title bar on its own -->
+        <ui:TitleBar Grid.Row="0" Margin="0" Padding="0"/>
+    
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Label Name -->
+                <RowDefinition Height="Auto"/> <!-- Field Name -->
+                <RowDefinition Height="Auto"/> <!-- Label Desc -->
+                <RowDefinition Height="Auto"/> <!-- Field Desc -->
+                <RowDefinition Height="Auto"/> <!-- Label Start/End -->
+                <RowDefinition Height="Auto"/> <!-- Field Start/End -->
+                <RowDefinition Height="Auto"/> <!-- Coordinates Start/End -->
+                <RowDefinition Height="Auto"/> <!-- Label Transport -->
+                <RowDefinition Height="Auto"/> <!-- Field Transport -->
+                <RowDefinition Height="Auto"/> <!-- Label Distance -->
+                <RowDefinition Height="Auto"/> <!-- Field Distance -->
+                <RowDefinition Height="Auto"/> <!-- Label Duration -->
+                <RowDefinition Height="Auto"/> <!-- Calculate Route -->
+                <RowDefinition Height="*"/>    <!-- Map User Control -->
+                <RowDefinition Height="Auto"/> <!-- Buttons -->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- TourName -->
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Name:" Target="{Binding ElementName=NameField}"/>
+            <ui:TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Name="NameField" Text="{Binding TourName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+            <!-- Description -->
+            <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="Description:" Target="{Binding ElementName=DescriptionField}"/>
+            <ui:TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Name="DescriptionField" Text="{Binding EditableTour.TourDescription, UpdateSourceTrigger=PropertyChanged}" Margin="5" TextWrapping="Wrap" MinHeight="60"/>
+
+            <!-- Start Location -->
+            <Label Grid.Row="4" Grid.Column="0" Content="Start Location:" Target="{Binding ElementName=StartLocationField}"/>
+            <Grid Grid.Row="5" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ui:TextBox Grid.Column="0" Name="StartLocationField" 
+                            Text="{Binding StartLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            Margin="5,5,0,5" IsReadOnly="False"/>
+                <ui:Button Grid.Column="1" Content="Find" Margin="0,5,5,5" 
+                        Command="{Binding ExecuteGeocodeStart}"/>
+            </Grid>
+            
+            <!-- Start Location Coordinates -->
+            <StackPanel Grid.Row="6" Grid.Column="0" Margin="5,0,5,5">
+                <ui:TextBlock Text="{Binding EditableTour.StartCoordinates.Longitude, StringFormat='Longitude: {0}'}" 
+                           Foreground="Gray" FontSize="11" Margin="0,2,0,0"/>
+                <ui:TextBlock Text="{Binding EditableTour.StartCoordinates.Latitude, StringFormat='Latitude: {0}'}" 
+                           Foreground="Gray" FontSize="11" Margin="0,0,0,2"/>
+            </StackPanel>
+
+            <!-- End Location -->
+            <Label Grid.Row="4" Grid.Column="1" Content="End Location:" Target="{Binding ElementName=EndLocationField}"/>
+            <Grid Grid.Row="5" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ui:TextBox Grid.Column="0" Name="EndLocationField" 
+                            Text="{Binding EndLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            Margin="5,5,0,5" IsReadOnly="False"/>
+                <ui:Button Grid.Column="1" Content="Find" Margin="0,5,5,5" 
+                        Command="{Binding ExecuteGeocodeEnd}"/>
+            </Grid>
+            
+            <!-- End Location Coordinates -->
+            <StackPanel Grid.Row="6" Grid.Column="1" Margin="5,0,5,5">
+                <ui:TextBlock Text="{Binding EditableTour.EndCoordinates.Longitude, StringFormat='Longitude: {0}'}" 
+                           Foreground="Gray" FontSize="11" Margin="0,2,0,0"/>
+                <ui:TextBlock Text="{Binding EditableTour.EndCoordinates.Latitude, StringFormat='Latitude: {0}'}" 
+                           Foreground="Gray" FontSize="11" Margin="0,0,0,2"/>
+            </StackPanel>
+
+            <!-- Transport -->
+            <Label Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Content="Transport:" Target="{Binding ElementName=TransportField}"/>
+            <ComboBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Name="TransportField" ItemsSource="{Binding Transports}" SelectedItem="{Binding EditableTour.TransportationType}" Margin="5"/>
+
+            <!-- Distance -->
+            <Label Grid.Row="9" Grid.Column="0" Content="Distance:" Target="{Binding ElementName=DistanceField}"/>
+            <ui:TextBox Grid.Row="10" Grid.Column="0" Name="DistanceField" Text="{Binding EditableTour.Distance, Mode=OneWay}" Margin="5" Padding="0,0,30,0" IsReadOnly="True"/>
+            <ui:TextBlock Grid.Row="10" Grid.Column="0" Text="km" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" IsHitTestVisible="False"/>
+
+            <!-- Estimated Time -->
+            <Label Grid.Row="9" Grid.Column="1" Content="Duration:" Target="{Binding ElementName=EstimatedTimeField}"/>
+            <ui:TextBox Grid.Row="10" Grid.Column="1" Name="EstimatedTimeField" Margin="5" Padding="0,0,30,0" IsReadOnly="True" TextWrapping="Wrap">
+                <ui:TextBox.Text>
+                    <MultiBinding StringFormat="{}{0} days {1} hours {2} minutes {3} seconds" Mode="OneWay">
+                        <Binding Path="EditableTour.EstimatedTime.Days" TargetNullValue="0"/>
+                        <Binding Path="EditableTour.EstimatedTime.Hours" TargetNullValue="0"/>
+                        <Binding Path="EditableTour.EstimatedTime.Minutes" TargetNullValue="0"/>
+                        <Binding Path="EditableTour.EstimatedTime.Seconds" TargetNullValue="0"/>
+                    </MultiBinding>
+                </ui:TextBox.Text>
+            </ui:TextBox>
+            
+            <!-- Calculate Route Button -->
+            <Grid Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ui:Button Grid.Column="1" Content="Calculate Route" Margin="5" 
+                        Command="{Binding ExecuteCalculateAndDrawRoute}"/>
+            </Grid>
+            
+            <!-- Map -->
+            <Border Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="2" BorderBrush="Gray" BorderThickness="1" Margin="5">
+                <local:Map x:Name="Map"/>
+            </Border>
+            
+            <!-- Save and Cancel Buttons -->
+            <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <ui:Button Content="Save" Command="{Binding ExecuteSave}" Width="80" Margin="5"/>
+                <ui:Button Content="Cancel" Command="{Binding ExecuteCancel}" Width="80" Margin="5"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

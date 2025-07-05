@@ -1,0 +1,132 @@
+﻿<Window x:Class="TourPlanner.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TourPlanner.Views"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        mc:Ignorable="d"
+        Title="Tour Planner" Height="800" Width="1400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Menu Bar -->
+        <Grid Grid.Row="0">
+            <local:MenuBar x:Name="MenuBar"/>
+        </Grid>
+
+        <!-- Search Bar -->
+        <Grid Grid.Row="1">
+            <local:SearchBar x:Name="SearchBar"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Tour List -->
+                <local:TourList Grid.Column="0" x:Name="TourList"/>
+
+                <!-- GridSplitter for resizing -->
+                <!-- Custom Style: Presents a thin (1px) centered gray line visually,
+                     but provides a wider (15px) interaction area for easier mouse grabbing.
+                     The Control Template is necessary to decouple the visual style from the interaction area. -->
+                <GridSplitter Grid.Column="1"
+                              Width="15"                    
+                              Margin="0 5 0 5"             
+                              HorizontalAlignment="Center"   
+                              VerticalAlignment="Stretch"
+                              Background="Transparent">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="{x:Type GridSplitter}">
+                            <Border Background="Transparent">
+                                <Rectangle Fill="#E0E0E0"  
+                                           Width="1"       
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
+
+                <!-- Right Column -->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Top Column -->
+                    <TabControl Grid.Row="0" Margin="10">
+                        <TabItem IsSelected="{Binding InfoTabSelected}">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="BookInformation24" />
+                                    <ui:TextBlock Text="Route Information" />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Grid Margin="10">
+                                <local:TourDetails x:Name="TourDetails"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem IsSelected="{Binding MapTabSelected}">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="Map24" />
+                                    <ui:TextBlock Text="Map" />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Grid>
+                                <local:Map x:Name="Map"/>
+                            </Grid>
+                        </TabItem>
+                        <TabItem IsSelected="{Binding MiscTabSelected}">
+                            <TabItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="TextboxMore24" />
+                                    <ui:TextBlock Text="Misc." />
+                                </StackPanel>
+                            </TabItem.Header>
+                            <Grid Margin="10">
+                                <local:TourAttributes x:Name="TourAttributes"/>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+
+                    <!-- Grid Splitter for resizing -->
+                    <GridSplitter Grid.Row="1"
+                                  Height="15"                    
+                                  Margin="5 0 5 5"             
+                                  HorizontalAlignment="Stretch"   
+                                  VerticalAlignment="Center"
+                                  ResizeDirection="Rows"
+                                  Background="Transparent">
+                        <GridSplitter.Template>
+                            <ControlTemplate TargetType="{x:Type GridSplitter}">
+                                <Border Background="Transparent">
+                                    <Rectangle Fill="#E0E0E0"  
+                                               Height="1"       
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </GridSplitter.Template>
+                    </GridSplitter>
+
+                    <!-- Bottom Column -->
+                    <Grid Grid.Row="2">
+                        <local:TourLogs Grid.Column="0" x:Name="TourLogs"/>
+                    </Grid>
+            </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

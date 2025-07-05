@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TourPlanner Map</title>
+        
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            
+            #map {
+                width: 100%;
+                height: 100vh; /* Full viewport height */
+            }
+        </style>
+        
+        <!-- Leaflet JavaScript -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    </head>
+
+    <body>
+        <div id="map"></div>
+    
+        <script>
+            // Initialize map (Vienna's coordinates as default; Zoom level 10)
+            var map = L.map('map').setView([48.210033, 16.363449], 10);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Listen for map clicks
+            map.on('click', onMapClick);
+            
+            // Store markers
+            let markers = [];
+            let routeLayer;
+        
+            
+            function onMapClick(e) {
+                // Send message to C# backend about where the map was clicked
+                window.chrome.webview.postMessage({
+                    type: 'MapClick',
+                    lat: e.latlng.lat,
+                    lon: e.latlng.lng,
+                });
+            }
+        
+            
+            function addMarker(lat, lon, title, description) {
+                // Create a marker at the specified coordinates
+                var marker = L.marker([lat, lon]).addTo(map);
+
+                // If title and description are provided, bind them to the marker's popup
+                if (title || description) {
+                    marker.bindPopup(`<b>${title}</b><br>${description}`);
+                }
+
+                // Add marker to array
+                markers.push(marker);
+                
+                console.log(`Marker added at: Lat ${lat}, Lon ${lon}`);
+            }
+            
+            
+            function removeMarkerByTitle(title) {
+                // Find the marker by title and remove it
+                const markerIndex = markers.findIndex(marker => {
+                    const popupContent = marker.getPopup() ? marker.getPopup().getContent() : '';
+                    return popupContent.includes(title);
+                });
+                
+                if (markerIndex !== -1) {
+                    map.removeLayer(markers[markerIndex]);
+                    markers.splice(markerIndex, 1);
+                    console.log(`Marker with title "${title}" removed.`);
+                } else {
+                    console.warn(`No marker found with title "${title}".`);
+                }
+            }
+            
+            
+            function flyToLocation(lat, lon, zoom) {
+                map.flyTo([lat, lon], zoom)
+                
+                console.log(`Map view set to: Lat ${lat}, Lon ${lon}, Zoom ${zoom}`);
+            }
+            
+        
+            // Function to draw the route
+            function drawRoute(geoJsonString) {
+                if (routeLayer) {
+                    map.removeLayer(routeLayer);
+                }
+                try {
+                    const geoJson = JSON.parse(geoJsonString);
+                    routeLayer = L.geoJSON(geoJson, {
+                        style: {
+                            color: "#ff7800",
+                            weight: 5,
+                            opacity: 0.65
+                        }
+                    }).addTo(map);
+                    map.fitBounds(routeLayer.getBounds()); // Zoom to the route
+                    console.log("Route drawn successfully.");
+                } catch (error) {
+                    console.error("Failed to parse or draw route:", error);
+                }
+            }
+        
+            // Function to clear markers and route
+            function clearMap() {
+                markers.forEach(marker => {
+                    map.removeLayer(marker);
+                });
+                markers = [];
+                
+                if(routeLayer) map.removeLayer(routeLayer);
+                startMarker = null;
+                endMarker = null;
+                routeLayer = null;
+                console.log("Map cleared.");
+            }
+        </script>
+    </body>
+</html>
