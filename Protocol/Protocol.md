@@ -27,8 +27,8 @@ This class is therefore directly dependent on WPF (`System.Windows`) (which is a
 Another significant challenge was implementing communication between the various classes in accordance with SOLID principles and loose coupling between components. We will revisit this in the section on `Design Patterns`.
 
 ### Class Diagram
-
 The following class diagram provides an overview of the application's architecture:
+![Class Diagram showing the basic structure of the TourPlanner application](Assets/UML/TourPlanner.png)
 
 ## Use Cases
 ![Use Case Diagram showcasing the basic functionality of the TourPlanner application](Assets/UML/MainUseCasesTourPlanner.drawio.png)
