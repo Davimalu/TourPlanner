@@ -492,6 +492,9 @@ public class PdfService : IPdfService
                 var avgTimeMinutes = logs.Average(l => l.TimeTaken.TotalMinutes);
                 TimeSpan avgTime = TimeSpan.FromMinutes(avgTimeMinutes);
                 var avgDistance = logs.Average(l => l.DistanceTraveled);
+                TimeSpan plannedTime = tour.EstimatedTime;
+                var plannedTimeMinutes = plannedTime.TotalMinutes;
+                
                 var totalTimeMinutes = logs.Sum(l => l.TimeTaken.TotalMinutes);
                 TimeSpan totalTime = TimeSpan.FromMinutes(totalTimeMinutes);
                 var totalDistance = logs.Sum(l => l.DistanceTraveled);
@@ -505,7 +508,7 @@ public class PdfService : IPdfService
                 AddKeyValuePairAsRow(logStatsTable, "Total Distance Logged:", $"{totalDistance:F1} km", font, boldFont);
 
                 // Efficiency metrics
-                var timeEfficiency = totalTimeMinutes > 0 ? avgTimeMinutes / totalTimeMinutes * 100 : 0;
+                var timeEfficiency = plannedTimeMinutes > 0 ? avgTimeMinutes / plannedTimeMinutes * 100 : 0;
                 var distanceEfficiency = tour.Distance > 0 ? avgDistance / tour.Distance * 100 : 0;
 
                 AddKeyValuePairAsRow(logStatsTable, "Time Efficiency:", timeEfficiency > 0 ? $"{timeEfficiency:F1}% of estimated" : "N/A", font, boldFont);
