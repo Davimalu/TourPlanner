@@ -67,7 +67,7 @@ namespace TourPlanner.ViewModels
         private async Task ExportTours(object? parameter)
         {
             // Get the save path from the user
-            string savePath = _ioService.OpenFileSaveDialog("Tour Files (*.tours)|*.tours|PDF Files (*.pdf)|*.pdf", "Export Tours", "%userprofile%");
+            string savePath = _ioService.OpenFileSaveDialog("Tour Files (*.tours)|*.tours|PDF Files (*.pdf)|*.pdf", "Export Tours", "MyTours");
             
             if (string.IsNullOrEmpty(savePath))
             {
