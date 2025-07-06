@@ -16,7 +16,6 @@ namespace TourPlanner.Commands
         /// Creates a new AsyncRelayCommand.
         /// </summary>
         /// <param name="executeAsync">The asynchronous operation to run when the command is executed</param>
-        /// <param name="logger">The logger to log errors during command execution</param>
         /// <param name="canExecute">whether the command can be executed or not</param>
         public RelayCommandAsync(Func<object?, Task> executeAsync, Func<object?, bool>? canExecute = null)
         {
