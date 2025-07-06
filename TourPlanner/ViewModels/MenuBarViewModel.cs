@@ -126,7 +126,7 @@ namespace TourPlanner.ViewModels
         private async Task ImportTours(object? parameter)
         {
             // Get the file path from the user
-            string loadPath = _ioService.OpenFileOpenDialog("Tour Files (*.tours)|*.tours", "Import Tours", "%userprofile%");
+            string loadPath = _ioService.OpenFileOpenDialog("Tour Files (*.tours)|*.tours", "Import Tours", "MyTours");
             
             if (string.IsNullOrEmpty(loadPath))
             {
